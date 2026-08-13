@@ -60,7 +60,8 @@ test('a career can be started, played and resumed', async ({ page }) => {
   await expect(page.locator('.statsbar__post')).toHaveText(
     'Administrative Officer · Alderford City Council',
   );
-  await expect(page.locator('.task')).toHaveCount(3);
+  // Four slots at the starting post, and none of the budget spent yet.
+  await expect(page.locator('.task')).toHaveCount(4);
   await expect(page.getByTestId('effort-remaining')).toContainText('10 of 10');
 
   for (let month = 1; month <= 5; month += 1) {
