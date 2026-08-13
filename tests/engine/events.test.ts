@@ -149,6 +149,44 @@ describe('choices', () => {
     expect(seen.size).toBe(2);
   });
 
+  it('rolls only the outcomes whose conditions the state satisfies', () => {
+    const withNote = game(3, {
+      phase: 'event',
+      pendingEvents: [{ eventId: 'evt.test.conditional' }],
+      flags: { left_a_note: true },
+    });
+    const withoutNote = game(3, {
+      phase: 'event',
+      pendingEvents: [{ eventId: 'evt.test.conditional' }],
+    });
+
+    // With the flag both outcomes are eligible; without it only the second can be rolled.
+    const seenWithout = new Set<string>();
+    for (let seed = 0; seed < 40; seed += 1) {
+      const state = { ...withoutNote, rngState: seed * 7919 };
+      const next = applyChoice(state, registry, 'evt.test.conditional', 'explain');
+      seenWithout.add(next.pendingEvents[0]!.resolution!.textKey);
+    }
+    expect([...seenWithout]).toEqual(['evt.test.conditional.choice.explain.out.1']);
+
+    const seenWith = new Set<string>();
+    for (let seed = 0; seed < 40; seed += 1) {
+      const state = { ...withNote, rngState: seed * 7919 };
+      const next = applyChoice(state, registry, 'evt.test.conditional', 'explain');
+      seenWith.add(next.pendingEvents[0]!.resolution!.textKey);
+    }
+    expect(seenWith.size).toBe(2);
+  });
+
+  it('reports the outcome index against the full list, not the eligible subset', () => {
+    const state = game(3, {
+      phase: 'event',
+      pendingEvents: [{ eventId: 'evt.test.conditional' }],
+    });
+    const next = applyChoice(state, registry, 'evt.test.conditional', 'explain');
+    expect(next.pendingEvents[0]?.resolution?.outcomeIndex).toBe(1);
+  });
+
   it('refuses a choice the player does not qualify for', () => {
     const state = game(3, {
       phase: 'event',

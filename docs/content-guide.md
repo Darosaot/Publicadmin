@@ -4,17 +4,17 @@ How to add narrative content to the game without touching the engine. Everything
 enforced by `src/content/validate.ts`, which runs as part of `npm test` — if you get a key or an id
 wrong, a test fails and tells you which one.
 
-## The two-file rule
+## How content and text fit together
 
-Every piece of content is split across two places:
+Content is authored in one place — `src/content/`, where structure and English prose sit together
+— and split at import time by the helpers in `src/content/authoring.ts`:
 
-1. **The data** — `src/content/…`, typed TypeScript. Structure, numbers, conditions, effects. No
-   prose whatsoever, only **keys**.
-2. **The text** — `src/i18n/en/…`, flat dictionaries mapping those keys to English strings.
+- the typed data the engine consumes (conditions, effects, weights), and
+- a flat English dictionary, `EN_STRINGS`, keyed by ids derived from the content itself.
 
-This is what makes translation mechanical: to add Spanish you copy `src/i18n/en/` to
-`src/i18n/es/`, translate the right-hand side of every entry, and register the locale. Nothing in
-`src/content/` changes.
+Writing an event and forgetting its text is therefore impossible, and no key is ever typed by
+hand. English is simply the source language; a translation is a separate dictionary with the same
+keys, registered in `src/i18n/index.tsx`.
 
 ## Naming
 
@@ -24,11 +24,11 @@ Ids are dotted, lowercase, and describe where the thing lives:
 | --- | --- | --- |
 | Task | `task.<department\|shared>.<name>` | `task.legal.contract_review` |
 | Random event | `evt.<department\|common>.<name>` | `evt.common.press_call` |
-| Milestone | `evt.milestone.<name>` | `evt.milestone.first_day` |
+| Milestone | `evt.milestone.<name>` | `evt.milestone.first_month` |
 | Follow-up | `evt.followup.<name>` | `evt.followup.audit_letter` |
-| Flag | `<verb>_<subject>` | `owes_favour_ruiz` |
+| Flag | `<verb>_<subject>` | `owes_favour_councillor` |
 
-Text keys are the id plus a suffix, so you can always find the string for a thing from the thing:
+Text keys are generated from the id, so the string for a thing is always findable from the thing:
 
 ```
 evt.common.press_call.title
@@ -41,35 +41,60 @@ evt.common.press_call.choice.decline.out.0     // the outcome text
 
 ```ts
 // src/content/events/common.ts
-{
-  id: 'evt.common.press_call',
+defineEvent('evt.common.press_call', {
   kind: 'random',
-  titleKey: 'evt.common.press_call.title',
-  bodyKey: 'evt.common.press_call.body',
-  weight: 10,
+  title: 'A journalist has your number',
+  body: 'She is polite, well-briefed, and asking about a decision your department signed off…',
+  weight: 12,
   conditions: { minLevel: 1, maxLevel: 3 },
   choices: [
     {
-      id: 'decline',
-      labelKey: 'evt.common.press_call.choice.decline',
+      // A choice with one certain outcome: use `text` and `effects` directly.
+      id: 'refer',
+      label: 'Refer her to the press office',
+      text: 'She writes the piece without you.',
+      effects: [{ kind: 'stat', stat: 'reputation', delta: -1 }],
+    },
+    {
+      // A choice that can land more than one way: use `outcomes` with weights.
+      id: 'explain',
+      label: 'Explain the file on the record',
       outcomes: [
-        {
-          weight: 1,
-          textKey: 'evt.common.press_call.choice.decline.out.0',
-          effects: [{ kind: 'stat', stat: 'reputation', delta: -1 }],
-        },
+        { weight: 3, text: 'The article is accurate…', effects: [/* … */] },
+        { weight: 2, text: 'The subeditor cuts the explanation…', effects: [/* … */] },
       ],
     },
     // …2 to 4 choices total
   ],
-}
+});
 ```
-
-Then add the four strings to `src/i18n/en/events/common.ts`.
 
 **Weights** are relative within the eligible pool; 10 is the default, 20 is "this should come up
 often", 3 is "rare colour". **Cooldown** defaults to 12 turns. Set `once: true` for an event that
 should never repeat in a career.
+
+## Conditional outcomes
+
+An outcome may carry its own `conditions`. This is how a decision taken years earlier changes how
+a later scene lands — the flag set back then gates the outcome now:
+
+```ts
+outcomes: [
+  {
+    // Only reachable if the player left a written note at the time.
+    conditions: { forbiddenFlags: ['knows_contract_flaw'] },
+    text: 'You produce the note, the date, and the person you gave it to…',
+    effects: [{ kind: 'stat', stat: 'integrity', delta: 5 }],
+  },
+  {
+    text: 'You say you raised it. There is no note…',
+    effects: [{ kind: 'stat', stat: 'reputation', delta: -7 }],
+  },
+]
+```
+
+**At least one outcome per choice must be unconditional**, so a choice can never dead-end.
+Validation enforces this.
 
 ## Conditions
 
@@ -108,10 +133,9 @@ steps. Longer chains are hard to test and harder to balance.
 ## Adding a task template
 
 ```ts
-{
-  id: 'task.legal.contract_review',
-  titleKey: 'task.legal.contract_review.title',
-  descKey: 'task.legal.contract_review.desc',
+defineTask('task.legal.contract_review', {
+  title: 'Contract review',
+  desc: 'Forty pages of clauses drafted by the supplier’s lawyers…',
   departments: ['legal'],
   baseEffort: 6,                 // scaled by level at spawn time
   deadlineRange: [2, 4],         // months, rolled at spawn
@@ -121,8 +145,8 @@ steps. Longer chains are hard to test and harder to balance.
     excellent: [{ kind: 'stat', stat: 'politicalCapital', delta: 2 }],
     poor: [{ kind: 'queueEvent', eventId: 'evt.followup.complaint', delayTurns: 2 }],
   },
-  onFail: [{ kind: 'queueEvent', eventId: 'evt.followup.missed_deadline' }],
-}
+  onFail: [{ kind: 'queueEvent', eventId: 'evt.followup.supplier_challenge' }],
+});
 ```
 
 Use `departments: 'any'` for shared work that lands on every desk. Use `minLevel` / `maxLevel` to
@@ -132,21 +156,34 @@ matrix nobody can fill.
 
 ## Adding a language
 
-1. `cp -r src/i18n/en src/i18n/es`
-2. Translate the values. Leave the keys and `{placeholders}` alone.
-3. Register it in the locale map in `src/i18n/index.tsx`.
+1. Get the full key list: `npm run docs:script` writes every string into
+   `docs/narrative-script.md`, and `EN_STRINGS` holds them all at runtime.
+2. Create `src/i18n/es/` with the same keys mapped to translated values, plus a translated copy of
+   `src/i18n/en/ui.ts`.
+3. Add the locale to the `locales` map in `src/i18n/index.tsx`.
 
 Only names and numbers are interpolated (`{name}`, `{amount}`), so no sentence depends on English
 grammar for its structure.
+
+## Regenerating the script
+
+`docs/narrative-script.md` is generated, not maintained:
+
+```bash
+npm run docs:script
+```
+
+Run it after any content change so the readable script keeps matching the game.
 
 ## What validation checks
 
 `src/content/validate.ts`, run by `tests/engine/content.test.ts`:
 
-- Every id is unique across the registry
-- Every `titleKey`, `bodyKey`, `descKey`, `labelKey` and `textKey` exists in the English dictionary
+- Every event and task id is unique
+- Every generated string key resolves to real English text, and none of it is empty
 - Every `spawnTask` template id and `queueEvent` event id refers to something that exists
-- Every event has between 2 and 4 choices, and every choice has at least one outcome
-- Every outcome weight is greater than 0
-- Every department has at least one task template and one event
-- Every `endGame` ending id is a real ending
+- Every event has at most 4 choices, and every choice has at least one outcome
+- Every outcome weight is greater than 0, and no choice has *only* conditional outcomes
+- Every department has task templates and random events that can reach it
+- Career levels are contiguous from 1, with rising salaries and real promotion requirements
+- Every ending has closing text, and the Minister ending is actually reachable from content

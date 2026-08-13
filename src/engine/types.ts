@@ -112,6 +112,12 @@ export interface Outcome {
   weight: number;
   textKey: string;
   effects: Effect[];
+  /**
+   * Restricts when this outcome can be rolled. This is how a decision taken years earlier
+   * changes how a later scene lands — the flag set back then gates the outcome now. At least one
+   * outcome per choice must be unconditional, so a choice can never dead-end.
+   */
+  conditions?: Condition;
 }
 
 export interface Choice {

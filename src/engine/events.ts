@@ -101,11 +101,19 @@ export function isChoiceAvailable(state: GameState, choice: Choice): boolean {
   return conditionMet(state, choice.conditions);
 }
 
+/**
+ * Rolls one of a choice's outcomes, considering only those whose conditions the current state
+ * satisfies. If conditions have excluded everything — which content validation is supposed to
+ * prevent — the full list is used rather than leaving the player with no outcome at all.
+ */
 export function rollOutcome(
-  rngState: number,
+  state: GameState,
   outcomes: readonly Outcome[],
 ): { outcome: Outcome | undefined; index: number; rngState: number } {
-  const roll = weightedPick(rngState, outcomes, (o) => o.weight);
+  const eligible = outcomes.filter((o) => conditionMet(state, o.conditions));
+  const pool = eligible.length > 0 ? eligible : outcomes;
+
+  const roll = weightedPick(state.rngState, pool, (o) => o.weight);
   return {
     outcome: roll.value,
     index: roll.value ? outcomes.indexOf(roll.value) : -1,
@@ -132,7 +140,7 @@ export function applyChoice(
   const choice = event.choices.find((c) => c.id === choiceId);
   if (!choice || !isChoiceAvailable(state, choice)) return state;
 
-  const roll = rollOutcome(state.rngState, choice.outcomes);
+  const roll = rollOutcome(state, choice.outcomes);
   if (!roll.outcome) return state;
 
   let next: GameState = { ...state, rngState: roll.rngState };

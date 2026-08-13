@@ -215,6 +215,39 @@ export const testEvents: GameEvent[] = [
     ],
   },
   {
+    id: 'evt.test.conditional',
+    kind: 'followup',
+    titleKey: 'evt.test.conditional.title',
+    bodyKey: 'evt.test.conditional.body',
+    weight: 1,
+    choices: [
+      {
+        id: 'explain',
+        labelKey: 'evt.test.conditional.choice.explain',
+        outcomes: [
+          {
+            weight: 1,
+            textKey: 'evt.test.conditional.choice.explain.out.0',
+            conditions: { requiredFlags: ['left_a_note'] },
+            effects: [{ kind: 'stat', stat: 'reputation', delta: 5 }],
+          },
+          {
+            weight: 1,
+            textKey: 'evt.test.conditional.choice.explain.out.1',
+            effects: [{ kind: 'stat', stat: 'reputation', delta: -5 }],
+          },
+        ],
+      },
+      {
+        id: 'silent',
+        labelKey: 'evt.test.conditional.choice.silent',
+        outcomes: [
+          { weight: 1, textKey: 'evt.test.conditional.choice.silent.out.0', effects: [] },
+        ],
+      },
+    ],
+  },
+  {
     id: 'evt.test.fatal',
     kind: 'followup',
     titleKey: 'evt.test.fatal.title',

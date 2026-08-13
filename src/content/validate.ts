@@ -1,0 +1,213 @@
+/**
+ * Structural checks over the whole content corpus.
+ *
+ * Run from `tests/engine/content.test.ts`, so a dangling event id or a missing string fails the
+ * build rather than crashing a player's third year in office.
+ */
+
+import { ENDING_IDS, type DepartmentId } from '../engine/types';
+import { DEPARTMENT_IDS } from '../engine/types';
+import { EN_STRINGS } from './authoring';
+import { careerLevels } from './careers';
+import { departments } from './departments';
+import { endingCopy } from './endings';
+import { allEvents, eventRegistry } from './events';
+import { allTasks, taskRegistry } from './tasks';
+
+export function validateContent(): string[] {
+  const problems: string[] = [];
+  const has = (key: string) => EN_STRINGS[key] !== undefined;
+
+  const requireString = (key: string, where: string) => {
+    if (!has(key)) problems.push(`${where}: missing English string for "${key}"`);
+  };
+
+  /* ---------------------------------------------------------------- ids */
+
+  const seenEventIds = new Set<string>();
+  for (const event of allEvents) {
+    if (seenEventIds.has(event.id)) problems.push(`duplicate event id: ${event.id}`);
+    seenEventIds.add(event.id);
+  }
+
+  const seenTaskIds = new Set<string>();
+  for (const task of allTasks) {
+    if (seenTaskIds.has(task.id)) problems.push(`duplicate task id: ${task.id}`);
+    seenTaskIds.add(task.id);
+  }
+
+  /* -------------------------------------------------------------- events */
+
+  for (const event of allEvents) {
+    requireString(event.titleKey, `event ${event.id}`);
+    requireString(event.bodyKey, `event ${event.id}`);
+
+    if (event.choices.length < 2 && event.choices.length !== 1) {
+      problems.push(`event ${event.id}: has no choices`);
+    }
+    if (event.choices.length > 4) {
+      problems.push(`event ${event.id}: ${event.choices.length} choices (maximum is 4)`);
+    }
+    if (event.weight <= 0 && event.kind === 'random') {
+      problems.push(`event ${event.id}: random events need a positive weight`);
+    }
+
+    const seenChoiceIds = new Set<string>();
+    for (const choice of event.choices) {
+      if (seenChoiceIds.has(choice.id)) {
+        problems.push(`event ${event.id}: duplicate choice id "${choice.id}"`);
+      }
+      seenChoiceIds.add(choice.id);
+      requireString(choice.labelKey, `event ${event.id} choice ${choice.id}`);
+
+      if (choice.outcomes.length === 0) {
+        problems.push(`event ${event.id} choice ${choice.id}: no outcomes`);
+      } else if (choice.outcomes.every((outcome) => outcome.conditions)) {
+        // Otherwise a state that satisfies none of them would leave the choice with no result.
+        problems.push(
+          `event ${event.id} choice ${choice.id}: every outcome is conditional, so there is no fallback`,
+        );
+      }
+      for (const outcome of choice.outcomes) {
+        requireString(outcome.textKey, `event ${event.id} choice ${choice.id}`);
+        if (outcome.weight <= 0) {
+          problems.push(`event ${event.id} choice ${choice.id}: outcome weight must be positive`);
+        }
+        problems.push(...validateEffects(outcome.effects, `event ${event.id}/${choice.id}`));
+      }
+    }
+  }
+
+  /* --------------------------------------------------------------- tasks */
+
+  for (const task of allTasks) {
+    requireString(task.titleKey, `task ${task.id}`);
+    requireString(task.descKey, `task ${task.id}`);
+
+    if (task.baseEffort <= 0) problems.push(`task ${task.id}: baseEffort must be positive`);
+    if (task.weight <= 0) problems.push(`task ${task.id}: weight must be positive`);
+
+    const [min, max] = task.deadlineRange;
+    if (min < 1 || max < min) {
+      problems.push(`task ${task.id}: deadlineRange [${min}, ${max}] is not usable`);
+    }
+
+    for (const [tier, effects] of Object.entries(task.onComplete ?? {})) {
+      problems.push(...validateEffects(effects, `task ${task.id} onComplete.${tier}`));
+    }
+    problems.push(...validateEffects(task.onFail ?? [], `task ${task.id} onFail`));
+  }
+
+  /* --------------------------------------------------------- departments */
+
+  for (const id of DEPARTMENT_IDS) {
+    const department = departments[id];
+    if (!department) {
+      problems.push(`no department defined for "${id}"`);
+      continue;
+    }
+    requireString(department.nameKey, `department ${id}`);
+    requireString(department.blurbKey, `department ${id}`);
+    requireString(department.flavourKey, `department ${id}`);
+
+    if (!allTasks.some((t) => t.departments === 'any' || t.departments.includes(id))) {
+      problems.push(`department ${id}: no task template can ever land on this desk`);
+    }
+    if (!hasDepartmentEvent(id)) {
+      problems.push(`department ${id}: no random event targets this department`);
+    }
+  }
+
+  /* -------------------------------------------------------------- career */
+
+  const levels = [...careerLevels].sort((a, b) => a.level - b.level);
+  levels.forEach((level, index) => {
+    requireString(level.titleKey, `career level ${level.level}`);
+    requireString(level.orgKey, `career level ${level.level}`);
+    requireString(level.orgShortKey, `career level ${level.level}`);
+
+    if (level.level !== index + 1) {
+      problems.push(`career levels must be contiguous from 1; found ${level.level} at index ${index}`);
+    }
+    if (index > 0 && !level.promotion) {
+      problems.push(`career level ${level.level}: needs promotion requirements`);
+    }
+    if (level.effortPoints <= 0 || level.taskSlots <= 0) {
+      problems.push(`career level ${level.level}: effort points and slots must be positive`);
+    }
+    const previous = levels[index - 1];
+    if (previous && level.baseSalary <= previous.baseSalary) {
+      problems.push(`career level ${level.level}: salary should exceed level ${previous.level}`);
+    }
+  });
+
+  /* ------------------------------------------------------------- endings */
+
+  for (const ending of ENDING_IDS) {
+    const copy = endingCopy[ending];
+    if (!copy) {
+      problems.push(`no closing text for ending "${ending}"`);
+      continue;
+    }
+    requireString(copy.titleKey, `ending ${ending}`);
+    requireString(copy.bodyKey, `ending ${ending}`);
+    requireString(copy.epitaphKey, `ending ${ending}`);
+  }
+
+  // Every ending except the scripted one must be reachable from the engine's own checks; the
+  // Minister ending has to be reachable from content, so verify something actually grants it.
+  const grantsMinister = allEvents.some((event) =>
+    event.choices.some((choice) =>
+      choice.outcomes.some((outcome) =>
+        outcome.effects.some((e) => e.kind === 'endGame' && e.ending === 'minister'),
+      ),
+    ),
+  );
+  if (!grantsMinister) problems.push('no event can award the Minister ending');
+
+  return problems;
+}
+
+function hasDepartmentEvent(id: DepartmentId): boolean {
+  return allEvents.some(
+    (event) => event.kind === 'random' && event.conditions?.departments?.includes(id),
+  );
+}
+
+function validateEffects(effects: readonly unknown[], where: string): string[] {
+  const problems: string[] = [];
+
+  for (const effect of effects as {
+    kind: string;
+    templateId?: string;
+    eventId?: string;
+    ending?: string;
+    delta?: number;
+  }[]) {
+    switch (effect.kind) {
+      case 'spawnTask':
+        if (!effect.templateId || !taskRegistry[effect.templateId]) {
+          problems.push(`${where}: spawnTask references unknown template "${effect.templateId}"`);
+        }
+        break;
+      case 'queueEvent':
+        if (!effect.eventId || !eventRegistry[effect.eventId]) {
+          problems.push(`${where}: queueEvent references unknown event "${effect.eventId}"`);
+        }
+        break;
+      case 'endGame':
+        if (!effect.ending || !ENDING_IDS.includes(effect.ending as never)) {
+          problems.push(`${where}: endGame references unknown ending "${effect.ending}"`);
+        }
+        break;
+      case 'stat':
+      case 'salary':
+        if (effect.delta === 0) problems.push(`${where}: effect with a delta of zero does nothing`);
+        break;
+      default:
+        break;
+    }
+  }
+
+  return problems;
+}
