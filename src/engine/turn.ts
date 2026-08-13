@@ -17,6 +17,10 @@ import {
   NETWORK_PC_GAIN,
   OVERTIME_POINTS,
   OVERTIME_STRESS,
+  PERFORMANCE_BASELINE,
+  PERFORMANCE_REVERSION_RATE,
+  POLITICAL_CAPITAL_DECAY_RATE,
+  REPUTATION_DECAY_RATE,
   REST_STRESS_RELIEF,
   TASK_FAILURE_EFFECTS,
   TASK_QUALITY_EFFECTS,
@@ -175,6 +179,23 @@ export function resolveTurn(
   }
 
   next = { ...next, tasks: survivors };
+
+  // Monthly drift: standing and allies fade, form returns to the middle. See `constants.ts`.
+  adjustStat(
+    next.stats,
+    'reputation',
+    -Math.round(next.stats.reputation * REPUTATION_DECAY_RATE),
+  );
+  adjustStat(
+    next.stats,
+    'politicalCapital',
+    -Math.round(next.stats.politicalCapital * POLITICAL_CAPITAL_DECAY_RATE),
+  );
+  adjustStat(
+    next.stats,
+    'performance',
+    -Math.round((next.stats.performance - PERFORMANCE_BASELINE) * PERFORMANCE_REVERSION_RATE),
+  );
 
   // Stress and networking.
   const stressDelta =

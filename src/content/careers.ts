@@ -15,7 +15,7 @@ export const careerLevels: CareerLevel[] = [
     orgShortKey: text('career.1.org_short', 'Alderford'),
     baseSalary: 2100,
     effortPoints: 10,
-    taskSlots: 3,
+    taskSlots: 4,
   },
   {
     level: 2,
@@ -23,7 +23,7 @@ export const careerLevels: CareerLevel[] = [
     orgKey: text('career.2.org', 'Northbridge City Council'),
     orgShortKey: text('career.2.org_short', 'Northbridge'),
     baseSalary: 2900,
-    effortPoints: 11,
+    effortPoints: 12,
     taskSlots: 4,
     promotion: { minReputation: 35, minPerformance: 50, minTurnsAtLevel: 8 },
   },
@@ -33,8 +33,8 @@ export const careerLevels: CareerLevel[] = [
     orgKey: text('career.3.org', 'Regional Government of Valmara'),
     orgShortKey: text('career.3.org_short', 'the Region'),
     baseSalary: 3900,
-    effortPoints: 12,
-    taskSlots: 4,
+    effortPoints: 14,
+    taskSlots: 5,
     promotion: {
       minReputation: 50,
       minPerformance: 55,
@@ -48,7 +48,7 @@ export const careerLevels: CareerLevel[] = [
     orgKey: text('career.4.org', 'National Agency for Public Investment'),
     orgShortKey: text('career.4.org_short', 'the Agency'),
     baseSalary: 5200,
-    effortPoints: 13,
+    effortPoints: 16,
     taskSlots: 5,
     promotion: {
       minReputation: 65,
@@ -63,8 +63,8 @@ export const careerLevels: CareerLevel[] = [
     orgKey: text('career.5.org', 'Ministry of Territorial Administration'),
     orgShortKey: text('career.5.org_short', 'the Ministry'),
     baseSalary: 6800,
-    effortPoints: 14,
-    taskSlots: 5,
+    effortPoints: 18,
+    taskSlots: 6,
     promotion: {
       minReputation: 78,
       minPerformance: 65,

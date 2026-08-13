@@ -39,7 +39,7 @@ export const departments: Record<DepartmentId, Department> = {
     flavour:
       'Everyone watches procurement. Auditors, journalists, losing bidders, and at least one ' +
       'councillor with a cousin in construction. Sign nothing you have not read twice.',
-    startingAdjustments: { reputation: 6, stress: 6 },
+    startingAdjustments: { reputation: 6, stress: 3 },
   }),
 
   policy: defineDepartment('policy', {

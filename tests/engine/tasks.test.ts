@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { TASK_EFFORT_MULTIPLIER } from '../../src/engine/constants';
 import { createGame } from '../../src/engine/newGame';
 import {
   isComplete,
@@ -33,10 +34,18 @@ function task(overrides: Partial<ActiveTask> = {}): ActiveTask {
 }
 
 describe('effort scaling', () => {
-  it('leaves level 1 alone and grows with the post', () => {
-    expect(scaleEffort(10, 1)).toBe(10);
-    expect(scaleEffort(10, 3)).toBe(12);
-    expect(scaleEffort(10, 5)).toBe(15);
+  it('applies the workload multiplier at level 1', () => {
+    // The board is deliberately oversubscribed; see TASK_EFFORT_MULTIPLIER.
+    expect(scaleEffort(10, 1)).toBe(Math.round(10 * TASK_EFFORT_MULTIPLIER));
+  });
+
+  it('grows with the post', () => {
+    const first = scaleEffort(10, 1);
+    const middle = scaleEffort(10, 3);
+    const top = scaleEffort(10, 5);
+
+    expect(middle).toBeGreaterThan(first);
+    expect(top).toBeGreaterThan(middle);
   });
 
   it('never scales a task below one point', () => {

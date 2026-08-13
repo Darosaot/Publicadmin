@@ -34,18 +34,55 @@ export const NETWORK_PC_GAIN = 2;
 /** The job weighs on you even in a quiet month. */
 export const BASELINE_STRESS_PER_TURN = 2;
 
+/* ------------------------------------------------------------------ drift */
+
+/**
+ * Monthly drift, and the reason the stats mean anything.
+ *
+ * Without it every stat is a ratchet: a career completes a hundred files, each worth a point or
+ * three of Reputation, and by year five everyone is on 100 regardless of how they played. Decay
+ * turns Reputation and Political Capital into a measure of how you are doing *lately* — they
+ * settle at whatever level your current work and current allies sustain — which is what makes
+ * the promotion thresholds mean something.
+ *
+ * Performance reverts toward the middle instead of decaying, in both directions: a great year
+ * fades, and a terrible one recovers rather than spiralling.
+ *
+ * Integrity is deliberately exempt. A record does not fade.
+ */
+export const REPUTATION_DECAY_RATE = 0.03;
+export const POLITICAL_CAPITAL_DECAY_RATE = 0.04;
+export const PERFORMANCE_REVERSION_RATE = 0.05;
+export const PERFORMANCE_BASELINE = 50;
+
 /* ------------------------------------------------------------------- tasks */
 
-/** Required effort grows 12% per level: bigger post, bigger files. */
-export const TASK_EFFORT_LEVEL_SCALE = 0.12;
+/**
+ * How much work a desk actually holds.
+ *
+ * The multiplier sets the ratio between what the board demands each month and what a level's
+ * effort points supply. It is deliberately above 1: a player who can finish everything is never
+ * choosing anything, and choosing is the game. Tune it with `npm run balance`.
+ */
+export const TASK_EFFORT_MULTIPLIER = 1.35;
 
-export const QUALITY_BASE = 50;
+/** On top of that, files get bigger with the post. Slots grow too, so this stays gentle. */
+export const TASK_EFFORT_LEVEL_SCALE = 0.08;
+
+/**
+ * The baseline is set so that finishing an average file on time, with exactly the effort it
+ * needed, is solid work rather than poor work. Earliness and extra care are what push it to
+ * excellent. Getting this wrong in the other direction produces a death spiral: poor work lowers
+ * Performance, which lowers quality, which produces more poor work.
+ */
+export const QUALITY_BASE = 58;
 export const QUALITY_EARLY_BONUS_PER_TURN = 6;
 export const QUALITY_EARLY_BONUS_CAP = 18;
 export const QUALITY_OVERINVEST_BONUS_PER_POINT = 4;
 export const QUALITY_OVERINVEST_BONUS_CAP = 16;
-export const QUALITY_PERFORMANCE_WEIGHT = 0.3;
-export const QUALITY_DIFFICULTY_PENALTY = 10;
+/** Kept low deliberately — it is the feedback term, and a strong one oscillates. */
+export const QUALITY_PERFORMANCE_WEIGHT = 0.2;
+export const QUALITY_DIFFICULTY_PENALTY = 7;
 export const QUALITY_STRESS_THRESHOLD = 50;
 export const QUALITY_STRESS_WEIGHT = 0.35;
 export const QUALITY_JITTER = 12;
@@ -59,7 +96,12 @@ export const TASK_QUALITY_EFFECTS = {
   poor: { performance: -2, reputation: -1 },
 } as const;
 
-export const TASK_FAILURE_EFFECTS = { performance: -5, reputation: -3 } as const;
+/**
+ * The board is deliberately oversubscribed, so missing something occasionally is the normal
+ * texture of the job rather than a punishment. The real sting is in the consequence events a
+ * missed deadline schedules.
+ */
+export const TASK_FAILURE_EFFECTS = { performance: -3, reputation: -2 } as const;
 
 /* ------------------------------------------------------------------ events */
 
@@ -92,7 +134,8 @@ export const OFFER_SALARY_VARIANCE = 0.06;
 /* ---------------------------------------------------------------- endings */
 
 export const BURNOUT_STRESS = 100;
-export const DISGRACE_INTEGRITY = 0;
+/** Not zero: a record this bad has already ended the career, and waiting for 0 never fires. */
+export const DISGRACE_INTEGRITY = 8;
 export const DISMISSAL_REPUTATION = 10;
 export const DISMISSAL_PERFORMANCE = 25;
 export const HONOURED_RETIREMENT_REPUTATION = 60;

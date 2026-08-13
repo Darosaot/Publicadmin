@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { DISGRACE_INTEGRITY } from '../../src/engine/constants';
 import { checkEnding, isPositiveEnding } from '../../src/engine/endings';
 import { createGame } from '../../src/engine/newGame';
 import { emptyAllocation, resolveTurn } from '../../src/engine/turn';
@@ -23,7 +24,8 @@ describe('checkEnding', () => {
   });
 
   it('ends in disgrace when integrity is gone', () => {
-    expect(checkEnding(game({ integrity: 1 }))).toBeUndefined();
+    expect(checkEnding(game({ integrity: DISGRACE_INTEGRITY + 1 }))).toBeUndefined();
+    expect(checkEnding(game({ integrity: DISGRACE_INTEGRITY }))).toBe('disgrace');
     expect(checkEnding(game({ integrity: 0 }))).toBe('disgrace');
   });
 

@@ -33,7 +33,7 @@ The budget cycle, invoices, treasury, and the annual ordeal of closing the year.
 
 ### Procurement
 
-*Starting adjustment: Reputation +6, Stress +6*
+*Starting adjustment: Reputation +6, Stress +3*
 
 Tenders, evaluation committees, framework agreements and very attentive suppliers.
 
@@ -51,11 +51,11 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 | Level | Post | Administration | Salary | Effort | Slots | To be offered this post |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Administrative Officer | Alderford City Council | €2100 | 10 | 3 | starting post |
-| 2 | Senior Officer | Northbridge City Council | €2900 | 11 | 4 | Rep 35, Perf 50, 8 months in post |
-| 3 | Head of Unit | Regional Government of Valmara | €3900 | 12 | 4 | Rep 50, Perf 55, PC 25, 10 months in post |
-| 4 | Head of Department | National Agency for Public Investment | €5200 | 13 | 5 | Rep 65, Perf 60, PC 40, 12 months in post |
-| 5 | Director-General | Ministry of Territorial Administration | €6800 | 14 | 5 | Rep 78, Perf 65, PC 55, 12 months in post |
+| 1 | Administrative Officer | Alderford City Council | €2100 | 10 | 4 | starting post |
+| 2 | Senior Officer | Northbridge City Council | €2900 | 12 | 4 | Rep 35, Perf 50, 8 months in post |
+| 3 | Head of Unit | Regional Government of Valmara | €3900 | 14 | 5 | Rep 50, Perf 55, PC 25, 10 months in post |
+| 4 | Head of Department | National Agency for Public Investment | €5200 | 16 | 5 | Rep 65, Perf 60, PC 40, 12 months in post |
+| 5 | Director-General | Ministry of Territorial Administration | €6800 | 18 | 6 | Rep 78, Perf 65, PC 55, 12 months in post |
 
 ## Tasks
 

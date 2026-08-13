@@ -72,13 +72,29 @@ describe('resolveTurn', () => {
   });
 
   it('completes a task once its requirement is met and scores it', () => {
-    const state = game();
-    const next = resolveTurn(state, registry, allIntoFirstTask(state));
+    // Pinned rather than relying on whichever template happened to spawn first: what is on the
+    // board depends on content, and this is testing the engine.
+    const base = game();
+    const state: GameState = {
+      ...base,
+      tasks: [
+        {
+          uid: 'only',
+          templateId: 'task.test.easy',
+          progress: 0,
+          required: 4,
+          difficulty: 1,
+          deadlineTurn: base.turn + 2,
+          spawnedTurn: base.turn,
+        },
+      ],
+    };
 
-    expect(next.lastReport?.completed.length).toBeGreaterThanOrEqual(1);
-    const completed = next.lastReport!.completed[0]!;
-    expect(['poor', 'good', 'excellent']).toContain(completed.tier);
-    expect(next.tasks.some((t) => t.uid === state.tasks[0]!.uid)).toBe(false);
+    const next = resolveTurn(state, registry, allocate({ tasks: { only: 4 } }));
+
+    expect(next.lastReport?.completed).toHaveLength(1);
+    expect(['poor', 'good', 'excellent']).toContain(next.lastReport!.completed[0]!.tier);
+    expect(next.tasks.some((t) => t.uid === 'only')).toBe(false);
   });
 
   it('fails tasks whose deadline arrives unfinished, and hurts the stats for it', () => {
@@ -175,7 +191,7 @@ describe('beginNextTurn', () => {
 
     expect(next.turn).toBe(state.turn + 1);
     expect(next.player.turnsAtLevel).toBe(state.player.turnsAtLevel + 1);
-    expect(next.tasks).toHaveLength(3);
+    expect(next.tasks).toHaveLength(3); // the fixture registry keeps level 1 at three slots
     expect(next.phase).toBe('allocation');
   });
 

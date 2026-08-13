@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "docs:script": "vite-node scripts/generate-script.ts"
+    "docs:script": "vite-node scripts/generate-script.ts",
+    "balance": "vite-node scripts/balance.ts"
   },
   "dependencies": {
     "react": "^18.3.1",

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createGame } from '../../src/engine/newGame';
 import { eligibleRandomEvents } from '../../src/engine/events';
-import { registry, allEvents, allTasks, EN_STRINGS } from '../../src/content';
+import { registry, allEvents, allTasks, careerLevels, EN_STRINGS } from '../../src/content';
 import { validateContent } from '../../src/content/validate';
 import { translate } from '../../src/i18n/translate';
 import { DEPARTMENT_IDS, type DepartmentId } from '../../src/engine/types';
@@ -32,7 +32,7 @@ describe('every department is playable', () => {
 
   it.each(departments)('%s has work available at level 1', (department: DepartmentId) => {
     const state = createGame({ name: 'Test', department, seed: 5 }, registry);
-    expect(state.tasks.length).toBe(3);
+    expect(state.tasks.length).toBe(careerLevels[0]!.taskSlots);
   });
 
   it.each(departments)('%s has random events available at level 1', (department: DepartmentId) => {

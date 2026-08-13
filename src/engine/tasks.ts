@@ -20,6 +20,7 @@ import {
   QUALITY_STRESS_THRESHOLD,
   QUALITY_STRESS_WEIGHT,
   TASK_EFFORT_LEVEL_SCALE,
+  TASK_EFFORT_MULTIPLIER,
 } from './constants';
 import { getCareerLevel, type ContentRegistry } from './registry';
 import { nextInt, nextRange, weightedPick } from './rng';
@@ -27,7 +28,9 @@ import type { ActiveTask, GameState, QualityTier, TaskTemplate } from './types';
 
 /** Files get bigger as the post gets bigger. */
 export function scaleEffort(baseEffort: number, level: number): number {
-  return Math.max(1, Math.round(baseEffort * (1 + TASK_EFFORT_LEVEL_SCALE * (level - 1))));
+  const scaled =
+    baseEffort * TASK_EFFORT_MULTIPLIER * (1 + TASK_EFFORT_LEVEL_SCALE * (level - 1));
+  return Math.max(1, Math.round(scaled));
 }
 
 /** Adds one task to the board, rolling its deadline. Mutates nothing — returns a new state. */
