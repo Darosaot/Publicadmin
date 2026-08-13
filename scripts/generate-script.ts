@@ -11,7 +11,7 @@
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { allEvents, allTasks, careerLevels, departmentList, endingCopy } from '../src/content';
-import { translate } from '../src/i18n';
+import { translate } from '../src/i18n/translate';
 import type { Condition, Effect, GameEvent, TaskTemplate } from '../src/engine/types';
 import { ENDING_IDS, STAT_IDS } from '../src/engine/types';
 

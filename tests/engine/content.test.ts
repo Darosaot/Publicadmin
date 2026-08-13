@@ -3,7 +3,7 @@ import { createGame } from '../../src/engine/newGame';
 import { eligibleRandomEvents } from '../../src/engine/events';
 import { registry, allEvents, allTasks, EN_STRINGS } from '../../src/content';
 import { validateContent } from '../../src/content/validate';
-import { translate } from '../../src/i18n';
+import { translate } from '../../src/i18n/translate';
 import { DEPARTMENT_IDS, type DepartmentId } from '../../src/engine/types';
 
 describe('content validation', () => {
