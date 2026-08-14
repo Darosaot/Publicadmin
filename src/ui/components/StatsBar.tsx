@@ -3,7 +3,7 @@ import { STAT_IDS, type GameState } from '../../engine/types';
 import { useT } from '../../i18n';
 import { getCareerLevel } from '../../engine/registry';
 import { registry } from '../../content';
-import { formatSalary } from '../format';
+import { formatDate, formatSalary } from '../format';
 import { Meter } from './Meter';
 
 export function StatsBar({ game }: { game: GameState }) {
@@ -14,7 +14,7 @@ export function StatsBar({ game }: { game: GameState }) {
   return (
     <header className="statsbar">
       <div className="statsbar__identity">
-        <p className="eyebrow">{t('dash.month', { turn: game.turn })}</p>
+        <p className="eyebrow">{formatDate(t, game)}</p>
         <h1 className="statsbar__name">{game.player.name}</h1>
         <p className="statsbar__post">
           {t(level.titleKey)} · {t(level.orgKey)}
@@ -24,7 +24,7 @@ export function StatsBar({ game }: { game: GameState }) {
           <span className="muted"> / {t('stat.salary').toLowerCase()}</span>
           <span className="statsbar__sep">·</span>
           <span className="muted">
-            {t('dash.month', { turn: game.turn })} {t('dash.of_max', { max: MAX_TURNS })}
+            {t('dash.of_max', { turn: game.turn, max: MAX_TURNS })}
           </span>
         </p>
       </div>

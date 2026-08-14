@@ -3,7 +3,7 @@ import { checkCondition } from '../../engine/effects';
 import type { GameState, PendingEvent } from '../../engine/types';
 import { useT } from '../../i18n';
 import { useGame } from '../../state/GameProvider';
-import { describeFailure } from '../format';
+import { describeFailure, formatDate } from '../format';
 import { Modal } from './Modal';
 
 /**
@@ -24,7 +24,7 @@ export function EventModal({ game, pending }: { game: GameState; pending: Pendin
   return (
     <Modal
       title={t(event.titleKey)}
-      eyebrow={t('dash.month', { turn: game.turn })}
+      eyebrow={formatDate(t, game)}
       footer={
         resolution && (
           <button

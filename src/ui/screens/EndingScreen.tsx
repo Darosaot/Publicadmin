@@ -1,4 +1,5 @@
 import { endingBodyKey, endingCopy, registry } from '../../content';
+import { yearsElapsed } from '../../engine/calendar';
 import { isPositiveEnding } from '../../engine/endings';
 import { getCareerLevel } from '../../engine/registry';
 import { STAT_IDS, type GameState } from '../../engine/types';
@@ -44,7 +45,7 @@ export function EndingScreen({ game }: { game: GameState }) {
           <p className="ending__summary">
             {t('ending.final_post')}: <strong>{t(level.titleKey)}</strong>, {t(level.orgKey)}
             <br />
-            {t('ending.months', { turns: game.turn })}
+            {t('ending.months', { years: yearsElapsed(game) })}
           </p>
         </section>
 

@@ -36,6 +36,7 @@ export function createGame(options: NewGameOptions, registry: ContentRegistry): 
     rngState: seedToState(seed),
 
     turn: 1,
+    calendarMonth: 0,
     phase: 'allocation',
 
     player: {

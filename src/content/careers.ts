@@ -16,6 +16,7 @@ export const careerLevels: CareerLevel[] = [
     baseSalary: 2100,
     effortPoints: 10,
     taskSlots: 4,
+    monthsPerTurn: 1,
   },
   {
     level: 2,
@@ -25,6 +26,7 @@ export const careerLevels: CareerLevel[] = [
     baseSalary: 2900,
     effortPoints: 12,
     taskSlots: 4,
+    monthsPerTurn: 2,
     promotion: { minReputation: 35, minPerformance: 50, minTurnsAtLevel: 8 },
   },
   {
@@ -35,6 +37,7 @@ export const careerLevels: CareerLevel[] = [
     baseSalary: 3900,
     effortPoints: 14,
     taskSlots: 6,
+    monthsPerTurn: 4,
     headcount: 4,
     monthlyBudget: 11500,
     promotion: {
@@ -52,6 +55,7 @@ export const careerLevels: CareerLevel[] = [
     baseSalary: 5200,
     effortPoints: 16,
     taskSlots: 7,
+    monthsPerTurn: 6,
     headcount: 6,
     monthlyBudget: 18500,
     promotion: {
@@ -69,6 +73,7 @@ export const careerLevels: CareerLevel[] = [
     baseSalary: 6800,
     effortPoints: 18,
     taskSlots: 8,
+    monthsPerTurn: 6,
     headcount: 8,
     monthlyBudget: 26000,
     promotion: {

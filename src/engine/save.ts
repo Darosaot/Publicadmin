@@ -5,8 +5,8 @@
  * rather than content objects, and because the RNG cursor is part of it. Loading a save resumes
  * the same random stream, so a run is fully reproducible.
  *
- * Version handling is deliberately minimal for v1: a save from an incompatible version is
- * rejected rather than migrated. When migrations become necessary, they go in `MIGRATIONS`.
+ * A save from a version with no migration path is rejected rather than guessed at. Migrations run
+ * one version at a time, so each one only has to know about the single change it made.
  */
 
 import { SAVE_VERSION } from './constants';
@@ -17,8 +17,23 @@ export const SAVE_KEY = 'padmin.save';
 
 type RawSave = Record<string, unknown>;
 
-/** Version N -> N+1 transforms. Empty until the save format actually changes. */
-const MIGRATIONS: Record<number, (raw: RawSave) => RawSave> = {};
+/**
+ * Version N -> N+1 transforms.
+ *
+ * Each one is handed the raw parsed save and returns it shaped for the next version. They run in
+ * sequence, so a v1 save reaching a v4 build passes through all three.
+ */
+const MIGRATIONS: Record<number, (raw: RawSave) => RawSave> = {
+  /**
+   * 1 -> 2: the clock split in two.
+   *
+   * Before this, a turn was always one calendar month, so a v1 career's elapsed months are exactly
+   * its turn count. Careers saved under the old clock therefore resume with a shorter history than
+   * a new one would have by the same turn — which is correct: that is how long they had actually
+   * been running.
+   */
+  1: (raw) => ({ ...raw, calendarMonth: typeof raw.turn === 'number' ? raw.turn : 0 }),
+};
 
 export function serialize(state: GameState): string {
   return JSON.stringify(state);
@@ -61,6 +76,7 @@ function hasRequiredShape(raw: RawSave): boolean {
   const player = raw.player as Record<string, unknown> | undefined;
   return (
     typeof raw.turn === 'number' &&
+    typeof raw.calendarMonth === 'number' &&
     typeof raw.rngState === 'number' &&
     typeof raw.phase === 'string' &&
     typeof raw.stats === 'object' &&

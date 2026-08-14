@@ -81,6 +81,40 @@ describe('rejecting bad saves', () => {
       reason: 'incompatible',
     });
   });
+});
+
+describe('migrating a save forward', () => {
+  /** A save as version 1 wrote them: a turn was a month, so there was no separate calendar. */
+  function version1(state: GameState): string {
+    const { calendarMonth: _dropped, ...rest } = state;
+    return JSON.stringify({ ...rest, saveVersion: 1 });
+  }
+
+  it('carries a version 1 career across the clock change instead of rejecting it', () => {
+    const state = { ...game(), turn: 17, calendarMonth: 17 };
+    const result = deserialize(version1(state), registry);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.state.saveVersion).toBe(SAVE_VERSION);
+    // Under the old clock a turn *was* a month, so the elapsed months are the turn count. A
+    // career saved back then really had been running seventeen months, not seventeen quarters.
+    expect(result.state.calendarMonth).toBe(17);
+    expect(result.state.player.name).toBe('Renata Vos');
+  });
+
+  it('leaves the migrated career playable', () => {
+    const result = deserialize(version1(game()), registry);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const played = beginNextTurn(
+      resolveTurn(result.state, registry, emptyAllocation()),
+      registry,
+    );
+    expect(played.turn).toBe(2);
+    expect(played.calendarMonth).toBeGreaterThan(result.state.calendarMonth);
+  });
 
   it('reports a save missing the fields the engine relies on', () => {
     const truncated = { saveVersion: SAVE_VERSION, turn: 4 };

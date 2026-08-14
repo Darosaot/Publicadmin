@@ -508,13 +508,17 @@ export function finalizeTurn(state: GameState, registry: ContentRegistry): GameS
   return { ...next, lastReport: report, phase: 'report' };
 }
 
-/** Opens the next month: the calendar turns, offers age out, and the board refills. */
+/** Opens the next cycle: the calendar turns, offers age out, and the board refills. */
 export function beginNextTurn(state: GameState, registry: ContentRegistry): GameState {
   if (state.phase !== 'report' || state.ending) return state;
+
+  // The calendar moves by the length of the cycle you have just worked, not by a flat month.
+  const worked = getCareerLevel(registry, state.player.level).monthsPerTurn;
 
   let next: GameState = {
     ...state,
     turn: state.turn + 1,
+    calendarMonth: state.calendarMonth + worked,
     player: { ...state.player, turnsAtLevel: state.player.turnsAtLevel + 1 },
   };
 

@@ -408,7 +408,7 @@ export const commonExtraEvents = [
     title: 'Someone is retiring after thirty-eight years',
     body: 'She has been in the building since before the department existed in its current form. There is a cake at three. Nobody has written anything down about what she knows.',
     weight: 10,
-    conditions: { minTurn: 24 },
+    conditions: { minYearsElapsed: 4 },
     choices: [
       {
         id: 'capture',
@@ -582,7 +582,7 @@ export const commonExtraEvents = [
     title: 'The ombudsman has an opinion',
     body: 'A case you handled two years ago has reached the ombudsman, who has found maladministration — not in the decision, which was right, but in taking eleven months to communicate it.',
     weight: 9,
-    conditions: { minTurn: 18 },
+    conditions: { minYearsElapsed: 2 },
     choices: [
       {
         id: 'accept_fix',
@@ -674,7 +674,7 @@ export const commonExtraEvents = [
     title: 'A letter from someone you helped',
     body: 'A handwritten letter, forwarded through three internal addresses. Eighteen months ago you spent an afternoon getting a case unstuck for a woman whose name you do not remember. She writes to say what it changed.',
     weight: 9,
-    conditions: { minTurn: 18 },
+    conditions: { minYearsElapsed: 2 },
     choices: [
       {
         id: 'keep',

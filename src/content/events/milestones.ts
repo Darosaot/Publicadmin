@@ -202,7 +202,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'You could stay here',
     body: 'It occurs to you, in an unremarkable week, that you are good at this job and that you could do it until you retire. The work is real, the hours are survivable, and nobody who matters to you would think less of you for it.',
-    conditions: { minTurn: 30, maxLevel: 2 },
+    conditions: { minYearsElapsed: 6, maxLevel: 2 },
     choices: [
       {
         id: 'stay',
@@ -230,7 +230,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'The reason',
     body: 'A new joiner, three weeks in, asks why you did this rather than the private sector, where you would have earned considerably more. She is not being rude; she genuinely wants to know, and you find you have to think about it.',
-    conditions: { minTurn: 45 },
+    conditions: { minYearsElapsed: 10 },
     choices: [
       {
         id: 'public_good',
@@ -263,7 +263,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'Someone from Alderford',
     body: 'At a conference, a woman you have not seen in twenty years — she sat opposite you in your first office — tells you that the thing you set up back then is still running, essentially unchanged, and still working.',
-    conditions: { minTurn: 66 },
+    conditions: { minYearsElapsed: 20 },
     choices: [
       {
         id: 'proud',
@@ -290,7 +290,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'The version of you that exists in the files',
     body: 'You are asked to give a talk to a group of new entrants on ethics in public administration. Preparing it, you go back through your own decisions, and there are several you would prefer the audience not to hear about.',
-    conditions: { maxStat: { integrity: 30 }, minTurn: 24 },
+    conditions: { maxStat: { integrity: 30 }, minYearsElapsed: 4 },
     choices: [
       {
         id: 'honest_talk',

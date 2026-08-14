@@ -50,6 +50,8 @@ export interface RunResult {
   seed: number;
   department: DepartmentId;
   turns: number;
+  /** Calendar months the career actually covered, which is not the turn count. */
+  months: number;
   level: number;
   ending?: EndingId;
   stats: GameState['stats'];
@@ -300,6 +302,7 @@ export function playCareer(
     seed,
     department,
     turns: game.turn,
+    months: game.calendarMonth,
     level: game.player.level,
     ending: game.ending,
     stats: game.stats,
@@ -342,6 +345,7 @@ export function summarise(results: RunResult[]) {
     byEnding,
     byLevel,
     meanTurns: mean((r) => r.turns),
+    meanYears: mean((r) => r.months) / 12,
     meanLevel: mean((r) => r.level),
     meanReputation: mean((r) => r.stats.reputation),
     meanStress: mean((r) => r.stats.stress),

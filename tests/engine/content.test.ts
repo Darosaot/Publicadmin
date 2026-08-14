@@ -135,7 +135,7 @@ describe('translation', () => {
   });
 
   it('interpolates parameters', () => {
-    expect(translate('en', 'dash.month', { turn: 7 })).toBe('Month 7');
+    expect(translate('en', 'dash.of_max', { turn: 7, max: 120 })).toBe('cycle 7 of 120');
   });
 
   it('translates a parameter that is itself a key', () => {
@@ -146,7 +146,7 @@ describe('translation', () => {
   });
 
   it('leaves an unknown parameter visible rather than blank', () => {
-    expect(translate('en', 'dash.month', {})).toBe('Month {turn}');
+    expect(translate('en', 'dash.of_max', { max: 120 })).toBe('cycle {turn} of 120');
   });
 
   it('returns the key itself when a string is missing', () => {

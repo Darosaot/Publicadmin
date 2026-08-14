@@ -5,6 +5,7 @@
  * place that knows stats are clamped to 0–100.
  */
 
+import { yearsElapsed } from './calendar';
 import { STAT_MAX, STAT_MIN } from './constants';
 import type { ContentRegistry } from './registry';
 import { spawnTask } from './tasks';
@@ -186,6 +187,9 @@ export function checkCondition(
   }
   if (condition.minTurn !== undefined && turn < condition.minTurn) {
     return { reason: 'turn', required: condition.minTurn, comparison: 'min' };
+  }
+  if (condition.minYearsElapsed !== undefined && yearsElapsed(state) < condition.minYearsElapsed) {
+    return { reason: 'turn', required: condition.minYearsElapsed, comparison: 'min' };
   }
   if (condition.minSalary !== undefined && player.salary < condition.minSalary) {
     return { reason: 'salary', required: condition.minSalary, comparison: 'min' };

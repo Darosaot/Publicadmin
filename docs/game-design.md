@@ -8,7 +8,7 @@
 
 ## 1. The pitch
 
-You are a public official. The game covers your whole working life, one month at a time, starting
+You are a public official. The game covers your whole working life, a decision at a time, starting
 at a desk in a small city council and ending — depending on how you play — in burnout, in quiet
 retirement, in disgrace, or in the Council of Ministers.
 
@@ -24,7 +24,9 @@ would like a word.
 
 ## 2. Core loop
 
-One **turn** is one **month**. A turn runs in four phases:
+One **turn** is one **decision cycle**, and a cycle covers more calendar time the more senior the
+post: a month at a junior desk, two at Senior Officer, a term as Head of Unit, half a year in a
+directorate. A turn runs in four phases:
 
 | Phase | What happens | Who decides |
 | --- | --- | --- |
@@ -33,7 +35,41 @@ One **turn** is one **month**. A turn runs in four phases:
 | **Events** | One to three events fire. Each is a short scene with 2–4 choices. Some consequences land immediately; some are scheduled for months later. | Player chooses, engine resolves |
 | **Report** | Salary is paid, the month is summarised, reviews and job offers are checked, and the game tests whether your career just ended. | Engine |
 
-Then the board refills and the next month begins.
+Then the board refills and the next cycle begins.
+
+### Why a cycle is not always a month
+
+The game covers a working life, and the writing has always said so — the retirement endings are
+titled "Thirty years", the Minister arc opens "twenty-two years ago you were three days into a job
+in Alderford". For a long time none of it was true: at one month a turn, 120 turns was a decade.
+
+Raising the turn count to 360 would have made it literal at the cost of three times the clicking,
+for a stretch of career where the interesting decisions are not three times as many. So the clock
+was split instead. `turn` counts decisions; `calendarMonth` counts elapsed time; each level carries
+a `monthsPerTurn`:
+
+| Level | Post | Months per cycle |
+| --- | --- | --- |
+| 1 | Administrative Officer | 1 |
+| 2 | Senior Officer | 2 |
+| 3 | Head of Unit | 4 |
+| 4 | Head of Department | 6 |
+| 5 | Director-General | 6 |
+
+Those numbers are not aesthetic. Simulated careers spend about 32 turns at level 1 and 41 at level
+2 — most of a career is early, because most careers plateau — and the figures above are what that
+distribution needs to land at **28.9 mean years of service**, which `npm run balance` reports and
+`tests/engine/autoplay.test.ts` pins between 24 and 36.
+
+It also says something true. A junior desk turns over monthly. A Director-General does not re-plan
+a directorate every four weeks, and their files genuinely run for years rather than months.
+
+**Deadlines stay in cycles**, which is why a task's `deadlineRange: [2, 4]` is two to four months
+at the bottom of the ladder and a year to two years at the top. That is the intended reading.
+
+Content that depends on how long ago something happened uses `minYearsElapsed` rather than
+`minTurn` — the milestone about "a woman you have not seen in twenty years" waits for twenty
+actual years.
 
 ## 3. Stats
 
@@ -41,9 +77,9 @@ Five stats run 0–100 and are always clamped to that range. Salary is money and
 
 | Stat | Starts at | What it means | What moves it |
 | --- | --- | --- | --- |
-| **Reputation** | 20 | Your professional standing outside your own office. This is the stat that gates promotions and job offers. | Task quality, reviews, events; **decays 4.6% a month** |
-| **Performance** | 50 | The rolling quality of your department's actual output. It feeds your reviews, which feed Reputation. | Completed and failed tasks; **reverts 5% a month toward 50** |
-| **Political Capital** | 10 | Favours owed to you, and people who take your call. Spent to force decisions through and to survive scandals. | Networking, events; **decays 4.4% a month** |
+| **Reputation** | 20 | Your professional standing outside your own office. This is the stat that gates promotions and job offers. | Task quality, reviews, events; **decays 4.6% a cycle** |
+| **Performance** | 50 | The rolling quality of your department's actual output. It feeds your reviews, which feed Reputation. | Completed and failed tasks; **reverts 5% a cycle toward 50** |
+| **Political Capital** | 10 | Favours owed to you, and people who take your call. Spent to force decisions through and to survive scandals. | Networking, events; **decays 4.4% a cycle** |
 | **Integrity** | 70 | Your ethical track record. High integrity closes off shortcuts but protects you when investigators arrive. Low integrity opens shortcuts and quietly accumulates risk. | Events, almost exclusively. Does not decay — a record does not fade |
 | **Stress** | 20 | Accumulated load. At 100 you burn out and the game ends. | Every turn (+2), overtime, crises; reduced by Rest |
 | **Salary** | €2,100/mo | Your pay. A progress marker, and a reason to take an offer you might otherwise refuse. | Promotions, reviews |
@@ -365,8 +401,8 @@ Checked at the end of every month, in this order — the first one that matches 
 | **Disgrace** | Integrity falls to 8 or below | The file with your signature on it is now evidence. |
 | **Dismissed** | Reputation ≤ 10 and Performance ≤ 25 | Not a scandal. Just a quiet conversation about how this isn't working. |
 | **Minister** | The confirmation arc succeeds | Three variants depending on how you got there: the Reformer (high integrity), the Operator (high political capital), the Survivor (neither, but you're still standing). |
-| **Honoured retirement** | Month 120 with Reputation ≥ 60 | Thirty years of files. A room full of people who mean it. |
-| **Quiet retirement** | Month 120 with Reputation < 60 | Thirty years of files. A card, signed by the department. |
+| **Honoured retirement** | Cycle 120 with Reputation ≥ 60 | Thirty years of files. A room full of people who mean it. |
+| **Quiet retirement** | Cycle 120 with Reputation < 60 | Thirty years of files. A card, signed by the department. |
 
 ## 10. Balance reference
 
@@ -374,8 +410,8 @@ All of these live in `src/engine/constants.ts`.
 
 | Constant | Value |
 | --- | --- |
-| Turn length | 1 month |
-| Maximum campaign length | 120 turns |
+| Turn length | 1 decision cycle: 1 / 2 / 4 / 6 / 6 months by level |
+| Maximum campaign length | 120 turns, about 29 years |
 | Starting stats | Rep 20, Perf 50, PC 10, Integrity 70, Stress 20 |
 | Effort points by level | 10 / 12 / 14 / 16 / 18 |
 | Task slots by level | 4 / 4 / 6 / 7 / 8 |
@@ -387,9 +423,9 @@ All of these live in `src/engine/constants.ts`.
 | Baseline stress per turn | +2 |
 | Task workload multiplier | ×1.35 |
 | Task effort level scaling | ×(1 + 0.08 × (level − 1)) |
-| Reputation decay | 4.6% a month |
-| Political capital decay | 4.4% a month |
-| Performance reversion | 5% a month toward 50 |
+| Reputation decay | 4.6% a cycle |
+| Political capital decay | 4.4% a cycle |
+| Performance reversion | 5% a cycle toward 50 |
 | Quality baseline | 58 |
 | Quality thresholds | Excellent ≥ 75, Good ≥ 45 |
 | Task failure | Performance −3, Reputation −2 |
@@ -418,6 +454,7 @@ Where it currently sits:
 
 | Measure | Value |
 | --- | --- |
+| Mean years of service | 28.9 |
 | Careers reaching Director-General | 58% |
 | Careers reaching Head of Unit or above | 82% |
 | Careers stuck at the starting post | 3% |

@@ -93,6 +93,33 @@ test('a file can be handed to someone, and the desk says who has it', async ({ p
   await expect(page.locator('.staff__carrying').first()).toBeVisible();
 });
 
+test('a senior post runs on a slower clock than a junior one', async ({ page }) => {
+  await resume(page, managing);
+
+  // The whole reason a 120-turn game is a thirty-year career: a cycle here is half a year, so
+  // ending one moves the calendar six months rather than one.
+  const before = managing.calendarMonth;
+  await page.getByRole('button', { name: 'End the month' }).click();
+
+  // Clear whatever the cycle threw up, then the report.
+  const dialog = page.getByRole('dialog');
+  for (let guard = 0; guard < 8; guard += 1) {
+    if (!(await dialog.isVisible().catch(() => false))) break;
+    const next = dialog.getByRole('button', { name: 'Next month' });
+    if (await next.isVisible().catch(() => false)) {
+      await next.click();
+      break;
+    }
+    const choice = dialog.locator('.choice:not(:disabled)').first();
+    if (await choice.isVisible().catch(() => false)) await choice.click();
+    await dialog.getByRole('button', { name: 'Continue' }).click();
+  }
+
+  const saved = await page.evaluate((key) => localStorage.getItem(key as string), SAVE_KEY);
+  const after = JSON.parse(saved ?? '{}') as { calendarMonth: number };
+  expect(after.calendarMonth - before).toBe(6);
+});
+
 test('the Team tab only exists once there is a team', async ({ page }) => {
   await page.goto('/?seed=42');
   await page.evaluate(() => localStorage.clear());

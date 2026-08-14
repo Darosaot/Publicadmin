@@ -1,4 +1,6 @@
+import { monthOfYear, serviceYear } from '../engine/calendar';
 import type { ConditionFailure } from '../engine/effects';
+import type { GameState } from '../engine/types';
 import type { Translate } from '../i18n';
 
 const money = new Intl.NumberFormat('en-IE', {
@@ -13,6 +15,19 @@ export function formatSalary(amount: number): string {
 
 export function formatDelta(value: number): string {
   return value > 0 ? `+${value}` : String(value);
+}
+
+/**
+ * Where you are in the career, in the calendar rather than in turns.
+ *
+ * At a junior desk the months tick one at a time; from a directorate they arrive a quarter at a
+ * time, which is the visible signal that the job has changed shape.
+ */
+export function formatDate(t: Translate, game: GameState): string {
+  return t('dash.date', {
+    month: t(`month.${monthOfYear(game)}`),
+    year: serviceYear(game),
+  });
 }
 
 /** Turns a failed condition into something a player can act on. */

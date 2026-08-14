@@ -64,17 +64,20 @@ test('a career can be started, played and resumed', async ({ page }) => {
   await expect(page.locator('.task')).toHaveCount(4);
   await expect(page.getByTestId('effort-remaining')).toContainText('10 of 10');
 
-  for (let month = 1; month <= 5; month += 1) {
-    await expect(page.locator('.statsbar .eyebrow')).toHaveText(`Month ${month}`);
+  // A cycle at a junior desk is one month, so the calendar advances a month at a time here. It
+  // will not later: a directorate turns over half a year at a time.
+  const months = ['January', 'February', 'March', 'April', 'May', 'June'];
+  for (let cycle = 0; cycle < 5; cycle += 1) {
+    await expect(page.locator('.statsbar .eyebrow')).toHaveText(`${months[cycle]}, year 1`);
     await playMonth(page);
   }
 
-  await expect(page.locator('.statsbar .eyebrow')).toHaveText('Month 6');
+  await expect(page.locator('.statsbar .eyebrow')).toHaveText('June, year 1');
 
-  // The career is saved as it is played, so a reload must resume the same month.
+  // The career is saved as it is played, so a reload must resume the same cycle.
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await expect(page.locator('.statsbar .eyebrow')).toHaveText('Month 6');
+  await expect(page.locator('.statsbar .eyebrow')).toHaveText('June, year 1');
   await expect(page.getByRole('heading', { name: 'Renata Vos' })).toBeVisible();
 });
 

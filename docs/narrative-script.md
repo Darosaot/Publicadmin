@@ -835,7 +835,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 #### Someone is retiring after thirty-eight years
 
-*`evt.common.long_service` · weight 10 · month 24+*
+*`evt.common.long_service` · weight 10*
 
 > She has been in the building since before the department existed in its current form. There is a cake at three. Nobody has written anything down about what she knows.
 
@@ -923,7 +923,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 #### The ombudsman has an opinion
 
-*`evt.common.ombudsman` · weight 9 · month 18+*
+*`evt.common.ombudsman` · weight 9*
 
 > A case you handled two years ago has reached the ombudsman, who has found maladministration — not in the decision, which was right, but in taking eleven months to communicate it.
 
@@ -976,7 +976,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 #### A letter from someone you helped
 
-*`evt.common.small_kindness` · weight 9 · month 18+*
+*`evt.common.small_kindness` · weight 9*
 
 > A handwritten letter, forwarded through three internal addresses. Eighteen months ago you spent an afternoon getting a case unstuck for a woman whose name you do not remember. She writes to say what it changed.
 
@@ -2588,7 +2588,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 #### You could stay here
 
-*`evt.milestone.comfortable_plateau` · up to level 2, month 30+*
+*`evt.milestone.comfortable_plateau` · up to level 2*
 
 > It occurs to you, in an unremarkable week, that you are good at this job and that you could do it until you retire. The work is real, the hours are survivable, and nobody who matters to you would think less of you for it.
 
@@ -2604,7 +2604,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 #### The reason
 
-*`evt.milestone.why_you_started` · month 45+*
+*`evt.milestone.why_you_started`*
 
 > A new joiner, three weeks in, asks why you did this rather than the private sector, where you would have earned considerably more. She is not being rude; she genuinely wants to know, and you find you have to think about it.
 
@@ -2625,7 +2625,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 #### Someone from Alderford
 
-*`evt.milestone.old_colleague` · month 66+*
+*`evt.milestone.old_colleague`*
 
 > At a conference, a woman you have not seen in twenty years — she sat opposite you in your first office — tells you that the thing you set up back then is still running, essentially unchanged, and still working.
 
@@ -2641,7 +2641,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 #### The version of you that exists in the files
 
-*`evt.milestone.reckoning` · month 24+, Integrity ≤ 30*
+*`evt.milestone.reckoning` · Integrity ≤ 30*
 
 > You are asked to give a talk to a group of new entrants on ethics in public administration. Preparing it, you go back through your own decisions, and there are several you would prefer the audience not to hear about.
 

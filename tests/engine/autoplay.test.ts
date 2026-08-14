@@ -48,6 +48,16 @@ describe('simulated careers', () => {
     expect(bottom / summary.runs).toBeLessThan(0.25);
   });
 
+  it('covers something like a working life, which is what the writing claims', () => {
+    // The endings are titled "Thirty years" and the Minister arc says "twenty-two years ago you
+    // were three days into a job in Alderford". For a long time none of that was true: a turn was
+    // a month, so 120 turns was a decade. A cycle now covers more calendar time the more senior
+    // the post, which costs the player no extra clicks and makes the prose honest.
+    const years = summary.meanYears;
+    expect(years, 'a career should be a career, not a decade').toBeGreaterThan(24);
+    expect(years, 'and not so long that the arithmetic stops being plausible').toBeLessThan(36);
+  });
+
   it('leaves reputation meaningful rather than saturated', () => {
     // Decay is what stops a hundred completed files pinning everyone at 100.
     expect(summary.meanReputation).toBeGreaterThan(20);

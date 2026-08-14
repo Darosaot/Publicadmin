@@ -104,6 +104,7 @@ The same shape gates events and individual choices:
 {
   minLevel?: number;              maxLevel?: number;
   departments?: DepartmentId[];   minTurn?: number;
+  minYearsElapsed?: number;
   minStat?: { reputation?: 40, politicalCapital?: 25, … };
   maxStat?: { integrity?: 30, … };
   requiredFlags?: string[];       forbiddenFlags?: string[];
@@ -114,6 +115,12 @@ The same shape gates events and individual choices:
 
 A choice whose conditions fail is **rendered but disabled**, with a generated hint explaining what
 you're missing. That's intentional — the player should see the option they can't afford.
+
+**`minTurn` counts decision cycles; `minYearsElapsed` counts calendar years, and they stopped
+being the same number once a senior cycle covered half a year.** Use `minTurn` when you mean "not
+in the first few turns" and `minYearsElapsed` whenever the prose says how long ago something
+happened. An event whose body opens "a case you handled two years ago" needs
+`minYearsElapsed: 2`, or it will fire in the player's first year.
 
 ## Effects
 

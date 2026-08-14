@@ -107,7 +107,11 @@ export function CareerScreen({ game }: { game: GameState }) {
             </p>
             <p className="muted">{t(getCareerLevel(registry, game.player.level).orgKey)}</p>
             <p className="muted">
-              {t('career.since', { turns: game.player.turnsAtLevel })}
+              {t('career.since', {
+                months:
+                  game.player.turnsAtLevel *
+                  getCareerLevel(registry, game.player.level).monthsPerTurn,
+              })}
             </p>
           </section>
 

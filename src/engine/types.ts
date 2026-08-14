@@ -58,6 +58,13 @@ export interface Condition {
   maxLevel?: number;
   departments?: DepartmentId[];
   minTurn?: number;
+  /**
+   * Whole years of service elapsed.
+   *
+   * Distinct from `minTurn` and the one to use whenever the prose says how long ago something
+   * was: turns and years stopped being the same thing once a senior cycle covered a quarter.
+   */
+  minYearsElapsed?: number;
   minStat?: Partial<PlayerStats>;
   maxStat?: Partial<PlayerStats>;
   minSalary?: number;
@@ -221,6 +228,14 @@ export interface CareerLevel {
   effortPoints: number;
   taskSlots: number;
   /**
+   * Calendar months one turn of this post covers.
+   *
+   * A junior desk turns over monthly. A directorate does not: the decisions are the same number
+   * per cycle, but the cycle is a quarter. This is what lets a 120-turn game be a thirty-year
+   * career rather than a ten-year one, without asking the player for three times the clicks.
+   */
+  monthsPerTurn: number;
+  /**
    * How many people report to you, and the money you answer for. Absent below the first
    * management post: until then you are the one being managed.
    */
@@ -340,6 +355,14 @@ export interface GameState {
   rngState: number;
 
   turn: number;
+  /**
+   * Months elapsed since the first day, which is not the same as `turn`.
+   *
+   * A turn is one decision cycle. At a junior desk that is a month; a Director-General does not
+   * re-plan their directorate every four weeks, so the same 120 turns cover a whole working life
+   * instead of a decade. Deadlines stay in turns — a senior file genuinely runs longer.
+   */
+  calendarMonth: number;
   phase: Phase;
 
   player: {
