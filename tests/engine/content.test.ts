@@ -14,16 +14,55 @@ describe('content validation', () => {
 
 describe('corpus size', () => {
   it('ships enough events that a long career does not repeat itself', () => {
-    expect(allEvents.length).toBeGreaterThanOrEqual(80);
+    expect(allEvents.length).toBeGreaterThanOrEqual(160);
   });
 
   it('ships enough task templates to keep the board varied', () => {
-    expect(allTasks.length).toBeGreaterThanOrEqual(40);
+    expect(allTasks.length).toBeGreaterThanOrEqual(60);
   });
 
   it('covers every kind of event', () => {
     const kinds = new Set(allEvents.map((e) => e.kind));
     expect(kinds).toEqual(new Set(['random', 'milestone', 'followup']));
+  });
+
+  it('gives every department a comparable amount of its own material', () => {
+    for (const department of DEPARTMENT_IDS) {
+      const own = allEvents.filter((e) => e.conditions?.departments?.includes(department));
+      expect(own.length, `${department} has too little of its own`).toBeGreaterThanOrEqual(12);
+    }
+  });
+});
+
+describe('consequences are reachable', () => {
+  /** Every event id that some choice, outcome or task result schedules. */
+  const scheduled = new Set<string>();
+  for (const event of allEvents) {
+    for (const choice of event.choices) {
+      for (const outcome of choice.outcomes) {
+        for (const effect of outcome.effects) {
+          if (effect.kind === 'queueEvent') scheduled.add(effect.eventId);
+        }
+      }
+    }
+  }
+  for (const task of allTasks) {
+    const effects = [...Object.values(task.onComplete ?? {}).flat(), ...(task.onFail ?? [])];
+    for (const effect of effects) {
+      if (effect.kind === 'queueEvent') scheduled.add(effect.eventId);
+    }
+  }
+
+  it('never schedules an event that does not exist', () => {
+    for (const id of scheduled) expect(registry.events[id], `missing ${id}`).toBeDefined();
+  });
+
+  it('has no followup that nothing can lead to', () => {
+    // Followups are never drawn at random, so an unscheduled one is content nobody can ever see.
+    const orphans = allEvents
+      .filter((e) => e.kind === 'followup' && !scheduled.has(e.id))
+      .map((e) => e.id);
+    expect(orphans).toEqual([]);
   });
 });
 

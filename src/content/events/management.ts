@@ -279,6 +279,7 @@ export const managementEvents = [
         effects: [
           { kind: 'stat', stat: 'performance', delta: -2 },
           { kind: 'teamMorale', delta: -3 },
+          { kind: 'queueEvent', eventId: 'evt.followup.team_exodus', delayTurns: 6 },
         ],
       },
       {
@@ -331,6 +332,7 @@ export const managementEvents = [
               { kind: 'loseStaff' },
               { kind: 'stat', stat: 'performance', delta: -4 },
               { kind: 'teamMorale', delta: -8 },
+              { kind: 'queueEvent', eventId: 'evt.followup.team_exodus', delayTurns: 4 },
             ],
           },
           {
