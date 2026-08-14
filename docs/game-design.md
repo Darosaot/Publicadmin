@@ -168,6 +168,28 @@ your desk, which events can fire, and which signature crisis is waiting for you.
 | **Finance** | Performance +6, Reputation −3 | Budget cycle, invoices, treasury, closing the year | The year-end lands in deficit and the accounts go under intervention |
 | **Procurement** | Reputation +6, Stress +3 | Tenders, evaluation committees, supplier relations | Two bidders in your tender turn out to share an address |
 | **Policy** | Political Capital +4, Reputation +2, Performance −2 | Council briefs, reports, public consultations | Your draft leaks before the vote and the public reads it first |
+| **Inspection** | Integrity +8, Political Capital −5 | On-site visits, findings, referrals, thematic reviews | A body you graded well turns out to have been managing its figures |
+| **Social services** | Integrity +4, Stress +6, Reputation −2 | Assessments, placement panels, safeguarding, statutory reviews | A case you closed comes back, and the review is public |
+
+The last two were added after the five above, and each was chosen because it breaks the loop in a
+different direction rather than adding a third flavour of the same desk.
+
+**Inspection** is the desk that arrives somewhere else. The subject of the work is another
+administration, staffed by people doing the job the player has done, which lets the game look at
+its own world from the other side of the table. Its failure mode is not a missed deadline in your
+own building — it is a body that carries on doing the thing for another two years because nobody
+wrote it down in time. It is also the oversight track's home department, so taking that fork
+changes what is on the desk and not only the title above it.
+
+Its economy is deliberately not the others'. Good inspection is admired by a small audience and
+resented by a large one, so the pool pays in integrity and charges political capital, and the
+reputation payouts are the thinnest of any department. That is the fix for the first balance pass,
+where it came in as an outright walkover (see §11).
+
+**Social services** is the desk where the file is a person. Mechanically this shows up in one
+place and it is the important one: `onFail` here is weighted toward integrity and stress rather
+than performance, because the cost of not getting to something is not mainly professional. It is
+the only department where doing badly hurts you in a way that has nothing to do with your career.
 
 ## 5. Tasks
 
@@ -289,9 +311,9 @@ A random event that fires goes on a **12-turn cooldown**, and events marked `onc
 
 ### The corpus
 
-213 events and 62 task templates. The events break down as 177 random, 21 follow-ups and 15
+241 events and 82 task templates. The events break down as 205 random, 21 follow-ups and 15
 milestones, and the random pool splits roughly evenly between work that could happen in any
-department and work that is specific to one of the five:
+department and work that is specific to one of the seven:
 
 | Pool | Events | What it covers |
 | --- | --- | --- |
@@ -299,11 +321,17 @@ department and work that is specific to one of the five:
 | Cast | 24 | Eight people who recur, and remember |
 | Reckonings | 17 | Gated entirely on flags: the things that come back |
 | Tracks | 8 | Leaving the ladder, and the top of each branch |
-| Department | 70 | 14 each for legal, projects, finance, procurement and policy |
+| Department | 98 | 14 each, across all seven departments |
 | Management | 12 | Only reachable once you have a unit |
 | Leadership | 14 | Only from level 4, where the decisions are institutional |
 | Milestones | 10 | The guaranteed beats, including the confirmation arc |
 | Follow-ups | 21 | Consequences, none of them ever drawn at random |
+
+The department row is 14 each rather than "roughly 14 each" on purpose. A test asserts every
+department has at least 12 of its own events, because the alternative is a department that is
+nominally supported and actually plays as the common pool with a different name on the title
+screen. The same guard exists on the task side: 10 department-specific templates each, plus 12
+shared ones, banded so that no tier is ever short of eligible work.
 
 Because a follow-up can only arrive if something scheduled it, an unscheduled one is content no
 player can ever reach. A test walks every choice, outcome and task result in the corpus and fails
@@ -536,7 +564,7 @@ All of these live in `src/engine/constants.ts`.
 
 ## 11. Measured balance
 
-The numbers above were not guessed. `npm run balance` plays 200 careers — 40 seeds across all five
+The numbers above were not guessed. `npm run balance` plays 280 careers — 40 seeds across all seven
 departments — with a bot that plays about as well as an engaged player on a first run, and prints
 the distribution. `tests/engine/autoplay.test.ts` asserts the shape of it so a future change to
 `constants.ts` or to the content cannot quietly break the game.
@@ -545,21 +573,33 @@ Where it currently sits:
 
 | Measure | Value |
 | --- | --- |
-| Mean years of service | 28.9 |
-| Careers reaching a tier-5 post | 51% |
-| Careers reaching tier 3 or above | 84% |
-| Careers stuck at the starting post | 3% |
-| Mean level, by track | line 4.0, expert 3.9, political 4.3, oversight 3.7 |
+| Mean years of service | 27.9 |
+| Careers reaching a tier-5 post | 45% |
+| Careers reaching tier 3 or above | 91% |
+| Careers stuck at the starting post | 2% |
+| Mean level, by track | line 4.0, expert 3.9, political 4.2, oversight 3.9 |
+| Mean level, by department | 3.9 to 4.5 — a spread of 0.6 |
 | Files finished on time | 95% |
-| Mean level reached | 4.1 |
-| Mean Reputation at the end | 78 |
-| Mean months survived | 119 of 120 |
+| Mean level reached | 4.2 |
+| Mean Reputation at the end | 68 |
+| Mean cycles survived | 119 of 120 |
 
-Endings, over those 200 careers: honoured retirement 72%, quiet retirement 21%, Minister 7.5%.
+Endings, over those 280 careers: honoured retirement 65%, quiet retirement 32%, Minister 3%.
 Burnout, disgrace and dismissal do not appear, because the balanced bot rests when tired and does
 not take bribes — the first two are reached reliably by the `reckless` and `ruthless` bot
 strategies, which exist precisely to prove that an ending is not unreachable. Burnout takes a
-reckless player about 9 months; disgrace takes a ruthless one about 21.
+reckless player about 7 months; disgrace takes a ruthless one about 26.
+
+The per-track line is the one to watch when adding content, and it needs a bot that *wants* a
+particular branch — `preferredTrack` exists for exactly this. Without it the bot chases salary,
+takes the political fork every time, and the report prints the line track four times under four
+headings while looking perfectly healthy. There is now a test that the four rows genuinely differ,
+because a guardrail that measures nothing is worse than no guardrail: it reads as green.
+
+The "stayed on it" column is the honest part of that table. The expert and political tracks hold
+85% and 78% of the bots that set out to walk them, because those forks are not always offered and
+a bot that is never offered its branch takes what it is given. Oversight holds 96% now that
+inspection exists as its home department — before that it was a title with no desk behind it.
 
 ### Two things the simulation caught
 
@@ -570,23 +610,40 @@ harsh, but because the new ones were slightly less generous than the ones they d
 rates were re-derived afterwards: both stats settle at `monthly gain ÷ decay rate`, so a corpus
 whose average gain falls needs a lower rate to sit in the same place.
 
-**The five departments had drifted a long way apart.** Once each had its own task board and its own
+**The departments had drifted a long way apart.** Once each had its own task board and its own
 event pool, a Policy career averaged level 4.8 and a Procurement one 3.0 — a gap the player could
 neither see nor do anything about. The cause was almost entirely the task boards: Procurement's
 files had the tightest deadlines in the game, which cost completions, which cost Performance, which
 cost quality, which compounded over thirty years. The boards were levelled (comparable mean effort,
-difficulty and deadline at every level) and the departments now sit between 4.0 and 4.3. A test
+difficulty and deadline at every level) and the departments now sit between 3.9 and 4.5. A test
 pins the spread so the next department to get new content cannot quietly run away from the others.
+
+That test earned its keep twice. It caught Procurement the first time, and it caught **Inspection**
+the second: the department shipped as an outright walkover at mean level 5.0, every simulated
+career topping out. The task board was not the problem — the event pool was paying reputation for
+work that in life makes enemies. An inspectorate that grades a body honestly under ministerial
+pressure does not become popular for it. Nine reputation payouts were trimmed toward integrity and
+political-capital costs, three task difficulties went up, and it came down to 4.5. The fix was a
+content-truth fix rather than a numbers fix, which is the usual shape of these: the balance was
+wrong because the fiction was wrong.
+
+**Adding a department is the most expensive thing you can do to the balance.** Not because a
+department is hard to write, but because the spread guard compares max minus min across *all* of
+them, so every new one is a fresh chance to blow a bound that six other departments are currently
+satisfying. This is why the expansion added two and not three. Communications — reputation as the
+output rather than a side effect, which inverts the core loop — remains the strongest next
+candidate, and should only be attempted with the spread as tight as it is now.
 
 ## 12. Deliberately out of scope for v1
 
 Sound and music; multiple save slots and save export; Spanish content (the architecture supports it,
-the dictionary isn't written yet); difficulty settings; changing department mid-career; named NPCs
-with persistent relationship tracking beyond your own unit; achievements.
+the dictionary isn't written yet); difficulty settings; changing department mid-career;
+achievements.
 
-The two that are worth revisiting first, if this gets a v2, are **named NPCs outside your unit** (a
-recurring boss, rival and mentor whose opinion of you is tracked the way your staff's morale
-already is) and **Spanish**.
+Two things that were on this list have since been built and are documented above: **named NPCs
+outside your unit** (§3a — eight of them, whose standing is tracked the way your staff's morale
+already is) and a **career that branches** (§7 — four tracks rather than one ladder). The list is
+shorter than it was, and the remaining item worth doing first is **Spanish**.
 
 ### Saving
 
