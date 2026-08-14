@@ -5,6 +5,7 @@ import type { GameState, PromotionRequirement } from '../../engine/types';
 import { useT } from '../../i18n';
 import { useGame } from '../../state/GameProvider';
 import { formatSalary } from '../format';
+import { GameTabs } from '../components/GameTabs';
 import { StatsBar } from '../components/StatsBar';
 
 export function CareerScreen({ game }: { game: GameState }) {
@@ -17,18 +18,7 @@ export function CareerScreen({ game }: { game: GameState }) {
     <>
       <StatsBar game={game} />
 
-      <nav className="tabs">
-        <button
-          type="button"
-          className="tab"
-          onClick={() => dispatch({ type: 'SET_VIEW', view: 'desk' })}
-        >
-          {t('action.dashboard')}
-        </button>
-        <button type="button" className="tab tab--active" aria-current="page">
-          {t('action.career')}
-        </button>
-      </nav>
+      <GameTabs current="career" />
 
       <div className="layout">
         <section className="layout__main">

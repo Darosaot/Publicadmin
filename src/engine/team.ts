@@ -126,7 +126,12 @@ export function setupTeamForLevel(state: GameState, registry: ContentRegistry): 
   for (const seniority of shape) {
     const made = createStaff(next, registry, seniority);
     next = made.state;
-    staff.push(made.staff);
+
+    // You are new; they are not. An inherited unit has history, and showing everyone at nought
+    // months makes it read as a team that was assembled for you this morning.
+    const tenure = nextInt(next.rngState, 4, 60);
+    next = { ...next, rngState: tenure.rngState };
+    staff.push({ ...made.staff, monthsInPost: tenure.value });
   }
 
   const budget: Budget = {

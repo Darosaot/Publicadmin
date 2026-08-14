@@ -92,6 +92,43 @@ export function TurnReportModal({ game }: { game: GameState }) {
         </section>
       )}
 
+      {report.team && (report.team.delegatedProgress.length > 0 ||
+        report.team.departures.length > 0 ||
+        report.team.arrivals.length > 0 ||
+        report.team.budgetVerdict) && (
+        <section className="report__section">
+          <h3 className="report__heading">{t('report.team_heading')}</h3>
+          <ul className="report__list">
+            {report.team.delegatedProgress.map((item, index) => (
+              <li key={`d${index}`}>
+                <span>
+                  {t('report.delegated', {
+                    name: item.staffName,
+                    task: t(registry.tasks[item.taskTemplateId]?.titleKey ?? item.taskTemplateId),
+                    progress: item.progress,
+                  })}
+                </span>
+              </li>
+            ))}
+            {report.team.arrivals.map((item, index) => (
+              <li key={`a${index}`}>
+                <span>{t('report.staff_joined', { name: item.name })}</span>
+                <span className="tag tag--excellent">{t('team.grade.' + item.seniority)}</span>
+              </li>
+            ))}
+            {report.team.departures.map((item, index) => (
+              <li key={`x${index}`}>
+                <span>{t('report.staff_left', { name: item.name })}</span>
+                <span className="tag tag--poor">{t('report.failed')}</span>
+              </li>
+            ))}
+          </ul>
+          {report.team.budgetVerdict && (
+            <p className="report__offer">{t(`report.budget_${report.team.budgetVerdict}`)}</p>
+          )}
+        </section>
+      )}
+
       {report.newOffers.map((offer) => (
         <p key={offer.id} className="report__offer">
           {t('report.new_offer', { org: getCareerLevel(registry, offer.toLevel).orgShortKey })}

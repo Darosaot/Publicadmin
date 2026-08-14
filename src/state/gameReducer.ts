@@ -9,7 +9,9 @@
 
 import { registry } from '../content';
 import { createGame, type NewGameOptions } from '../engine/newGame';
+import { AGENCY_TEMP_MAX } from '../engine/constants';
 import { declineOffer } from '../engine/career';
+import { cancelHiring, startHiring } from '../engine/team';
 import { clearSave, loadGame } from '../engine/save';
 import {
   acceptOffer,
@@ -19,9 +21,9 @@ import {
   emptyAllocation,
   resolveTurn,
 } from '../engine/turn';
-import type { Allocation, GameState } from '../engine/types';
+import type { Allocation, GameState, Seniority } from '../engine/types';
 
-export type GameView = 'desk' | 'career';
+export type GameView = 'desk' | 'team' | 'career';
 
 export interface AppState {
   /** Null means the title screen. */
@@ -47,9 +49,22 @@ export type GameAction =
   | { type: 'NEXT_MONTH' }
   | { type: 'ACCEPT_OFFER'; offerId: string }
   | { type: 'DECLINE_OFFER'; offerId: string }
+  | { type: 'SET_DELEGATION'; taskUid: string; staffId: string | null }
+  | { type: 'TOGGLE_COACHING'; staffId: string }
+  | { type: 'TOGGLE_ONE_TO_ONE'; staffId: string }
+  | { type: 'TOGGLE_TRAINING'; staffId: string }
+  | { type: 'TOGGLE_RECRUITING' }
+  | { type: 'SET_AGENCY_TEMPS'; count: number }
+  | { type: 'START_HIRING'; seniority: Seniority }
+  | { type: 'CANCEL_HIRING' }
   | { type: 'SET_VIEW'; view: GameView }
   | { type: 'ABANDON' }
   | { type: 'DISMISS_NOTICE' };
+
+/** Adds or removes an id from a selection list. */
+function toggle(list: string[], id: string): string[] {
+  return list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
+}
 
 export const initialAppState: AppState = {
   game: null,
@@ -145,6 +160,54 @@ export function gameReducer(state: AppState, action: GameAction): AppState {
     case 'DECLINE_OFFER': {
       if (!state.game) return state;
       return { ...state, game: declineOffer(state.game, action.offerId) };
+    }
+
+    case 'SET_DELEGATION': {
+      const delegations = { ...state.allocation.delegations };
+      if (action.staffId === null) delete delegations[action.taskUid];
+      else delegations[action.taskUid] = action.staffId;
+      return { ...state, allocation: { ...state.allocation, delegations } };
+    }
+
+    case 'TOGGLE_COACHING':
+      return { ...state, allocation: { ...state.allocation, coaching: toggle(state.allocation.coaching, action.staffId) } };
+
+    case 'TOGGLE_ONE_TO_ONE':
+      return { ...state, allocation: { ...state.allocation, oneToOnes: toggle(state.allocation.oneToOnes, action.staffId) } };
+
+    case 'TOGGLE_TRAINING':
+      return { ...state, allocation: { ...state.allocation, training: toggle(state.allocation.training, action.staffId) } };
+
+    case 'TOGGLE_RECRUITING':
+      return { ...state, allocation: { ...state.allocation, recruiting: !state.allocation.recruiting } };
+
+    case 'SET_AGENCY_TEMPS':
+      return {
+        ...state,
+        allocation: {
+          ...state.allocation,
+          agencyTemps: Math.max(0, Math.min(AGENCY_TEMP_MAX, Math.floor(action.count))),
+        },
+      };
+
+    case 'START_HIRING': {
+      if (!state.game) return state;
+      // Opening a recruitment also commits this month's effort to it, which is what the
+      // player almost always means by pressing the button.
+      return {
+        ...state,
+        game: startHiring(state.game, action.seniority),
+        allocation: { ...state.allocation, recruiting: true },
+      };
+    }
+
+    case 'CANCEL_HIRING': {
+      if (!state.game) return state;
+      return {
+        ...state,
+        game: cancelHiring(state.game),
+        allocation: { ...state.allocation, recruiting: false },
+      };
     }
 
     case 'SET_VIEW':

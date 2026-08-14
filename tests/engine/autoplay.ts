@@ -45,6 +45,8 @@ import type {
 } from '../../src/engine/types';
 
 export interface RunResult {
+  /** The career as it finished, for tooling that wants to inspect or serialise it. */
+  finalState: GameState;
   seed: number;
   department: DepartmentId;
   turns: number;
@@ -220,6 +222,8 @@ export function playCareer(
   department: DepartmentId,
   strategy: Strategy = 'balanced',
   maxTurns = 200,
+  /** Stop as soon as this level is reached, rather than playing the career out. */
+  stopAtLevel?: number,
 ): RunResult {
   let game = createGame({ name: 'Bot', department, seed }, registry);
   // A second stream so the bot's decisions do not consume the game's randomness.
@@ -286,9 +290,13 @@ export function playCareer(
     }
 
     if (game.turn > maxTurns) break;
+    if (stopAtLevel !== undefined && game.player.level >= stopAtLevel && game.phase === 'allocation') {
+      break;
+    }
   }
 
   return {
+    finalState: game,
     seed,
     department,
     turns: game.turn,

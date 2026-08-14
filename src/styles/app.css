@@ -1317,3 +1317,232 @@ input {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------- Team ---------- */
+
+.team__count {
+  font-size: var(--fs-base);
+  font-weight: 400;
+}
+
+.roster {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: var(--s-3);
+}
+
+.staff {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-left: 3px solid var(--c-border-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.staff--good {
+  border-left-color: var(--c-good);
+}
+.staff--warn {
+  border-left-color: var(--c-warn);
+}
+.staff--bad {
+  border-left-color: var(--c-bad);
+}
+
+.staff__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--s-2);
+}
+
+.staff__name {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.staff__grade {
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+}
+
+.staff__months {
+  font-size: var(--fs-xs);
+  color: var(--c-text-faint);
+  white-space: nowrap;
+}
+
+.staff__bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.staffbar__head {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-xs);
+  color: var(--c-text-muted);
+  margin-bottom: 2px;
+}
+
+.staffbar__head strong {
+  font-variant-numeric: tabular-nums;
+  color: var(--c-text);
+}
+
+.staffbar__track {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--c-surface-sunken);
+  overflow: hidden;
+}
+
+.staffbar__fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.staffbar__fill--skill {
+  background: var(--c-reputation);
+}
+.staffbar__fill--good {
+  background: var(--c-good);
+}
+.staffbar__fill--warn {
+  background: var(--c-warn);
+}
+.staffbar__fill--bad {
+  background: var(--c-bad);
+}
+
+.staff__carrying {
+  font-size: var(--fs-xs);
+  color: var(--c-brand);
+  font-weight: 600;
+  background: var(--c-brand-soft);
+  padding: 2px var(--s-2);
+  border-radius: var(--r-sm);
+}
+
+.staff__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-top: auto;
+}
+
+.chipbtn {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  padding: 3px var(--s-2);
+  border: 1px solid var(--c-border-strong);
+  border-radius: 999px;
+  background: var(--c-surface);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+
+.chipbtn:hover:not(:disabled) {
+  border-color: var(--c-brand);
+  background: var(--c-brand-soft);
+}
+
+.chipbtn--on {
+  background: var(--c-brand);
+  border-color: var(--c-brand);
+  color: #fff;
+}
+
+.chipbtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.chipbtn__cost {
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+
+.budget__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-3);
+  font-size: var(--fs-sm);
+  padding: 2px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.budget__row--total {
+  border-top: 1px solid var(--c-border);
+  margin-top: var(--s-2);
+  padding-top: var(--s-2);
+  font-weight: 700;
+}
+
+.budget__row--over dd {
+  color: var(--c-bad);
+}
+.budget__row--under dd {
+  color: var(--c-good);
+}
+
+.budget__year {
+  margin-top: var(--s-3);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.budget__warning {
+  font-size: var(--fs-xs);
+  margin-bottom: var(--s-3);
+}
+
+.agency {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--c-border);
+}
+
+.hiring__status {
+  font-weight: 600;
+  margin-bottom: var(--s-2);
+}
+
+.hiring__grades {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+}
+
+.team__morale {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  margin-bottom: var(--s-2);
+}
+
+.delegate__select {
+  font-size: var(--fs-xs);
+  padding: 3px var(--s-2);
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-sm);
+  background: var(--c-surface);
+  max-width: 9.5rem;
+}
+
+.task__foot {
+  gap: var(--s-2);
+  align-items: center;
+}
