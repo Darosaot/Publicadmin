@@ -1,1 +1,0 @@
-{"root":["./vite.config.ts","./playwright.config.ts","./tests/e2e/smoke.spec.ts","./scripts/balance.ts","./scripts/generate-script.ts"],"version":"5.9.3"}

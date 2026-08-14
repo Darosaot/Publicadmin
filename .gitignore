@@ -2,6 +2,7 @@ node_modules/
 dist/
 playwright-report/
 test-results/
+*.tsbuildinfo
 *.local
 .DS_Store
 .netlify/
