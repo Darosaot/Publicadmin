@@ -1,0 +1,109 @@
+/* Design tokens: one place for colour, type and spacing.
+   Light palette on bare :root, dark override via prefers-color-scheme. */
+
+:root {
+  /* Surfaces */
+  --c-bg: #eef1f6;
+  --c-surface: #ffffff;
+  --c-surface-2: #f5f7fa;
+  --c-surface-sunken: #e4e9f0;
+  --c-border: #cfd7e3;
+  --c-border-strong: #a9b6c9;
+
+  /* Text */
+  --c-text: #16202e;
+  --c-text-muted: #5b6b80;
+  --c-text-faint: #8a97a8;
+  --c-text-inverse: #ffffff;
+
+  /* Brand: institutional blue + civic gold */
+  --c-brand: #1b4b8f;
+  --c-brand-strong: #12356a;
+  --c-brand-soft: #dce6f5;
+  --c-accent: #b8860b;
+  --c-accent-soft: #f6ecd2;
+
+  /* Stat semantics */
+  --c-reputation: #1b6bb5;
+  --c-performance: #2f7d54;
+  --c-political: #7b4fa8;
+  --c-integrity: #b8860b;
+  --c-stress: #c0453a;
+
+  /* Feedback */
+  --c-good: #2f7d54;
+  --c-good-soft: #dff0e5;
+  --c-warn: #b06a12;
+  --c-warn-soft: #fbeed8;
+  --c-bad: #c0453a;
+  --c-bad-soft: #fadfdd;
+
+  /* Type */
+  --f-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --f-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --f-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-base: 0.9375rem;
+  --fs-md: 1.0625rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.625rem;
+  --fs-2xl: 2.25rem;
+
+  /* Space */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+
+  /* Shape */
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 14px;
+  --shadow-sm: 0 1px 2px rgba(16, 28, 45, 0.08);
+  --shadow-md: 0 4px 14px rgba(16, 28, 45, 0.12);
+  --shadow-lg: 0 18px 48px rgba(16, 28, 45, 0.28);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --c-bg: #10161f;
+    --c-surface: #1a222e;
+    --c-surface-2: #212b39;
+    --c-surface-sunken: #141c26;
+    --c-border: #2f3d4e;
+    --c-border-strong: #46586d;
+
+    --c-text: #e6ecf4;
+    --c-text-muted: #a2b0c2;
+    --c-text-faint: #7b8899;
+    --c-text-inverse: #10161f;
+
+    --c-brand: #6aa3e8;
+    --c-brand-strong: #8dbcf3;
+    --c-brand-soft: #1e314a;
+    --c-accent: #e2b33f;
+    --c-accent-soft: #3a3016;
+
+    --c-reputation: #5aa4de;
+    --c-performance: #57b183;
+    --c-political: #ab86d4;
+    --c-integrity: #e2b33f;
+    --c-stress: #e0726a;
+
+    --c-good: #57b183;
+    --c-good-soft: #1c3428;
+    --c-warn: #d99a3c;
+    --c-warn-soft: #382c16;
+    --c-bad: #e0726a;
+    --c-bad-soft: #3a2020;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.6);
+  }
+}
