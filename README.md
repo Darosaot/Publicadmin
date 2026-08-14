@@ -1,5 +1,7 @@
 # Public Service Story
 
+**▶ Play it: [publicadminsim.netlify.app](https://publicadminsim.netlify.app)**
+
 A public administration career simulator. You join a small city council as a junior official in
 the department of your choice, manage the work that lands on your desk each month, and build (or
 burn) a reputation. Do it well enough and other administrations start calling — a bigger city, the
@@ -69,4 +71,6 @@ layer over the engine, and saves go to `localStorage` — there is no backend.
 
 ## Deployment
 
-Static build, no server required. Deployed on Netlify (`netlify.toml`: `npm run build` → `dist/`).
+Static build, no server required. Deployed on Netlify at
+[publicadminsim.netlify.app](https://publicadminsim.netlify.app) from `main`
+(`netlify.toml`: `npm run build` → `dist/`). Pull requests get their own deploy preview.
