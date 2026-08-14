@@ -98,6 +98,60 @@ export function validateContent(): string[] {
     problems.push(...validateEffects(task.onFail ?? [], `task ${task.id} onFail`));
   }
 
+  /* --------------------------------------------------------------- flags */
+
+  /**
+   * A flag nothing reads is a dropped thread.
+   *
+   * Flags are the game's memory, and writing one is a promise that the decision will matter
+   * later. It is very easy to make that promise while authoring a scene and never keep it — at
+   * one point twenty-five of the twenty-seven flags in the corpus were write-only, which is a
+   * great deal of authored consequence that no player could ever encounter.
+   */
+  const written = new Set<string>();
+  const read = new Set<string>();
+
+  const noteEffects = (effects: readonly { kind: string; flag?: string }[]) => {
+    for (const effect of effects) {
+      if ((effect.kind === 'flag' || effect.kind === 'flagDelta') && effect.flag) {
+        written.add(effect.flag);
+      }
+    }
+  };
+  const noteCondition = (condition: { requiredFlags?: string[]; forbiddenFlags?: string[]; minFlag?: Record<string, number>; maxFlag?: Record<string, number> } | undefined) => {
+    if (!condition) return;
+    for (const flag of condition.requiredFlags ?? []) read.add(flag);
+    for (const flag of condition.forbiddenFlags ?? []) read.add(flag);
+    for (const flag of Object.keys(condition.minFlag ?? {})) read.add(flag);
+    for (const flag of Object.keys(condition.maxFlag ?? {})) read.add(flag);
+  };
+
+  for (const event of allEvents) {
+    noteCondition(event.conditions);
+    for (const choice of event.choices) {
+      noteCondition(choice.conditions);
+      for (const outcome of choice.outcomes) {
+        noteCondition(outcome.conditions);
+        noteEffects(outcome.effects);
+      }
+    }
+  }
+  for (const task of allTasks) {
+    for (const effects of Object.values(task.onComplete ?? {})) noteEffects(effects);
+    noteEffects(task.onFail ?? []);
+  }
+
+  // The engine itself sets and reads this one, so the corpus never will.
+  read.add('minister_track');
+
+  for (const flag of [...written].sort()) {
+    if (!read.has(flag)) {
+      problems.push(
+        `flag "${flag}" is set but nothing ever reads it — either gate something on it or drop it`,
+      );
+    }
+  }
+
   /* --------------------------------------------------------- departments */
 
   for (const id of DEPARTMENT_IDS) {

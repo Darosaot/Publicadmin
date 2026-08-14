@@ -70,6 +70,10 @@ export interface Condition {
   minSalary?: number;
   requiredFlags?: string[];
   forbiddenFlags?: string[];
+  /** Numeric flags at or above a value. A flag that has never been set reads as 0. */
+  minFlag?: Record<string, number>;
+  /** Numeric flags at or below a value. */
+  maxFlag?: Record<string, number>;
   /** True: only with a unit under you. False: only before you have one. */
   requiresTeam?: boolean;
   /** Gates on the state of the unit itself. */
@@ -82,6 +86,8 @@ export type Effect =
   | { kind: 'stat'; stat: StatId; delta: number }
   | { kind: 'salary'; delta: number }
   | { kind: 'flag'; flag: string; value?: boolean }
+  /** Moves a numeric flag. Absent counts as 0, so the first delta sets it. */
+  | { kind: 'flagDelta'; flag: string; delta: number }
   | { kind: 'spawnTask'; templateId: string }
   | { kind: 'queueEvent'; eventId: string; delayTurns?: number }
   | { kind: 'endGame'; ending: EndingId }
@@ -388,7 +394,15 @@ export interface GameState {
   scheduledEvents: { eventId: string; onTurn: number }[];
   firedEvents: string[];
   cooldowns: Record<string, number>;
-  flags: Record<string, boolean>;
+  /**
+   * Named state set by choices, and the game's memory.
+   *
+   * Values may be boolean or numeric. Booleans are the original form — "this happened" — and
+   * numbers are for the things that were always really a quantity and had been flattened to a
+   * bit: how much a person owes you, how warm a relationship is. Both read as truthy/falsy, so
+   * `requiredFlags` and `forbiddenFlags` work the same on either.
+   */
+  flags: Record<string, boolean | number>;
 
   offers: JobOffer[];
 

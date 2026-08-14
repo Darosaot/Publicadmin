@@ -11,6 +11,7 @@ import { managementEvents } from './management';
 import { milestoneEvents } from './milestones';
 import { policyEvents } from './policy';
 import { procurementEvents } from './procurement';
+import { reckoningEvents } from './reckonings';
 import { projectsEvents } from './projects';
 
 export const allEvents: GameEvent[] = [
@@ -27,6 +28,7 @@ export const allEvents: GameEvent[] = [
   ...milestoneEvents,
   ...followupEvents,
   ...followupExtraEvents,
+  ...reckoningEvents,
 ];
 
 export const eventRegistry: Record<string, GameEvent> = Object.fromEntries(

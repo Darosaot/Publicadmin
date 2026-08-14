@@ -12,6 +12,18 @@ import { spawnTask } from './tasks';
 import { adjustTeamMorale, averageMorale, createStaff } from './team';
 import type { Condition, Effect, GameState, PlayerStats, StatId } from './types';
 
+/**
+ * A flag read as a number.
+ *
+ * Flags started out boolean and some of them grew into quantities. An unset flag is 0, and a
+ * boolean one is 0 or 1, so a numeric read of any flag is always meaningful.
+ */
+export function flagValue(state: GameState, flag: string): number {
+  const raw = state.flags[flag];
+  if (typeof raw === 'number') return raw;
+  return raw ? 1 : 0;
+}
+
 /** Structural clone of the state. Cheap enough at this size, and keeps the engine honest. */
 export function cloneState(state: GameState): GameState {
   return {
@@ -71,6 +83,10 @@ export function applyEffects(
 
       case 'flag':
         next.flags[effect.flag] = effect.value ?? true;
+        break;
+
+      case 'flagDelta':
+        next.flags[effect.flag] = flagValue(next, effect.flag) + effect.delta;
         break;
 
       case 'spawnTask': {
@@ -235,6 +251,16 @@ export function checkCondition(
   if (condition.forbiddenFlags) {
     for (const flag of condition.forbiddenFlags) {
       if (flags[flag]) return { reason: 'flag' };
+    }
+  }
+  if (condition.minFlag) {
+    for (const [flag, required] of Object.entries(condition.minFlag)) {
+      if (flagValue(state, flag) < required) return { reason: 'flag' };
+    }
+  }
+  if (condition.maxFlag) {
+    for (const [flag, limit] of Object.entries(condition.maxFlag)) {
+      if (flagValue(state, flag) > limit) return { reason: 'flag' };
     }
   }
 

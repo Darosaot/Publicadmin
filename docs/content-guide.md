@@ -108,6 +108,8 @@ The same shape gates events and individual choices:
   minStat?: { reputation?: 40, politicalCapital?: 25, … };
   maxStat?: { integrity?: 30, … };
   requiredFlags?: string[];       forbiddenFlags?: string[];
+  minFlag?: Record<string, number>;
+  maxFlag?: Record<string, number>;
   requiresTeam?: boolean;         minStaffCount?: number;
   minTeamMorale?: number;         maxTeamMorale?: number;
 }
@@ -132,6 +134,7 @@ is almost always a flag plus a follow-up event.
 | Stat change | `{ kind: 'stat', stat, delta }` | Clamped to 0–100 automatically |
 | Salary change | `{ kind: 'salary', delta }` | In euros per month |
 | Set a flag | `{ kind: 'flag', flag, value? }` | `value` defaults to `true` |
+| Move a numeric flag | `{ kind: 'flagDelta', flag, delta }` | Unset counts as 0, so the first delta sets it |
 | Add a task | `{ kind: 'spawnTask', templateId }` | Lands on the board immediately |
 | Schedule an event | `{ kind: 'queueEvent', eventId, delayTurns? }` | The consequence mechanism |
 | End the game | `{ kind: 'endGame', ending }` | Short-circuits everything else |
@@ -199,6 +202,29 @@ departments drift more than 1.2 levels apart; `npm run balance` prints the real 
 
 Only names and numbers are interpolated (`{name}`, `{amount}`), so no sentence depends on English
 grammar for its structure.
+
+## Flags, and keeping the promise
+
+Setting a flag is a promise that the decision will matter later. It is very easy to make that
+promise while writing a scene and never keep it — at one point **twenty-five of the twenty-seven
+flags in the corpus were write-only**, which is a great deal of consequence no player could reach.
+
+Validation now fails on a flag that is set but never read, so the payoff has to be written in the
+same commit as the promise. The payoff usually belongs in `events/reckonings.ts`, where everything
+is gated on a flag and nothing can fire unless it was earned.
+
+Three things make a reckoning land:
+
+- **Give it years.** Add `minYearsElapsed`. A consequence that arrives the following month is a
+  puzzle; one that arrives a decade later is a memory.
+- **Make it a decision, not a punishment.** The interesting part is being asked again, with more
+  information and less room, about something you have not thought about since.
+- **Use conditional outcomes for the second flag.** A choice gated on one flag can carry an
+  outcome gated on another, which is how "you did this once before" gets written. Remember that
+  every choice still needs one unconditional outcome.
+
+Numeric flags exist for the things that are really quantities — standing with a person, how many
+times you have taken the shortcut. Use `flagDelta` to move one and `minFlag` to gate on it.
 
 ## Adding a follow-up
 

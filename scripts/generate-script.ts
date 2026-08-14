@@ -37,11 +37,13 @@ function describeEffect(effect: Effect): string {
       return `Salary ${signed(effect.delta)}`;
     case 'flag':
       return `flag \`${effect.flag}\`${effect.value === false ? ' cleared' : ''}`;
+    case 'flagDelta':
+      return `\`${effect.flag}\` ${signed(effect.delta)}`;
     case 'spawnTask':
       return `new task: ${t(`${effect.templateId}.title`)}`;
     case 'queueEvent': {
       const delay = effect.delayTurns ?? 0;
-      return `schedules "${t(`${effect.eventId}.title`)}"${delay ? ` in ${delay} months` : ''}`;
+      return `schedules "${t(`${effect.eventId}.title`)}"${delay ? ` in ${delay} cycles` : ''}`;
     }
     case 'endGame':
       return `**ends the career: ${effect.ending}**`;
@@ -76,7 +78,10 @@ function describeCondition(condition: Condition | undefined): string {
   } else if (condition.maxLevel !== undefined) {
     parts.push(`up to level ${condition.maxLevel}`);
   }
-  if (condition.minTurn !== undefined) parts.push(`month ${condition.minTurn}+`);
+  if (condition.minTurn !== undefined) parts.push(`cycle ${condition.minTurn}+`);
+  if (condition.minYearsElapsed !== undefined) {
+    parts.push(`year ${condition.minYearsElapsed}+`);
+  }
 
   for (const stat of STAT_IDS) {
     const min = condition.minStat?.[stat];
@@ -87,6 +92,12 @@ function describeCondition(condition: Condition | undefined): string {
 
   for (const flag of condition.requiredFlags ?? []) parts.push(`\`${flag}\``);
   for (const flag of condition.forbiddenFlags ?? []) parts.push(`not \`${flag}\``);
+  for (const [flag, min] of Object.entries(condition.minFlag ?? {})) {
+    parts.push(`\`${flag}\` ≥ ${min}`);
+  }
+  for (const [flag, max] of Object.entries(condition.maxFlag ?? {})) {
+    parts.push(`\`${flag}\` ≤ ${max}`);
+  }
 
   return parts.join(', ');
 }

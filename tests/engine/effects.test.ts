@@ -94,6 +94,46 @@ describe('applyEffects', () => {
   });
 });
 
+describe('numeric flags', () => {
+  it('moves a flag that does not exist yet, starting from zero', () => {
+    const next = applyEffects(
+      game(),
+      [{ kind: 'flagDelta', flag: 'standing_vasquez', delta: 6 }],
+      registry,
+    );
+    expect(next.flags.standing_vasquez).toBe(6);
+  });
+
+  it('accumulates, in both directions', () => {
+    let state = applyEffects(
+      game(),
+      [{ kind: 'flagDelta', flag: 'standing_vasquez', delta: 6 }],
+      registry,
+    );
+    state = applyEffects(
+      state,
+      [{ kind: 'flagDelta', flag: 'standing_vasquez', delta: -10 }],
+      registry,
+    );
+    expect(state.flags.standing_vasquez).toBe(-4);
+  });
+
+  it('leaves the state it was given alone', () => {
+    const before = game();
+    applyEffects(before, [{ kind: 'flagDelta', flag: 'standing_vasquez', delta: 6 }], registry);
+    expect(before.flags.standing_vasquez).toBeUndefined();
+  });
+
+  it('promotes a boolean flag to a number rather than failing', () => {
+    const next = applyEffects(
+      game({ flags: { owed: true } }),
+      [{ kind: 'flagDelta', flag: 'owed', delta: 2 }],
+      registry,
+    );
+    expect(next.flags.owed).toBe(3);
+  });
+});
+
 describe('statDeltas', () => {
   it('reports only the stats that moved', () => {
     const before = { reputation: 20, performance: 50, politicalCapital: 10, integrity: 70, stress: 20 };
@@ -148,6 +188,28 @@ describe('conditions', () => {
     expect(conditionMet(state, { requiredFlags: ['missing'] })).toBe(false);
     expect(conditionMet(state, { forbiddenFlags: ['has_ally'] })).toBe(false);
     expect(conditionMet(state, { forbiddenFlags: ['missing'] })).toBe(true);
+  });
+
+  it('reads a numeric flag against a threshold', () => {
+    const state = game({ flags: { standing_vasquez: 35 } });
+    expect(conditionMet(state, { minFlag: { standing_vasquez: 30 } })).toBe(true);
+    expect(conditionMet(state, { minFlag: { standing_vasquez: 40 } })).toBe(false);
+    expect(conditionMet(state, { maxFlag: { standing_vasquez: 40 } })).toBe(true);
+    expect(conditionMet(state, { maxFlag: { standing_vasquez: 30 } })).toBe(false);
+  });
+
+  it('treats a flag that was never set as zero', () => {
+    const state = game();
+    expect(conditionMet(state, { minFlag: { never_set: 1 } })).toBe(false);
+    expect(conditionMet(state, { maxFlag: { never_set: 0 } })).toBe(true);
+  });
+
+  it('reads a boolean flag numerically, so the two kinds mix', () => {
+    // Flags started out boolean and some grew into quantities; old and new content has to be
+    // able to gate on the same flag without knowing which kind it is.
+    const state = game({ flags: { happened: true } });
+    expect(conditionMet(state, { minFlag: { happened: 1 } })).toBe(true);
+    expect(conditionMet(state, { requiredFlags: ['happened'] })).toBe(true);
   });
 
   it('reports which requirement failed, so the UI can explain it', () => {

@@ -97,10 +97,22 @@ this standard", not "survive long enough". Performance reverts toward the middle
 directions, which also stops the opposite failure: a bad month lowering Performance, which lowers
 quality, which produces more bad months.
 
-**Hidden state.** The engine also tracks *flags* — named booleans set by choices (`owes_favour_ruiz`,
-`signed_off_irregular_invoice`, `journalist_has_your_number`). Flags gate later events, so a
-decision in month 9 can produce a knock at the door in month 20. Flags are never shown directly;
-you find out they existed when they fire.
+**Hidden state.** The engine also tracks *flags* — named values set by choices
+(`accepted_supplier_gift`, `journalist_has_your_number`, `holds_leverage`). Flags gate later
+events, so a decision in your second year can produce a knock at the door in your twelfth. They are
+never shown directly; you find out they existed when they fire.
+
+A flag may be a boolean ("this happened") or a number, for the things that were always really a
+quantity — how much someone owes you, how warm a relationship is. Both read as truthy, so
+`requiredFlags` works on either, and `minFlag` / `maxFlag` compare numerically with an unset flag
+reading as 0.
+
+**A flag nothing reads is a dropped thread**, and the corpus had twenty-five of them: authored
+consequence that no player could ever encounter, because the payoff had never been written. Content
+validation now fails on any flag that is set but never gated on, and the *Reckonings* pool
+(`src/content/events/reckonings.ts`) is where those twenty-five promises are kept — seventeen
+events, every one of them unreachable unless you earned it, most waiting several years before they
+arrive.
 
 ## 4. Departments
 
@@ -235,13 +247,14 @@ A random event that fires goes on a **12-turn cooldown**, and events marked `onc
 
 ### The corpus
 
-165 events and 62 task templates. The events break down as 134 random, 21 follow-ups and 10
+182 events and 62 task templates. The events break down as 151 random, 21 follow-ups and 10
 milestones, and the random pool splits roughly evenly between work that could happen in any
 department and work that is specific to one of the five:
 
 | Pool | Events | What it covers |
 | --- | --- | --- |
 | Common | 38 | The building, the institution, your own life in it |
+| Reckonings | 17 | Gated entirely on flags: the things that come back |
 | Department | 70 | 14 each for legal, projects, finance, procurement and policy |
 | Management | 12 | Only reachable once you have a unit |
 | Leadership | 14 | Only from level 4, where the decisions are institutional |

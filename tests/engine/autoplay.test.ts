@@ -110,6 +110,26 @@ describe('simulated careers', () => {
   });
 });
 
+describe('decisions come back', () => {
+  it('fires consequence events that only a past choice can unlock', () => {
+    // The reckonings pool is gated entirely on flags set years earlier, so an event from it
+    // firing is proof that a decision was remembered. If this drops to zero, either the flags
+    // stopped being set or the gates are unreachable in practice — both silent failures.
+    const reckonings = results.flatMap((r) =>
+      r.finalState.firedEvents.filter((id) => id.startsWith('evt.reckon.')),
+    );
+    expect(new Set(reckonings).size, 'no consequence event ever fired').toBeGreaterThan(3);
+  });
+
+  it('reaches them through the corrupt path too, where most of the flags are set', () => {
+    const ruthless = playMany(seeds.slice(0, 6), DEPARTMENT_IDS, 'ruthless');
+    const anyFlags = ruthless.some((r) =>
+      Object.keys(r.finalState.flags).some((f) => f !== 'minister_track'),
+    );
+    expect(anyFlags, 'a ruthless career should leave a trail').toBe(true);
+  });
+});
+
 describe('every ending is reachable', () => {
   // The balanced bot reaches four of the six on its own.
   const reachedByBalanced = new Set(results.map((r) => r.ending));

@@ -3,7 +3,7 @@
 > **Generated file.** Produced from the shipped content by `npm run docs:script`. Edit the
 > content in `src/content/` and regenerate — changes made directly to this file are lost.
 
-The complete corpus: 165 events, 62 task templates, 5 departments, 5 career levels and 6 endings. Stat effects are shown after each outcome.
+The complete corpus: 182 events, 62 task templates, 5 departments, 5 career levels and 6 endings. Stat effects are shown after each outcome.
 
 ## Departments
 
@@ -64,17 +64,17 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
 | Clear the inbox backlog | any desk, level 1–2 | 4 | 2–4 | 1 | — |
-| Transparency request | any desk | 6 | 2–3 | 2 | missed: schedules "A list of eleven questions" in 1 months |
+| Transparency request | any desk | 6 | 2–3 | 2 | missed: schedules "A list of eleven questions" in 1 cycles |
 | Committee papers | any desk, level 1–3 | 5 | 2–3 | 1 | — |
-| Staff appraisal round | any desk, level 2+ | 7 | 3–5 | 2 | excellent: Political capital +2; poor: schedules "A grievance" in 2 months |
+| Staff appraisal round | any desk, level 2+ | 7 | 3–5 | 2 | excellent: Political capital +2; poor: schedules "A grievance" in 2 cycles |
 | Reorganisation consultation | any desk | 6 | 3–4 | 2 | — |
-| Annual activity report | any desk | 8 | 3–5 | 2 | excellent: Reputation +2; missed: schedules "A conversation with the door closed" in 1 months |
+| Annual activity report | any desk | 8 | 3–5 | 2 | excellent: Reputation +2; missed: schedules "A conversation with the door closed" in 1 cycles |
 | Unit business plan | any desk, level 3+ | 16 | 3–4 | 2 | excellent: Reputation +2 · team morale +4; poor: team morale -4 |
 | Budget bid | any desk, level 3+ | 18 | 2–3 | 3 | excellent: monthly budget +1200 · Reputation +2; poor: monthly budget -800; missed: monthly budget -1200 · Reputation -2 |
 | Paper for the management board | any desk, level 3+ | 12 | 2–2 | 2 | excellent: Political capital +3 |
 | Workforce plan | any desk, level 3+ | 14 | 3–5 | 2 | excellent: team morale +5; poor: team morale -6 |
 | Quarterly performance return | any desk, level 3+ | 10 | 2–2 | 1 | — |
-| Briefing for the executive | any desk, level 4+ | 12 | 2–2 | 3 | excellent: Political capital +4; poor: Political capital -3; missed: schedules "A question on the council agenda" in 1 months |
+| Briefing for the executive | any desk, level 4+ | 12 | 2–2 | 3 | excellent: Political capital +4; poor: Political capital -3; missed: schedules "A question on the council agenda" in 1 cycles |
 
 **Clear the inbox backlog** — Two hundred and forty unread messages, of which perhaps nine matter. Finding out which nine is the work.
 **Transparency request** — A citizen has asked for every document relating to a decision taken four years ago. The clock started the moment it arrived.
@@ -93,14 +93,14 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
-| Contract review | legal | 6 | 2–4 | 2 | poor: schedules "Internal review" in 3 months; missed: schedules "A formal challenge" in 1 months |
-| Licensing appeal | legal, level 1–3 | 7 | 2–4 | 2 | missed: schedules "A formal complaint" in 1 months |
+| Contract review | legal | 6 | 2–4 | 2 | poor: schedules "Internal review" in 3 cycles; missed: schedules "A formal challenge" in 1 cycles |
+| Licensing appeal | legal, level 1–3 | 7 | 2–4 | 2 | missed: schedules "A formal complaint" in 1 cycles |
 | Legal opinion | legal | 4 | 2–3 | 2 | excellent: Political capital +2 |
 | Byelaw revision | legal | 8 | 3–5 | 2 | — |
-| Litigation bundle | legal | 10 | 2–4 | 3 | excellent: Reputation +3; missed: Reputation -3 · schedules "A conversation with the door closed" in 1 months |
-| Data protection assessment | legal | 7 | 3–4 | 2 | missed: schedules "A letter from the audit authority" in 2 months |
+| Litigation bundle | legal | 10 | 2–4 | 3 | excellent: Reputation +3; missed: Reputation -3 · schedules "A conversation with the door closed" in 1 cycles |
+| Data protection assessment | legal | 7 | 3–4 | 2 | missed: schedules "A letter from the audit authority" in 2 cycles |
 | Land registry dispute | legal, level 1–3 | 9 | 3–5 | 3 | — |
-| Framework terms and conditions | legal, level 2+ | 9 | 3–5 | 3 | excellent: Reputation +3; poor: schedules "Internal review" in 4 months |
+| Framework terms and conditions | legal, level 2+ | 9 | 3–5 | 3 | excellent: Reputation +3; poor: schedules "Internal review" in 4 cycles |
 | Drafting instructions | legal, level 4+ | 22 | 3–5 | 3 | excellent: Reputation +4 |
 | Legal risk register | legal, level 4+ | 16 | 3–4 | 2 | — |
 
@@ -119,14 +119,14 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
-| Milestone report | projects | 6 | 2–4 | 2 | missed: schedules "A letter from the audit authority" in 2 months |
+| Milestone report | projects | 6 | 2–4 | 2 | missed: schedules "A letter from the audit authority" in 2 cycles |
 | Grant application | projects | 9 | 2–4 | 3 | excellent: Reputation +3 · Political capital +2 |
 | Partner coordination | projects | 5 | 2–3 | 2 | excellent: Political capital +3 |
 | Project budget revision | projects | 7 | 2–3 | 2 | — |
-| Eligibility check | projects | 8 | 3–4 | 2 | poor: schedules "A letter from the audit authority" in 3 months; missed: schedules "A letter from the audit authority" in 1 months |
-| Interim payment claim | projects, level 1–4 | 7 | 2–3 | 2 | missed: Political capital -3 · schedules "A question on the council agenda" in 1 months |
+| Eligibility check | projects | 8 | 3–4 | 2 | poor: schedules "A letter from the audit authority" in 3 cycles; missed: schedules "A letter from the audit authority" in 1 cycles |
+| Interim payment claim | projects, level 1–4 | 7 | 2–3 | 2 | missed: Political capital -3 · schedules "A question on the council agenda" in 1 cycles |
 | Monitoring visit | projects, level 1–3 | 4 | 3–4 | 1 | — |
-| Project closure dossier | projects, level 2+ | 10 | 3–5 | 3 | excellent: Reputation +3; missed: schedules "A letter from the audit authority" in 2 months |
+| Project closure dossier | projects, level 2+ | 10 | 3–5 | 3 | excellent: Reputation +3; missed: schedules "A letter from the audit authority" in 2 cycles |
 | National programme design | projects, level 4+ | 24 | 3–5 | 3 | excellent: Reputation +4 · Political capital +2 |
 | Portfolio prioritisation | projects, level 4+ | 18 | 2–4 | 3 | poor: Political capital -3 |
 
@@ -145,14 +145,14 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
-| Monthly closing | finance, level 1–4 | 5 | 2–3 | 2 | missed: schedules "A conversation with the door closed" in 1 months |
-| Invoice backlog | finance, level 1–2 | 5 | 2–3 | 1 | missed: schedules "A formal challenge" in 1 months |
+| Monthly closing | finance, level 1–4 | 5 | 2–3 | 2 | missed: schedules "A conversation with the door closed" in 1 cycles |
+| Invoice backlog | finance, level 1–2 | 5 | 2–3 | 1 | missed: schedules "A formal challenge" in 1 cycles |
 | Budget amendment | finance | 7 | 2–4 | 2 | excellent: Political capital +2 |
 | Treasury forecast | finance | 6 | 2–3 | 2 | — |
-| Subsidy justification review | finance | 8 | 3–4 | 2 | poor: schedules "A question on the council agenda" in 2 months |
-| Draft annual budget | finance | 11 | 3–5 | 3 | excellent: Reputation +3 · Political capital +2; missed: schedules "A question on the council agenda" in 1 months |
+| Subsidy justification review | finance | 8 | 3–4 | 2 | poor: schedules "A question on the council agenda" in 2 cycles |
+| Draft annual budget | finance | 11 | 3–5 | 3 | excellent: Reputation +3 · Political capital +2; missed: schedules "A question on the council agenda" in 1 cycles |
 | Cost centre reconciliation | finance | 7 | 3–4 | 3 | — |
-| Audit response file | finance, level 2+ | 9 | 2–4 | 3 | excellent: Reputation +3; missed: schedules "A letter from the audit authority" in 1 months |
+| Audit response file | finance, level 2+ | 9 | 2–4 | 3 | excellent: Reputation +3; missed: schedules "A letter from the audit authority" in 1 cycles |
 | Spending review submission | finance, level 4+ | 24 | 3–4 | 3 | excellent: monthly budget +2000 · Reputation +3; missed: monthly budget -2500 |
 | Multi-year financial framework | finance, level 4+ | 20 | 3–5 | 3 | — |
 
@@ -171,16 +171,16 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
-| Tender specification | procurement | 7 | 2–4 | 2 | poor: schedules "A formal challenge" in 2 months |
-| Evaluation committee | procurement | 8 | 3–4 | 3 | excellent: Reputation +3; poor: schedules "A formal challenge" in 1 months; missed: schedules "A formal challenge" in 1 months |
-| Framework renewal | procurement | 6 | 3–4 | 2 | missed: Reputation -2 · schedules "A question on the council agenda" in 1 months |
+| Tender specification | procurement | 7 | 2–4 | 2 | poor: schedules "A formal challenge" in 2 cycles |
+| Evaluation committee | procurement | 8 | 3–4 | 3 | excellent: Reputation +3; poor: schedules "A formal challenge" in 1 cycles; missed: schedules "A formal challenge" in 1 cycles |
+| Framework renewal | procurement | 6 | 3–4 | 2 | missed: Reputation -2 · schedules "A question on the council agenda" in 1 cycles |
 | Bidder clarifications | procurement, level 1–3 | 5 | 2–3 | 2 | — |
-| Award publication | procurement, level 1–3 | 4 | 2–3 | 2 | missed: schedules "A formal challenge" in 1 months |
+| Award publication | procurement, level 1–3 | 4 | 2–3 | 2 | missed: schedules "A formal challenge" in 1 cycles |
 | Supplier performance review | procurement | 6 | 3–4 | 2 | excellent: Integrity +2 |
-| Direct award justification | procurement | 6 | 2–3 | 2 | poor: schedules "A letter from the audit authority" in 3 months |
-| Response to a challenge | procurement, level 2+ | 9 | 2–3 | 3 | excellent: Reputation +4; missed: Reputation -3 · schedules "A list of eleven questions" in 1 months |
+| Direct award justification | procurement | 6 | 2–3 | 2 | poor: schedules "A letter from the audit authority" in 3 cycles |
+| Response to a challenge | procurement, level 2+ | 9 | 2–3 | 3 | excellent: Reputation +4; missed: Reputation -3 · schedules "A list of eleven questions" in 1 cycles |
 | Procurement policy reform | procurement, level 4+ | 22 | 3–5 | 3 | excellent: Reputation +4 · Integrity +2 |
-| Category strategy | procurement, level 4+ | 18 | 3–4 | 3 | poor: schedules "A formal challenge" in 3 months |
+| Category strategy | procurement, level 4+ | 18 | 3–4 | 3 | poor: schedules "A formal challenge" in 3 cycles |
 
 **Tender specification** — Describe what the administration needs precisely enough to get it, and generally enough that only one company cannot possibly qualify.
 **Evaluation committee** — Six bids, four evaluators, and a scoring grid that will be read very carefully by whoever comes second.
@@ -198,15 +198,15 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
 | Council brief | policy, level 1–3 | 5 | 2–2 | 1 | excellent: Political capital +2 |
-| Public consultation | policy | 7 | 3–4 | 2 | missed: schedules "A formal complaint" in 1 months |
+| Public consultation | policy | 7 | 3–4 | 2 | missed: schedules "A formal complaint" in 1 cycles |
 | Strategy paper | policy | 9 | 3–5 | 3 | excellent: Reputation +3 |
 | Impact assessment | policy | 8 | 3–4 | 3 | — |
-| Answer to a formal question | policy | 5 | 2–2 | 2 | missed: schedules "A question on the council agenda" in 1 months |
+| Answer to a formal question | policy | 5 | 2–2 | 2 | missed: schedules "A question on the council agenda" in 1 cycles |
 | Stakeholder roundtable | policy | 6 | 2–4 | 2 | excellent: Political capital +3 |
 | Position paper | policy, level 2+ | 8 | 3–4 | 3 | excellent: Political capital +3 |
-| Annual policy review | policy | 9 | 3–5 | 2 | poor: schedules "A list of eleven questions" in 2 months; missed: schedules "A conversation with the door closed" in 1 months |
+| Annual policy review | policy | 9 | 3–5 | 2 | poor: schedules "A list of eleven questions" in 2 cycles; missed: schedules "A conversation with the door closed" in 1 cycles |
 | Green paper | policy, level 4+ | 22 | 3–5 | 3 | excellent: Reputation +4 |
-| Appearance before the committee | policy, level 4+ | 16 | 2–3 | 3 | excellent: Reputation +4; poor: schedules "A list of eleven questions" in 1 months; missed: Reputation -4 |
+| Appearance before the committee | policy, level 4+ | 16 | 2–3 | 3 | excellent: Reputation +4; poor: schedules "A list of eleven questions" in 1 cycles; missed: Reputation -4 |
 
 **Council brief** — Two pages for someone who will read one of them, ten minutes before speaking about it in public.
 **Public consultation** — Six weeks of submissions from residents, associations and one man who writes every week about the same roundabout.
@@ -749,7 +749,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - *(weight 3)* Fixed in a fortnight, quietly, at some personal cost. Two hundred people get the right outcome. The record shows nothing ever went wrong.
   <br>↳ Integrity -3 · Stress +6
 - *(weight 2)* The correction is spotted by someone reconciling the numbers, and the question is no longer about the error but about the fortnight.
-  <br>↳ Integrity -4 · Reputation -5 · schedules "Internal review" in 1 months
+  <br>↳ Integrity -4 · Reputation -5 · schedules "Internal review" in 1 cycles
 
 **Leave it**
 
@@ -790,7 +790,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - *(weight 2)* The assessment concludes the risk is low and documents why. It is a defensible judgement, properly recorded, and it holds.
   <br>↳ Stress +5 · Performance +1
 - *(weight 3)* One of the eleven downloads was a journalist. The story is not the breach; the story is the eleven days.
-  <br>↳ Reputation -7 · Integrity -3 · schedules "A list of eleven questions" in 1 months
+  <br>↳ Reputation -7 · Integrity -3 · schedules "A list of eleven questions" in 1 cycles
 
 #### Six months somewhere else
 
@@ -835,7 +835,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 #### Someone is retiring after thirty-eight years
 
-*`evt.common.long_service` · weight 10*
+*`evt.common.long_service` · weight 10 · year 4+*
 
 > She has been in the building since before the department existed in its current form. There is a cake at three. Nobody has written anything down about what she knows.
 
@@ -919,11 +919,11 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **It was four years ago**
 
 - You say nothing, because it genuinely does not affect your judgement. That is probably true. It is not the test, and you know what the test is.
-  <br>↳ Integrity -5 · flag `undeclared_interest` · schedules "A letter from the audit authority" in 5 months
+  <br>↳ Integrity -5 · flag `undeclared_interest` · schedules "A letter from the audit authority" in 5 cycles
 
 #### The ombudsman has an opinion
 
-*`evt.common.ombudsman` · weight 9*
+*`evt.common.ombudsman` · weight 9 · year 2+*
 
 > A case you handled two years ago has reached the ombudsman, who has found maladministration — not in the decision, which was right, but in taking eleven months to communicate it.
 
@@ -972,11 +972,11 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Offer to meet whenever there is an issue**
 
 - Which sounds identical and is not: by the time there is an issue there is an issue. The first grievance of the year arrives in March.
-  <br>↳ schedules "A grievance" in 3 months
+  <br>↳ schedules "A grievance" in 3 cycles
 
 #### A letter from someone you helped
 
-*`evt.common.small_kindness` · weight 9*
+*`evt.common.small_kindness` · weight 9 · year 2+*
 
 > A handwritten letter, forwarded through three internal addresses. Eighteen months ago you spent an afternoon getting a case unstuck for a woman whose name you do not remember. She writes to say what it changed.
 
@@ -1050,12 +1050,12 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Mention it verbally to your director only**
 
 - He thanks you and says he will look into it. Nothing enters the file. Whatever happens next, there is now no record that you knew.
-  <br>↳ Integrity -3 · flag `knows_contract_flaw` · schedules "The contract has been annulled" in 4 months
+  <br>↳ Integrity -3 · flag `knows_contract_flaw` · schedules "The contract has been annulled" in 4 cycles
 
 **It is not your file**
 
 - You close it and go back to your own work. The works continue. The clause is still there.
-  <br>↳ Integrity -5 · flag `knows_contract_flaw` · schedules "The contract has been annulled" in 3 months
+  <br>↳ Integrity -5 · flag `knows_contract_flaw` · schedules "The contract has been annulled" in 3 cycles
 
 #### Twenty days
 
@@ -1136,7 +1136,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Anonymous letters go in the bin**
 
 - It is a defensible policy, consistently applied. It is also, this once, wrong.
-  <br>↳ Integrity -4 · schedules "A letter from the audit authority" in 5 months
+  <br>↳ Integrity -4 · schedules "A letter from the audit authority" in 5 cycles
 
 #### You are the one who goes
 
@@ -1219,7 +1219,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Four years is four years**
 
 - Nothing has gone wrong yet. You tell her it is a good catch and that these things are rarely worth reopening, and watch her decide what kind of department this is.
-  <br>↳ Integrity -4 · team morale -4 · schedules "Somebody went outside" in 5 months
+  <br>↳ Integrity -4 · team morale -4 · schedules "Somebody went outside" in 5 cycles
 
 #### Settle or fight
 
@@ -1274,14 +1274,14 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Defer to the firm**
 
 - They are the specialists and it is the safe institutional answer. Eighteen months later the point is litigated and your original view is the one the court takes.
-  <br>↳ Reputation -3 · Integrity -2 · schedules "The court has ruled" in 5 months
+  <br>↳ Reputation -3 · Integrity -2 · schedules "The court has ruled" in 5 cycles
 
 **Insist on your own view**
 
 - *(weight 3)* You hold, in writing, with reasons. You are right, and the department stops instructing that firm on this class of question.
   <br>↳ Reputation +5
 - *(weight 2)* You hold and you are wrong, in writing, at length. It is a specific and memorable kind of embarrassment.
-  <br>↳ Reputation -5 · Stress +5 · schedules "The court has ruled" in 6 months
+  <br>↳ Reputation -5 · Stress +5 · schedules "The court has ruled" in 6 cycles
 
 #### The powers are broader than they need to be
 
@@ -1297,7 +1297,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Let it go as drafted; it is an emergency**
 
 - It is an emergency, and the power is used proportionately, and it is still on the statute book eleven years later being used for things nobody in that room imagined.
-  <br>↳ Integrity -5 · Political capital +4 · schedules "The power is being used for something else" in 7 months
+  <br>↳ Integrity -5 · Political capital +4 · schedules "The power is being used for something else" in 7 cycles
 
 ### Projects
 
@@ -1317,7 +1317,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - *(weight 3)* It is complete four weeks later and nobody ever looks. The payment arrives on schedule, the partner is grateful, and the file contains a statement that was untrue when you signed it.
   <br>↳ Integrity -5 · Political capital +4 · flag `reported_incomplete_milestone`
 - *(weight 2)* The programme selects your project for a spot check in the following quarter. It is complete by then. The dates in the file are not.
-  <br>↳ Integrity -5 · flag `reported_incomplete_milestone` · schedules "A letter from the audit authority" in 2 months
+  <br>↳ Integrity -5 · flag `reported_incomplete_milestone` · schedules "A letter from the audit authority" in 2 cycles
 
 **Ask the programme for a formal extension**
 
@@ -1338,7 +1338,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Pass it through**
 
 - It is one line in a claim of four hundred. You certify the lot. Somewhere in the file there is now a number you did not believe.
-  <br>↳ Integrity -4 · schedules "A letter from the audit authority" in 4 months
+  <br>↳ Integrity -4 · schedules "A letter from the audit authority" in 4 cycles
 
 **Exclude the line and pay the rest**
 
@@ -1408,7 +1408,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Include it and describe it differently**
 
 - A generous reading of "pilot area" and it fits. Nobody queries it. The wording is doing a great deal of work and everyone who reads it carefully will see that.
-  <br>↳ Political capital +5 · Integrity -5 · schedules "A letter from the audit authority" in 5 months
+  <br>↳ Political capital +5 · Integrity -5 · schedules "A letter from the audit authority" in 5 cycles
 
 #### Three auditors and a checklist
 
@@ -1447,7 +1447,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **It was disclosed; certify it**
 
 - Disclosure is not the same as justification, and you know the difference. The claim is certified.
-  <br>↳ Integrity -4 · schedules "A letter from the audit authority" in 3 months
+  <br>↳ Integrity -4 · schedules "A letter from the audit authority" in 3 cycles
 
 #### A success story
 
@@ -1489,7 +1489,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Report it at the next scheduled milestone**
 
 - Eleven weeks later, when the report is due. By then the options have narrowed to one, and the funder’s first question is when you knew.
-  <br>↳ Integrity -5 · schedules "Payments are suspended" in 3 months
+  <br>↳ Integrity -5 · schedules "Payments are suspended" in 3 cycles
 
 #### The evaluation is not flattering
 
@@ -1505,12 +1505,12 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Publish a summary**
 
 - The summary is accurate and contains none of the numbers that matter. Somebody requests the full report under transparency law in about four months.
-  <br>↳ Integrity -4 · schedules "A list of eleven questions" in 4 months
+  <br>↳ Integrity -4 · schedules "A list of eleven questions" in 4 cycles
 
 **Do not publish**
 
 - It sits on a shared drive. The next project is designed by people who never read it and repeats two of the three failures.
-  <br>↳ Integrity -6 · Performance -2 · schedules "A message from someone doing your old job" in 8 months
+  <br>↳ Integrity -6 · Performance -2 · schedules "A message from someone doing your old job" in 8 cycles
 
 #### The receipts are too neat
 
@@ -1533,7 +1533,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Nothing is provably wrong**
 
 - You certify it. The claim is one of six hundred and you have four days. It is the reasonable decision and you do not entirely believe it.
-  <br>↳ Integrity -4 · schedules "Payments are suspended" in 5 months
+  <br>↳ Integrity -4 · schedules "Payments are suspended" in 5 cycles
 
 #### The match funding has not appeared
 
@@ -1567,7 +1567,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - *(weight 3)* You argue proportionality with evidence of the actual visibility achieved. The correction is reduced to nothing. It takes five months of correspondence about a logo.
   <br>↳ Reputation +3 · Stress +6
 - *(weight 2)* The rule is the rule. The correction stands, and the file is passed to the people who apply corrections to whole programmes rather than single outputs.
-  <br>↳ Stress +7 · Reputation -2 · schedules "A financial correction" in 4 months
+  <br>↳ Stress +7 · Reputation -2 · schedules "A financial correction" in 4 cycles
 
 **Accept the correction and fix the templates**
 
@@ -1611,7 +1611,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Carry it into next year**
 
 - A reclassification, defensible on a narrow reading, moves the problem twelve months. Next year’s finance officer will find it. This year you might be that person.
-  <br>↳ Integrity -5 · Political capital +4 · flag `carried_a_deficit` · schedules "A letter from the audit authority" in 6 months
+  <br>↳ Integrity -5 · Political capital +4 · flag `carried_a_deficit` · schedules "A letter from the audit authority" in 6 cycles
 
 **Find the four hundred thousand**
 
@@ -1697,12 +1697,12 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Leave it in suspense**
 
 - It is not yours to spend and not yours to return unasked. It sits there for another two years, an unexplained number in an account, quietly waiting for an auditor.
-  <br>↳ Integrity -2 · schedules "A letter from the audit authority" in 6 months
+  <br>↳ Integrity -2 · schedules "A letter from the audit authority" in 6 cycles
 
 **Recognise it as income**
 
 - It clears the suspense account and improves the year-end position by one hundred and eighty thousand euros. Somebody, eventually, will want it back.
-  <br>↳ Integrity -5 · Performance +2 · schedules "A letter from the audit authority" in 4 months
+  <br>↳ Integrity -5 · Performance +2 · schedules "A letter from the audit authority" in 4 cycles
 
 #### A more constructive presentation
 
@@ -1739,7 +1739,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Pay it and raise the order afterwards**
 
 - The supplier is paid, the paperwork is created to match, and the department learns that the rule is negotiable. The next one is twenty-eight thousand.
-  <br>↳ Integrity -4 · Political capital +3 · schedules "Internal review" in 4 months
+  <br>↳ Integrity -4 · Political capital +3 · schedules "Internal review" in 4 cycles
 
 **Pay the supplier, report the breach**
 
@@ -1778,7 +1778,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Take the generous reading**
 
 - It survives the external audit, because it is defensible. It is also the first of a series of generous readings that will be taken by people who learned it from this one.
-  <br>↳ Integrity -5 · Political capital +4 · flag `creative_accounting` · schedules "Somebody went outside" in 6 months
+  <br>↳ Integrity -5 · Political capital +4 · flag `creative_accounting` · schedules "Somebody went outside" in 6 cycles
 
 **Ask the auditors in advance**
 
@@ -1804,7 +1804,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Let it lapse**
 
 - You allow the recovery to time out without a decision anyone signed. They survive, the money is gone, and there is no record of why.
-  <br>↳ Integrity -4 · schedules "A letter from the audit authority" in 4 months
+  <br>↳ Integrity -4 · schedules "A letter from the audit authority" in 4 cycles
 
 #### The number at the back of the accounts
 
@@ -1833,7 +1833,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - *(weight 3)* Payment times halve, interest disappears, and nothing bad happens because the two steps were checking things that had already been checked.
   <br>↳ Performance +4 · Reputation +3
 - *(weight 2)* Payment times halve and a duplicate payment of sixty thousand euros goes out four months later, because one of those steps was doing something after all.
-  <br>↳ Reputation -5 · schedules "Internal review" in 2 months
+  <br>↳ Reputation -5 · schedules "Internal review" in 2 cycles
 
 **Bid for more people in the payments team**
 
@@ -1864,7 +1864,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Balance the budget and say nothing**
 
 - It balances. The reserves position is in the accounts for anyone who looks. Four years is four years away and you may not be here.
-  <br>↳ Integrity -6 · schedules "A question on the council agenda" in 5 months
+  <br>↳ Integrity -6 · schedules "A question on the council agenda" in 5 cycles
 
 #### The new ledger goes live on Monday
 
@@ -1910,7 +1910,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Note it and proceed**
 
 - Shared addresses are not proof of anything, and the deadline is Friday. You write a line in the file recording that you noticed, which is the part you will think about later.
-  <br>↳ Integrity -5 · flag `ignored_collusion_signal` · schedules "A list of eleven questions" in 5 months
+  <br>↳ Integrity -5 · flag `ignored_collusion_signal` · schedules "A list of eleven questions" in 5 cycles
 
 #### A very specific requirement
 
@@ -1931,7 +1931,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Publish it as they wrote it**
 
 - They are the technical experts and it is their specification. One bid is received. It is compliant, and it is expensive.
-  <br>↳ Integrity -5 · Political capital +2 · schedules "A formal challenge" in 2 months
+  <br>↳ Integrity -5 · Political capital +2 · schedules "A formal challenge" in 2 cycles
 
 #### A member of the committee has a view
 
@@ -1952,7 +1952,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Let the committee be persuaded**
 
 - The scores are revisited "for consistency" and the third bid becomes the first. Everything is documented. Nothing is defensible if anyone ever reads it properly.
-  <br>↳ Integrity -6 · Political capital +4 · schedules "A formal challenge" in 2 months
+  <br>↳ Integrity -6 · Political capital +4 · schedules "A formal challenge" in 2 cycles
 
 #### The heating has failed
 
@@ -1973,7 +1973,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Call the usual contractor**
 
 - They start on Monday. The justification is written afterwards, thinly. It is the fourth direct award to the same company and the pattern is now a pattern.
-  <br>↳ Integrity -4 · Performance +2 · schedules "A letter from the audit authority" in 4 months
+  <br>↳ Integrity -4 · Performance +2 · schedules "A letter from the audit authority" in 4 cycles
 
 #### The incumbent knows the building
 
@@ -2033,7 +2033,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - *(weight 2)* You document the security desk delay and admit it. Nobody challenges. The administration gets the better bid, and you have created a precedent you cannot control.
   <br>↳ Performance +3 · Integrity -2
 - *(weight 2)* A losing bidder challenges within the week. The award is annulled, the process runs again, and the four minutes cost eleven weeks.
-  <br>↳ Reputation -4 · Stress +6 · schedules "A formal challenge" in 1 months
+  <br>↳ Reputation -4 · Stress +6 · schedules "A formal challenge" in 1 cycles
 
 **Cancel and rerun the tender**
 
@@ -2059,7 +2059,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Find a way to the local firm**
 
 - A generous reading of one qualitative criterion closes an eleven per cent gap. Forty jobs stay in the town. The scoring sheet will not survive a challenge and everyone hopes there is not one.
-  <br>↳ Integrity -6 · Political capital +5 · schedules "A formal challenge" in 2 months
+  <br>↳ Integrity -6 · Political capital +5 · schedules "A formal challenge" in 2 cycles
 
 #### One bid
 
@@ -2100,7 +2100,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Take the saving**
 
 - The headline saving is announced. Eighteen months and nine variations later the final cost is above the second bid, and the announcement is what everyone remembers.
-  <br>↳ Reputation +2 · Integrity -4 · schedules "The claim" in 5 months
+  <br>↳ Reputation +2 · Integrity -4 · schedules "The claim" in 5 cycles
 
 #### Nobody is managing the contract
 
@@ -2118,7 +2118,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Assign a manager going forward only**
 
 - Sensible, forward-looking, and it draws a line under two years nobody will now examine. The supplier notices the line exactly as clearly as you do, and prices the rest of the contract accordingly.
-  <br>↳ Performance +2 · Integrity -3 · schedules "The claim" in 6 months
+  <br>↳ Performance +2 · Integrity -3 · schedules "The claim" in 6 cycles
 
 #### Ten per cent for social value
 
@@ -2155,7 +2155,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Extend the framework**
 
 - A variation nobody will query, which is not the same as lawful. Eleven services continue and there is now a document with your name on it that would not survive a challenge.
-  <br>↳ Integrity -5 · schedules "A formal challenge" in 4 months
+  <br>↳ Integrity -5 · schedules "A formal challenge" in 4 cycles
 
 **Report that the department failed to plan for this**
 
@@ -2176,7 +2176,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **The statutory minimum**
 
 - Scores, headline reasons, nothing actionable. Entirely compliant, and they do not bid again, and neither do the two firms they talk to. One of them takes it to the ombudsman instead.
-  <br>↳ Integrity -2 · schedules "The ombudsman has taken the case" in 4 months
+  <br>↳ Integrity -2 · schedules "The ombudsman has taken the case" in 4 cycles
 
 ### Policy
 
@@ -2285,7 +2285,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Send it to them quietly**
 
 - Their comments improve the draft considerably. Two other organisations find out eight months later, and the thing they remember is not the improvement.
-  <br>↳ Integrity -4 · Performance +2 · schedules "A formal complaint" in 4 months
+  <br>↳ Integrity -4 · Performance +2 · schedules "A formal complaint" in 4 cycles
 
 #### The announcement is Tuesday
 
@@ -2303,7 +2303,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - *(weight 2)* The provisional figures hold up. Nobody ever knows how close it was.
   <br>↳ Political capital +3 · Stress +4
 - *(weight 3)* The final analysis moves the headline figure by a third. The correction is published quietly and quoted loudly.
-  <br>↳ Reputation -4 · Integrity -3 · schedules "A list of eleven questions" in 2 months
+  <br>↳ Reputation -4 · Integrity -3 · schedules "A list of eleven questions" in 2 cycles
 
 **Say the announcement should wait three weeks**
 
@@ -2345,7 +2345,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Write it as though the first paper never existed**
 
 - Two documents, opposite conclusions, same author, no acknowledgement. Someone finds both eventually, because someone always does.
-  <br>↳ Integrity -4 · Political capital +2 · schedules "A list of eleven questions" in 4 months
+  <br>↳ Integrity -4 · Political capital +2 · schedules "A list of eleven questions" in 4 cycles
 
 **Ask for it to be given to someone else**
 
@@ -2410,7 +2410,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Draft it so both can read it their way**
 
 - A genuinely skilful piece of writing that resolves nothing. It is agreed in a fortnight and the contradiction surfaces at implementation, where it costs ten times as much.
-  <br>↳ Political capital +4 · Integrity -4 · schedules "Internal review" in 4 months
+  <br>↳ Political capital +4 · Integrity -4 · schedules "Internal review" in 4 cycles
 
 **Draft for the one with more authority**
 
@@ -2457,7 +2457,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Publish it the afternoon of something bigger**
 
 - It is out, technically, on a day nobody is looking. Two years later somebody assembles a list of things published on such afternoons, and this is on it.
-  <br>↳ Integrity -5 · schedules "A list of eleven questions" in 6 months
+  <br>↳ Integrity -5 · schedules "A list of eleven questions" in 6 cycles
 
 #### A review would be helpful
 
@@ -2473,7 +2473,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Eighteen months it is**
 
 - You write the terms of reference so that reporting in eighteen months is unavoidable. It is a professional piece of work in the service of nothing happening.
-  <br>↳ Integrity -5 · Political capital +4 · schedules "A message from someone doing your old job" in 9 months
+  <br>↳ Integrity -5 · Political capital +4 · schedules "A message from someone doing your old job" in 9 cycles
 
 **Advise that the question can be answered now**
 
@@ -2486,7 +2486,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 #### One month in
 
-*`evt.milestone.first_month` · up to level 1, month 2+*
+*`evt.milestone.first_month` · up to level 1, cycle 2+*
 
 > Four weeks. You have learned where the good coffee is, which of the three printers works, and that roughly a third of what the department does exists because of a decision nobody present can explain. Your line manager asks how you are finding it.
 
@@ -2588,7 +2588,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 #### You could stay here
 
-*`evt.milestone.comfortable_plateau` · up to level 2*
+*`evt.milestone.comfortable_plateau` · up to level 2, year 6+*
 
 > It occurs to you, in an unremarkable week, that you are good at this job and that you could do it until you retire. The work is real, the hours are survivable, and nobody who matters to you would think less of you for it.
 
@@ -2604,7 +2604,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 #### The reason
 
-*`evt.milestone.why_you_started`*
+*`evt.milestone.why_you_started` · year 10+*
 
 > A new joiner, three weeks in, asks why you did this rather than the private sector, where you would have earned considerably more. She is not being rude; she genuinely wants to know, and you find you have to think about it.
 
@@ -2625,7 +2625,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 #### Someone from Alderford
 
-*`evt.milestone.old_colleague`*
+*`evt.milestone.old_colleague` · year 20+*
 
 > At a conference, a woman you have not seen in twenty years — she sat opposite you in your first office — tells you that the thing you set up back then is still running, essentially unchanged, and still working.
 
@@ -2641,7 +2641,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 #### The version of you that exists in the files
 
-*`evt.milestone.reckoning` · Integrity ≤ 30*
+*`evt.milestone.reckoning` · year 4+, Integrity ≤ 30*
 
 > You are asked to give a talk to a group of new entrants on ethics in public administration. Preparing it, you go back through your own decisions, and there are several you would prefer the audience not to hear about.
 
@@ -2669,7 +2669,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Let your name go forward**
 
 - You say yes, and the machine starts moving around you immediately: the vetting, the committee, the questions. Twenty-two years of files are about to be read by people looking for a reason.
-  <br>↳ Stress +10 · schedules "The hearing" in 1 months
+  <br>↳ Stress +10 · schedules "The hearing" in 1 cycles
 
 **Say no**
 
@@ -2679,7 +2679,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Ask what you would be allowed to do** *(requires Political capital ≥ 75)*
 
 - You name the two things you would want a free hand on. He does not agree to either, and does not say no, and the fact that you asked is reported upward and read as seriousness rather than presumption.
-  <br>↳ Political capital +5 · Reputation +3 · schedules "The hearing" in 1 months
+  <br>↳ Political capital +5 · Reputation +3 · schedules "The hearing" in 1 cycles
 
 ### Consequences
 
@@ -2696,19 +2696,19 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - *(weight 3)* You spend a fortnight assembling a complete, indexed response. The finding is a minor observation with no financial correction. The auditor’s covering note uses the word "exemplary" about the file management.
   <br>↳ Reputation +3 · Integrity +2 · Stress +6
 - *(weight 2)* The file is as weak as you feared. A correction is proposed and the matter is referred onward for a fuller look.
-  <br>↳ Reputation -4 · Stress +7 · schedules "This is now a formal matter" in 3 months
+  <br>↳ Reputation -4 · Stress +7 · schedules "This is now a formal matter" in 3 cycles
 
 **Answer exactly what was asked**
 
 - *(weight 3)* A narrow, correct response. They close the file with one observation. Nothing further is asked.
   <br>↳ Stress +3
 - *(weight 2)* The narrowness is itself noticed. A second, longer list of documents arrives four weeks later.
-  <br>↳ Reputation -2 · Stress +5 · schedules "This is now a formal matter" in 4 months
+  <br>↳ Reputation -2 · Stress +5 · schedules "This is now a formal matter" in 4 cycles
 
 **Ask for an extension and hope it goes quiet**
 
 - Granted once. Audits do not go quiet; they go slow. The same request arrives in the spring with a firmer sentence at the end.
-  <br>↳ Reputation -2 · Integrity -2 · schedules "This is now a formal matter" in 5 months
+  <br>↳ Reputation -2 · Integrity -2 · schedules "This is now a formal matter" in 5 cycles
 
 #### This is now a formal matter
 
@@ -2774,7 +2774,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - *(weight 2)* The irregularity turns out to be immaterial and the challenge fails. The department’s decision stands and the supplier pays its own costs.
   <br>↳ Reputation +4 · Stress +6
 - *(weight 3)* The challenge succeeds. The award is set aside, damages are agreed, and the judgment contains three paragraphs about the administration’s evaluation practice.
-  <br>↳ Reputation -6 · Stress +8 · schedules "A list of eleven questions" in 1 months
+  <br>↳ Reputation -6 · Stress +8 · schedules "A list of eleven questions" in 1 cycles
 
 **Settle quietly**
 
@@ -2841,7 +2841,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Reject it in full**
 
 - A careful, defensible letter that does not concede the paragraph that was right. It is escalated to the ombudsman, where the same paragraph is found again, by someone with more authority.
-  <br>↳ Reputation -4 · Integrity -3 · Stress +5 · schedules "The ombudsman has taken the case" in 3 months
+  <br>↳ Reputation -4 · Integrity -3 · Stress +5 · schedules "The ombudsman has taken the case" in 3 cycles
 
 **Pass it to the complaints unit**
 
@@ -2919,14 +2919,14 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Stand on your record**
 
 - *(weight 4; only if Integrity ≥ 40)* You answer everything, including the two questions that hurt. The committee’s report notes that you did not evade, and that your account of the difficult decisions matched the documents.
-  <br>↳ Reputation +5 · Stress +8 · schedules "The appointment" in 1 months
+  <br>↳ Reputation +5 · Stress +8 · schedules "The appointment" in 1 cycles
 - *(weight 4)* They have found three of them. Not the worst three, but three, and your answers are careful in a way that reads on television as careful.
   <br>↳ Reputation -6 · Political capital -8 · Stress +12
 
 **Let your allies manage the committee** *(requires Political capital ≥ 60)*
 
 - The difficult questions are asked by people who have agreed in advance how they will be answered. It is an unedifying three hours and it works completely.
-  <br>↳ Political capital -12 · Integrity -5 · schedules "The appointment" in 1 months
+  <br>↳ Political capital -12 · Integrity -5 · schedules "The appointment" in 1 cycles
 
 **Withdraw your name**
 
@@ -2960,7 +2960,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - *(weight 2)* The decision holds. Maladministration is not found and the file closes with a note that the process was followed. It has cost four months of correspondence to prove.
   <br>↳ Reputation +3 · Stress +6
 - *(weight 3)* Maladministration is found, a remedy is recommended, and the report is published with the administration named. The paragraph about the original response to the complaint is the one that gets quoted.
-  <br>↳ Reputation -6 · Integrity -2 · Stress +8 · schedules "A list of eleven questions" in 2 months
+  <br>↳ Reputation -6 · Integrity -2 · Stress +8 · schedules "A list of eleven questions" in 2 cycles
 
 **Treat it as a systemic question, not a single case**
 
@@ -2983,7 +2983,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - *(weight 2)* It is arguably confined to its facts, and the administration proceeds unchanged for three years without being contradicted.
   <br>↳ Political capital +3 · Integrity -3
 - *(weight 3)* It is not confined to its facts. A second claimant establishes that within the year, at greater cost, and your note advising the narrow reading is disclosed in those proceedings.
-  <br>↳ Reputation -6 · Integrity -4 · schedules "Internal review" in 3 months
+  <br>↳ Reputation -6 · Integrity -4 · schedules "Internal review" in 3 cycles
 
 **Recommend an appeal** *(requires Political capital ≥ 25)*
 
@@ -3001,12 +3001,12 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - *(weight 3)* Sixty pages in three weeks: what failed, what has changed, and what has been re-checked. The suspension lifts in the summer with a partial correction, and the plan is circulated to other bodies as an example.
   <br>↳ Reputation +4 · Performance +3 · Stress +11
 - *(weight 2)* The plan is accepted in principle and the suspension holds for another two quarters while the sample is extended. The administration borrows to cover the gap.
-  <br>↳ Reputation -3 · Stress +10 · schedules "A financial correction" in 3 months
+  <br>↳ Reputation -3 · Stress +10 · schedules "A financial correction" in 3 cycles
 
 **Contest the suspension as disproportionate**
 
 - A well-argued letter about proportionality, which is answered four months later, in the negative, by people who suspend payments for a living. The delay costs more than the correction would have.
-  <br>↳ Reputation -4 · Stress +7 · schedules "A financial correction" in 2 months
+  <br>↳ Reputation -4 · Stress +7 · schedules "A financial correction" in 2 cycles
 
 **Withdraw the affected claims and re-certify from scratch**
 
@@ -3029,12 +3029,12 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - *(weight 3)* You demonstrate, file by file, that the failure was confined to one measure. The rate drops from ten per cent to two, which is four months of work and an enormous amount of money.
   <br>↳ Reputation +6 · Stress +9
 - *(weight 2)* The sample they extend to prove your point proves the opposite. The rate goes up.
-  <br>↳ Reputation -6 · Stress +10 · schedules "A question on the council agenda" in 2 months
+  <br>↳ Reputation -6 · Stress +10 · schedules "A question on the council agenda" in 2 cycles
 
 **Recover it from the beneficiaries**
 
 - The correction is passed on to forty organisations that followed the guidance you gave them. It is lawful, it is what the rules contemplate, and eleven of them will not survive it.
-  <br>↳ Integrity -6 · Reputation -2 · schedules "A list of eleven questions" in 3 months
+  <br>↳ Integrity -6 · Reputation -2 · schedules "A list of eleven questions" in 3 cycles
 
 #### The claim
 
@@ -3052,7 +3052,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Reject the claim in full**
 
 - A robust letter that does not acknowledge the two good heads. It is the position the administration takes by default, and it converts a negotiation into litigation that it goes on to lose on those two heads.
-  <br>↳ Reputation -5 · Stress +8 · schedules "Internal review" in 4 months
+  <br>↳ Reputation -5 · Stress +8 · schedules "Internal review" in 4 cycles
 
 **Settle the whole claim quickly**
 
@@ -3119,7 +3119,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Advise that the words permit it**
 
 - Which they do. It is the correct legal answer to the question asked, and it is not the answer to the question that matters, and you are the only person who can tell the difference.
-  <br>↳ Integrity -6 · Political capital +4 · schedules "A list of eleven questions" in 4 months
+  <br>↳ Integrity -6 · Political capital +4 · schedules "A list of eleven questions" in 4 cycles
 
 **Propose repealing it immediately**
 
