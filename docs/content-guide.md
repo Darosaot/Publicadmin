@@ -174,10 +174,10 @@ defineTask('task.legal.contract_review', {
 
 Use `departments: 'any'` for shared work that lands on every desk. Use `minLevel` / `maxLevel` to
 retire a template as you climb — but prefer letting `baseEffort` scale automatically over writing
-a separate template per level. **Never write department-specific content per level**; that's a 5×5
+a separate template per level. **Never write department-specific content per level**; that's a 7×5
 matrix nobody can fill.
 
-### Keeping the five departments comparable
+### Keeping the seven departments comparable
 
 The task board is the biggest lever on how a career goes, and it is easy to make one department
 harder than the others without noticing. Two numbers matter more than they look:
@@ -191,6 +191,37 @@ harder than the others without noticing. Two numbers matter more than they look:
 Procurement once had the tightest deadlines and no cheap template, and averaged nearly two career
 levels below Policy for it. `tests/engine/autoplay.test.ts` now fails if the best and worst
 departments drift more than 1.2 levels apart; `npm run balance` prints the real spread.
+
+A third number matters just as much and lives in the event pool rather than the task board:
+
+- **How much reputation the pool hands out.** Inspection shipped paying about +3.2 reputation per
+  event where legal pays +1.9, and that alone made it a walkover — mean level 5.0, every career
+  topping out. Reputation is the promotion currency, so a generous pool is a fast ladder. Before
+  adding a department, total its stat deltas and compare the density against an existing pool.
+
+### Adding a department
+
+The cost is fixed and worth knowing before you start, because the tests enforce all of it:
+
+| What | How much | Enforced by |
+| --- | --- | --- |
+| Own task templates | 10, banded across the tiers | `validate.ts` — `taskSlots + 2` eligible at every tier, ≥1 department-specific |
+| Tier-4 templates | 2, appended to `tasks/senior.ts` | the same tier check, at the top |
+| Own events | 14 (12 is the floor) | `content.test.ts` |
+| Registration | `departments.ts`, `tasks/index.ts`, `events/index.ts`, `DepartmentId` | typecheck |
+| Balance | inside the 1.2-level spread | `autoplay.test.ts` |
+
+`departmentList` is derived from `DEPARTMENT_IDS`, so a department added to the record now appears
+on the new-game screen automatically. It used to be a hand-written parallel array that nothing
+validated, which meant a fully-written department could be invisible to the player and every test
+would pass.
+
+Write the department around **what its failure mode is**, not around its subject matter. Inspection
+and social services justify their existence because failing at them means something different:
+inspection's failure is a body that carries on unchallenged for two more years, social services'
+is a person. That difference is what `onFail` should encode — social services weights integrity and
+stress over performance for exactly this reason — and it is the only thing that stops a new
+department being the same desk with different nouns.
 
 ## Adding a language
 
@@ -225,6 +256,17 @@ Two things to keep in mind:
 - **`npm run balance` reports per track**, and `tests/engine/autoplay.test.ts` fails if the best
   and worst drift more than 1.2 mean levels apart. Adding a pile of content to one branch is
   exactly how that gap opens.
+- **A track wants a home department.** `tracks` gates events, but the desk itself comes from the
+  department, and oversight was a set of job titles with nobody's task board behind them until
+  inspection existed. If a track has no department where its work is the everyday work, most of
+  what you write for it will have to be an event, and events are the expensive way to say
+  "this job is different".
+
+One trap in the measurement, worth stating because it looked fine for a while: the balance bot
+chases salary, so left to itself it takes the political fork from every start and the per-track
+report prints the line track four times under four headings. `playCareer` takes a `preferredTrack`
+for this, and a test asserts the four rows actually differ. A guardrail that measures nothing is
+worse than none, because it reads as green.
 
 ## Writing for the cast
 

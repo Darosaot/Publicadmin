@@ -3,7 +3,7 @@
 > **Generated file.** Produced from the shipped content by `npm run docs:script`. Edit the
 > content in `src/content/` and regenerate — changes made directly to this file are lost.
 
-The complete corpus: 213 events, 62 task templates, 5 departments, 15 posts across 4 tracks and 6 endings. Stat effects are shown after each outcome.
+The complete corpus: 241 events, 82 task templates, 7 departments, 15 posts across 4 tracks and 6 endings. Stat effects are shown after each outcome.
 
 ## Departments
 
@@ -46,6 +46,22 @@ Tenders, evaluation committees, framework agreements and very attentive supplier
 Council briefs, strategy papers, consultations and the art of the defensible sentence.
 
 > Your words end up in the council chamber with someone else’s name on them. That is the job. Occasionally one of them changes something, and you never find out which.
+
+### Inspection
+
+*Starting adjustment: Integrity +8, Political capital -5*
+
+Visits, findings, recommendations, and the long business of finding out whether anything changed after the last report.
+
+> You are the one who arrives. Everyone is very slightly more careful than usual for the two days you are there, and your whole skill is asking the question they have not rehearsed.
+
+### Social services
+
+*Starting adjustment: Integrity +4, Stress +6, Reputation -2*
+
+Assessments, placements, safeguarding panels and a caseload that is made of people.
+
+> Every file on this desk is somebody. That is the entire difference, and it is not a small one: the thing you do not get to on Friday is not a document waiting patiently in a tray.
 
 ## The career tree
 
@@ -252,6 +268,58 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 **Annual policy review** — Which of last year’s commitments were met, in a document that must be honest enough to be useful and diplomatic enough to be published.
 **Green paper** — The administration’s thinking, published for argument. Everything you leave out is a decision, and everyone will notice which.
 **Appearance before the committee** — Three hours of questions, on the record, about decisions taken by people who no longer work here.
+
+### Inspection
+
+| Task | Desk | Effort | Deadline | Difficulty | Consequences |
+| --- | --- | --- | --- | --- | --- |
+| On-site inspection | inspection | 7 | 2–4 | 3 | excellent: Integrity +2 |
+| Inspection report | inspection | 8 | 3–4 | 2 | excellent: Reputation +3; poor: schedules "A formal complaint" in 2 cycles; missed: Integrity -2 |
+| Follow-up on last year’s recommendations | inspection | 6 | 3–5 | 2 | — |
+| Evidence log | inspection, level 1–3 | 5 | 2–3 | 2 | missed: Integrity -2 |
+| Notification pack | inspection, level 1–3 | 4 | 2–3 | 2 | — |
+| Factual accuracy process | inspection | 7 | 2–3 | 3 | excellent: Integrity +3 |
+| Referral to the authorities | inspection, level 2+ | 9 | 2–4 | 3 | excellent: Reputation +4; missed: Integrity -3 · schedules "Internal review" in 2 cycles |
+| Thematic review | inspection, level 3+ | 11 | 3–5 | 3 | excellent: Reputation +4 · Integrity +2 |
+| Redesign the inspection regime | inspection, level 4+ | 21 | 3–5 | 3 | excellent: Reputation +4 · Integrity +2 |
+| Put a body into special measures | inspection, level 4+ | 17 | 2–4 | 3 | excellent: Reputation +5; poor: schedules "A list of eleven questions" in 1 cycles; missed: Reputation -4 |
+
+**On-site inspection** — Two days at a body that has cleared a diary, tidied a filing room and put out biscuits. The whole skill is asking the question nobody rehearsed an answer to.
+**Inspection report** — Everything you found, in an order that makes it actionable, in language that survives being quoted back at you by their lawyers.
+**Follow-up on last year’s recommendations** — Eleven recommendations, accepted in full twelve months ago. Establishing how many were actually implemented takes considerably longer than making them did.
+**Evidence log** — Every document, who gave it to you, when, and what it was said to show. Dull, and the only reason a contested finding ever survives.
+**Notification pack** — The letter telling a body it is being inspected, the scope, and the twenty-nine documents they must produce. It is a form, and getting the scope wrong wastes a fortnight of everyone’s life.
+**Factual accuracy process** — The body has forty comments on the draft. Nine are corrections you must make, and thirty-one are attempts to soften a finding by objecting to a comma.
+**Referral to the authorities** — What you found is beyond a recommendation. Writing the referral means being right, in a form somebody else will act on, about something that will end at least one career.
+**Thematic review** — Not one body but fourteen, on one question, looking for the pattern none of them can see from inside. It is the most useful thing the office does and the hardest to resource.
+**Redesign the inspection regime** — How often, on what, and against which standard — for every body in the sector at once. Get it wrong and you have created four years of the wrong questions being asked very thoroughly.
+**Put a body into special measures** — The evidence is there and the consequences are enormous: a chief executive, four hundred staff and a service that has to keep running while it is taken apart.
+
+### Social services
+
+| Task | Desk | Effort | Deadline | Difficulty | Consequences |
+| --- | --- | --- | --- | --- | --- |
+| Needs assessment | social | 6 | 2–4 | 2 | excellent: Integrity +2; missed: Stress +5 |
+| Placement panel | social | 7 | 2–4 | 3 | excellent: Reputation +3; poor: Stress +4; missed: Integrity -2 · Stress +6 |
+| Safeguarding referral | social | 8 | 2–4 | 3 | excellent: Integrity +4; missed: Integrity -4 · Stress +9 · schedules "This is now a formal matter" in 2 cycles |
+| Case recording | social, level 1–3 | 5 | 2–4 | 1 | missed: Integrity -2 |
+| Entitlement check | social, level 1–3 | 4 | 2–3 | 1 | — |
+| Statutory review | social | 6 | 2–4 | 2 | missed: Integrity -3 · Stress +5 |
+| Provider quality review | social, level 2+ | 8 | 3–4 | 2 | excellent: Integrity +3 |
+| Serious case review | social, level 3+ | 11 | 3–5 | 3 | excellent: Integrity +5 · Reputation +3; poor: schedules "A list of eleven questions" in 1 cycles; missed: Reputation -4 · Stress +10 · schedules "A list of eleven questions" in 1 cycles |
+| Recommission the whole care market | social, level 4+ | 22 | 3–5 | 3 | excellent: Reputation +4 · Integrity +3; missed: Reputation -4 · Stress +8 |
+| Set the eligibility threshold | social, level 4+ | 18 | 2–4 | 3 | excellent: Integrity +4; poor: schedules "A formal complaint" in 2 cycles; missed: Stress +8 |
+
+**Needs assessment** — Ninety minutes in somebody’s front room, and a form afterwards that decides what they get for the next two years.
+**Placement panel** — Six cases, four places and a chair who wants it done by four o’clock. Every decision is between people rather than between options.
+**Safeguarding referral** — A concern raised by somebody who was not sure whether to raise it. Getting this wrong in either direction is the thing that wakes you at four in the morning for years.
+**Case recording** — The visits you have already done, written up properly. It is the part everyone leaves until Friday and the only part that exists once you leave the service.
+**Entitlement check** — Forty minutes of arithmetic that finds a family eleven hundred euros a year they did not know they were owed. Nobody has ever thanked the department for it.
+**Statutory review** — A case reviewed on the schedule the law sets, whether or not anything has changed. Most of them have not. One of them has, badly, and you cannot tell which from the file.
+**Provider quality review** — The agency delivering care to two hundred people is cheap and the complaints have doubled. Both of those facts are in your gift to do something about.
+**Serious case review** — Something went badly wrong and the review has to say why, in public, without turning into either a whitewash or a search for one person to blame.
+**Recommission the whole care market** — Eleven providers, four thousand people receiving a service, and a budget that has not moved in three years. Everybody in this is somebody’s parent.
+**Set the eligibility threshold** — Where the line goes between the people the service helps and the people it does not. It is arithmetic on a spreadsheet and it is several thousand specific lives.
 
 ## Events
 
@@ -2513,6 +2581,601 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 
 - You set out the answer, the evidence for it, and the fact that a review would establish nothing new. It is refused, and the note is on the file when the review reports exactly that in eighteen months.
   <br>↳ Integrity +5 · Political capital -4 · Reputation +2
+
+### Inspection
+
+#### She is doing an impossible job well
+
+*`evt.inspection.the_good_manager` · weight 12 · inspection*
+
+> The service is failing against four of the seven standards. It is also being run by somebody who has been carrying two vacancies for a year, has raised it in writing five times, and is the only reason it is failing against four rather than seven.
+
+**Report the failures, and where they come from**
+
+- Four findings against the service and one against the body that would not fill the posts. The second one is the finding that changes anything, and it is the one they did not expect.
+  <br>↳ Integrity +6 · Reputation +2 · Political capital -6
+
+**Report against the standards and nothing else**
+
+- Four findings, correctly evidenced, against a manager who did everything she could. The report is unarguable and reads, to anyone who was there, as a document written by someone who has never done the job.
+  <br>↳ Performance +3 · Integrity -3
+
+**Find three rather than four**
+
+- One of them was arguable and you argue it her way. She knows exactly what you did, which puts her in the position of owing an inspector something, which is the last thing she needed.
+  <br>↳ Integrity -5 · Stress +3 · flag `buried_a_finding`
+
+#### You know this administration
+
+*`evt.inspection.old_colleague_body` · weight 12 · inspection*
+
+> The body on next month’s schedule is one you worked in, and two of the people who will be across the table from you were colleagues. You know where the weaknesses are before you arrive, which is either the most useful thing about you or a reason to send somebody else.
+
+**Declare it and lead the inspection anyway**
+
+- A paragraph on the file, agreed with your director, and then the best-targeted inspection the office runs that year — because you know which cupboard the problem is in.
+  <br>↳ Integrity +5 · Performance +4 · Stress +5
+
+**Hand it to someone else**
+
+- A colleague takes it, without your knowledge of the place, and produces a competent report that misses the two things you would have gone straight to.
+  <br>↳ Integrity +4 · Performance -2
+
+**Give them a fortnight’s warning about the cupboard**
+
+- One phone call and they have two weeks to put it right before you arrive. The service is better for it and the inspection is now a piece of theatre that you wrote.
+  <br>↳ Integrity -7 · Political capital +5 · flag `tipped_off_a_colleague`
+
+#### One grade either way
+
+*`evt.inspection.grade_pressure` · weight 13 · inspection*
+
+> The evidence puts the body on the boundary between two overall grades. The lower one triggers intervention, funding conditions and a change of leadership. The higher one triggers a letter.
+
+**Let the evidence decide it, and say it was marginal**
+
+- You grade it and then write, in the report, that it was a marginal call and exactly which way the evidence tipped. Nobody does this, and it is the reason your gradings are the ones people trust.
+  <br>↳ Integrity +7 · Reputation +2 · Political capital -3
+
+**Take the lower grade; the intervention is what they need**
+
+- *(weight 3)* The intervention arrives, and eighteen months later the service is genuinely better under people who could not have been brought in any other way.
+  <br>↳ Reputation +3 · Integrity +2 · Political capital -4
+- *(weight 2)* The intervention arrives, costs eleven months of everyone’s attention, and replaces a struggling leadership team with a struggling interim one. The service is not better. Your grading was defensible.
+  <br>↳ Reputation -3 · Stress +6
+
+**Take the higher grade; they are on the way up**
+
+- They probably are. You have also just made the judgement that trajectory counts, which is not in the framework, and which somebody less scrupulous than you will cite next year.
+  <br>↳ Integrity -4 · Political capital +3
+
+#### Somebody inside has called you
+
+*`evt.inspection.whistleblower_call` · weight 12 · inspection*
+
+> A member of staff at a body you inspect has rung the office directly. What they describe is serious, they are plainly frightened, and they will not put it in writing.
+
+**Find it another way, so they never have to be named**
+
+- You go looking for the same thing in the documents, and it takes three weeks and you find it. The finding stands on paper nobody can trace back to a phone call.
+  <br>↳ Integrity +8 · Reputation +3 · Stress +7
+
+**Tell them you can act only on something in writing**
+
+- True, procedurally. They do not put it in writing, and the thing they described goes on for another two years, and you were entirely correct about the procedure.
+  <br>↳ Integrity -5 · Stress +4
+
+**Bring the inspection forward without explaining why**
+
+- *(weight 3)* You arrive four months early on a pretext. It is obvious to everyone that something prompted it, and within a fortnight the body has worked out how many people could have made that call.
+  <br>↳ Reputation +2 · Integrity -3 · Stress +6
+- *(weight 2)* You arrive early, find it in two days, and the speed is itself the protection: nobody has time to work out where it came from before the report is public.
+  <br>↳ Reputation +3 · Integrity +3
+
+#### The same finding, for the fourth time
+
+*`evt.inspection.same_finding_again` · weight 12 · inspection*
+
+> You have written this recommendation about this body three times. It has been accepted in full three times. Nothing has happened three times, and the person who accepted it each time is genuinely sincere.
+
+**Report that acceptance has become meaningless**
+
+- You write, in terms, that this body accepts recommendations as a substitute for implementing them, and that the office should stop treating acceptance as an outcome. It is quoted in the annual report.
+  <br>↳ Integrity +6 · Reputation +1 · Political capital -8
+
+**Work out with them why it never happens**
+
+- Two days that are not an inspection at all, spent finding the actual obstacle, which turns out to be a finance rule in a different body entirely. The recommendation is implemented within the quarter.
+  <br>↳ Performance +5 · Integrity +3 · Stress +5
+
+**Make it for the fourth time**
+
+- Recommendation four, identical to recommendations one to three, accepted in full. The report is accurate, the process has been followed, and you have written the same paragraph for four years.
+  <br>↳ Integrity -3 · Performance -2
+
+#### The draft is in the paper
+
+*`evt.inspection.press_leak` · weight 11 · inspection*
+
+> A journalist has three paragraphs of your draft report, verbatim, four weeks before publication. They did not get it from your office, which leaves the body being inspected — and it is the three paragraphs that are least bad.
+
+**Publish the whole thing immediately**
+
+- You bring the date forward and the full report goes out, findings and all, three days later. Whoever leaked it got two days of favourable coverage in exchange for the rest of it arriving early.
+  <br>↳ Reputation +2 · Integrity +4 · Political capital -4 · Stress +6
+
+**Complain formally to the body about the leak**
+
+- A letter, an apology, an internal inquiry that finds nothing. It is entirely correct and it occupies six weeks that would otherwise have gone on the report.
+  <br>↳ Political capital -3 · Performance -2
+
+**Go back and harden the findings**
+
+- You reread every finding asking whether you softened it, and toughen two that you had. Both are better for it. Neither of you will ever be sure whether they would have been toughened anyway.
+  <br>↳ Reputation +2 · Integrity -2 · Stress +4
+
+#### The inspectorate is being inspected
+
+*`evt.inspection.own_house` · weight 11 · inspection, level 3+*
+
+> A peer review of your own office. The reviewers are competent, they have asked for the file on a case you handled, and the standard you are being held to is one you wrote.
+
+**Give them the worst file first**
+
+- You hand over the one you are least proud of, unprompted, at the start. The review finds three things and the covering letter says the office was more open with them than any body it inspects.
+  <br>↳ Integrity +8 · Reputation +2
+
+**Cooperate exactly as you would expect a body to**
+
+- Everything asked for, on time, nothing volunteered. It is precisely the behaviour you write findings about when you see it, and you notice that on about the third day.
+  <br>↳ Performance +2 · Integrity -2
+
+#### A view has been expressed about the outcome
+
+*`evt.inspection.minister_wants_a_grade` · weight 12 · inspection, level 3+*
+
+> Nobody has asked you to change anything. What has happened is that a minister’s office has let it be known, twice, that a poor grade for this body would be unhelpful at this particular moment.
+
+**Grade it as it is, and put the approach on the file**
+
+- The grade stands and a note records who let what be known and when. The note is the part that costs you, and it is the part that means it will not be tried again.
+  <br>↳ Integrity +9 · Political capital -10 · Reputation +2 · flag `recorded_the_pressure`
+
+**Grade it as it is and say nothing about the approach**
+
+- The right grade and no record of the pressure. You have protected the judgement and left the pressure available to be applied to somebody less able to ignore it.
+  <br>↳ Integrity +4 · Political capital -3
+
+**Grade it as it is and move the publication date**
+
+- Not a word of the report changes. It comes out five weeks later, after the moment that would have been unhelpful, and everyone involved understands that this is what was actually being asked for.
+  <br>↳ Integrity -6 · Political capital +7 · flag `softened_for_politics`
+
+#### You have inspected them eleven times
+
+*`evt.inspection.captured` · weight 11 · inspection, year 6+*
+
+> You know the chief executive’s children’s names. You know which of the findings she can move and which she cannot. It has made your inspections sharper every year for a decade, and this year you notice you have stopped looking in one particular direction.
+
+**Ask to be taken off the body**
+
+- You write that you have been inspecting them too long to be sure you are still seeing it. Your successor finds two things in her first visit that were in front of you for three years. Nobody outside the office ever hears about any of it.
+  <br>↳ Integrity +8
+
+**Go and look in that direction, hard**
+
+- *(weight 3)* There is nothing there. You had simply stopped checking, which is not the same as having been captured, and knowing the difference costs you a week and is worth it.
+  <br>↳ Integrity +5 · Stress +4
+- *(weight 2)* There is something there, and it has been there a while, and you are the inspector of record for every year it was.
+  <br>↳ Integrity +4 · Reputation -5 · Stress +9
+
+**You are the reason that body is as good as it is**
+
+- Which is true, and is the sentence every captured inspector in history has said to themselves, and both of those facts are now in the room with you.
+  <br>↳ Integrity -5 · Performance +2
+
+#### They are attacking the method, not the finding
+
+*`evt.inspection.methodology_attacked` · weight 11 · inspection*
+
+> A well-resourced body has engaged consultants to write a critique of your inspection methodology. It is forty pages, it is not stupid, and it does not contest a single one of your findings.
+
+**Answer it in public, point by point**
+
+- Six weeks and a document that concedes the three points that are right and dismantles the other twenty-nine. The methodology is stronger afterwards and everyone can see what the exercise was.
+  <br>↳ Reputation +2 · Integrity +5 · Stress +7
+
+**Decline to be drawn, and republish the findings**
+
+- You say only that the findings stand and that none of them is contested. It is the right answer strategically and it lets forty unanswered pages sit on their website for four years.
+  <br>↳ Reputation +2 · Stress +3
+
+**Quietly adopt the three points they got right**
+
+- The methodology changes at the next revision, without acknowledgement. It is better. They know exactly why it changed and have learned that forty pages works.
+  <br>↳ Performance +4 · Integrity -3
+
+#### You are sure and you cannot prove it
+
+*`evt.inspection.no_evidence_but` · weight 12 · inspection*
+
+> Everything about this body says the figures are being managed. Four inspectors have felt it. Nothing in three years of documents will support a finding, and a finding you cannot support is worse than no finding at all.
+
+**Report exactly what you can evidence, and nothing more**
+
+- Three thin findings and a paragraph about the limits of what an inspection can see. It is the honest document and it will not stop anything.
+  <br>↳ Integrity +6 · Stress +5
+
+**Change what you ask for next time**
+
+- You redesign the evidence request around the thing you cannot prove, and come back in eighteen months, and this time the documents that would show it either exist or conspicuously do not.
+  <br>↳ Performance +5 · Reputation +2 · Stress +6
+
+**Write it so a reader draws the conclusion**
+
+- No finding, but an arrangement of facts from which one is unavoidable. It is effective, it is not evidence, and it is precisely what you would criticise a body for doing to a member of staff.
+  <br>↳ Reputation +3 · Integrity -6
+
+#### Four staff and a framework built for four hundred
+
+*`evt.inspection.small_body` · weight 11 · inspection*
+
+> The body has four employees and delivers one service well. The inspection framework asks them for nineteen policies, a risk register and a workforce strategy, none of which they have and none of which would improve anything.
+
+**Inspect what matters and record why you did not ask for the rest**
+
+- You look at the service, which is good, and write down that the framework is disproportionate for bodies of this size. The office changes the framework the following year for everyone.
+  <br>↳ Integrity +7 · Reputation +2 · Political capital -4
+
+**Apply the framework as written**
+
+- Nineteen findings against a body that does its actual job well, all of them accurate. They spend the next year producing documents and the service gets slightly worse.
+  <br>↳ Performance +2 · Integrity -4
+
+#### The best person you have met this year works for them
+
+*`evt.inspection.recruit_from_them` · weight 10 · inspection, level 3+*
+
+> She took you through their weakest area with complete candour, including two things you would not have found. The office has a vacancy and she would be extraordinary in it.
+
+**Wait until the report is published, then approach her**
+
+- Eleven weeks of not saying anything, and then a conversation that is above suspicion. She takes the job and is extraordinary in it.
+  <br>↳ Integrity +6 · Performance +3
+
+**Mention it now, while you are still there**
+
+- She is flattered and the report is not yet written, and the two facts are in the same room. Nothing improper happens and there is now a version of events in which something did.
+  <br>↳ Integrity -5 · Performance +3
+
+**Leave her where she is**
+
+- The body needs her more than the office does, and you say so to nobody. She is still there four years later, still candid, still the reason the weakest area is not worse.
+  <br>↳ Integrity +4 · Reputation -1
+
+#### The service closed
+
+*`evt.inspection.consequence_of_a_finding` · weight 11 · inspection, year 4+*
+
+> Your report was accurate. The funder read it, withdrew, and the service closed in March. Two hundred people used it and there is nothing else in that district.
+
+**Stand by the report and say what it was for**
+
+- The service was unsafe and the report said so. That it was also the only service is a fact about the district and not a reason to have written something untrue, and you say both halves out loud.
+  <br>↳ Integrity +7 · Stress +6
+
+**Change how the office reports when there is no alternative provision**
+
+- Findings stay as they are; the covering advice now says explicitly what exists instead, so a funder withdrawing has to do it knowingly. Two closures are prevented in the following three years.
+  <br>↳ Integrity +6 · Reputation +2 · Performance +3
+
+**Be more careful about how hard you write it next time**
+
+- The next borderline report is a shade gentler. Nothing closes. Something else, in a place you never inspect, goes on being unsafe for another two years.
+  <br>↳ Integrity -6 · Stress -4 · flag `buried_a_finding`
+
+### Social services
+
+#### Just under the threshold
+
+*`evt.social.threshold_case` · weight 13 · social*
+
+> The assessment scores him at a point below the line for support. The line is where it is because of a budget decision taken two years ago in a different building. He is seventy-nine and lives alone.
+
+**Apply the threshold**
+
+- You write the letter that says no, and the reasons are accurate. Eleven weeks later he is in hospital after a fall, at a cost to the state of about forty times what the support would have been.
+  <br>↳ Performance +2 · Stress +7 · Integrity -2
+
+**Find the reading of the assessment that gets him over**
+
+- There is one, it is defensible, and you both know what you have done. He gets four hours a week. So, from now on, does everyone whose assessor is willing to read it that way, which is not everyone.
+  <br>↳ Integrity -3 · Stress -2 · Reputation +1
+
+**Refuse, and put the case up as evidence the line is wrong**
+
+- He still gets the letter. His case, anonymised, becomes one of nine in a paper that moves the threshold eight months later. Nine people got a letter to produce that paper.
+  <br>↳ Integrity +6 · Reputation +4 · Stress +6
+
+#### Forty-one open cases
+
+*`evt.social.caseload` · weight 13 · social*
+
+> The safe caseload is twenty-eight. Yours is forty-one, has been for five months, and the only way anybody knows how to bring it down is to close cases that are not finished.
+
+**Put the number in writing, to everyone who should see it**
+
+- An email that names the figure and says plainly what will happen at forty-one. It makes you unpopular for a quarter and it exists, dated, when somebody eventually asks what was known.
+  <br>↳ Integrity +6 · Reputation +3 · Political capital -4 · flag `recorded_the_pressure`
+
+**Triage honestly and let the bottom ones drift**
+
+- You rank all forty-one and give the bottom nine the minimum the law requires. It is the only sane response and it means nine people are now receiving a service designed by arithmetic.
+  <br>↳ Performance +3 · Integrity -3 · Stress +4
+
+**Carry all forty-one properly**
+
+- Evenings, weekends, and every case getting what it needs for about four months. Then something in you gives out, quietly, in a car park, and the caseload is still forty-one.
+  <br>↳ Performance +5 · Stress +14
+
+#### The family are certain you are wrong
+
+*`evt.social.family_complaint` · weight 12 · social*
+
+> They have written to the director, the councillor and the paper. They are angry, articulate and mistaken about the central fact — and underneath the mistake there is something real that nobody has ever explained to them.
+
+**Sit down with them for as long as it takes**
+
+- *(weight 3)* Two hours and the central fact finally lands, because you brought the documents and went through them in order. They are not happy. They are no longer fighting the wrong thing.
+  <br>↳ Integrity +6 · Reputation +3 · Stress +5
+- *(weight 2)* Two hours in which nothing lands, because what they cannot accept is not a fact but an outcome. You have given them everything you have and they leave exactly as they arrived.
+  <br>↳ Integrity +5 · Stress +9
+
+**Answer through the complaints process**
+
+- A correct letter in thirty working days that answers every point and explains nothing. It goes to the ombudsman, where the process is found to have been followed impeccably.
+  <br>↳ Integrity -3 · schedules "The ombudsman has taken the case" in 3 cycles
+
+**Move the case to another worker**
+
+- A fresh start for everyone, and the new worker spends four months rebuilding a relationship that took you two years, and the family learn that complaining changes who but not what.
+  <br>↳ Stress -5 · Performance -3
+
+#### The cheapest provider
+
+*`evt.social.provider_cheap` · weight 12 · social*
+
+> Their price is a third below anyone else and their care plans are template documents with names changed. Awarding elsewhere means the budget does not cover the caseload. Awarding here means two hundred people get whatever that price buys.
+
+**Refuse to award to them, and say why the budget will not stretch**
+
+- You put the arithmetic in front of the committee: this budget covers this number of people at a price that is not this one. It is an uncomfortable meeting and the money moves by eleven per cent.
+  <br>↳ Integrity +7 · Reputation +4 · Political capital -5
+
+**Award, and monitor them harder than anyone has been monitored**
+
+- *(weight 3)* Monthly visits, unannounced, for a year. They improve, genuinely, because somebody finally made them. It costs you a great deal of time and it works.
+  <br>↳ Performance +4 · Stress +8
+- *(weight 2)* You monitor them thoroughly and document a decline you cannot stop, because the price was always the reason and monitoring does not change a price.
+  <br>↳ Integrity -3 · Stress +9 · schedules "A formal complaint" in 3 cycles
+
+**Award it. The budget is the budget.**
+
+- Two hundred people at a third below the market rate. Every step of the procurement is impeccable and you already know roughly what the review in two years will say.
+  <br>↳ Performance +3 · Integrity -5 · flag `buried_a_finding`
+
+#### The case is in the paper
+
+*`evt.social.press_case` · weight 12 · social*
+
+> A family have gone to the press. The story is one-sided because the only side that can speak is theirs — everything that would explain the department’s decision is confidential and about a child.
+
+**Say nothing, and take it**
+
+- The department is described for four days as heartless and incompetent by people who have been told a version of events that leaves out the reason. You cannot correct any of it and you never will be able to.
+  <br>↳ Integrity +6 · Reputation -6 · Stress +8
+
+**Explain, in general terms, how decisions like this are taken**
+
+- No detail about the case, a great deal about the framework. It is duller than their story and about a tenth as widely read, and it is the most you can honestly do.
+  <br>↳ Reputation -2 · Integrity +4
+
+**Let a journalist understand the missing piece**
+
+- Nothing on the record and nothing written down, but afterwards he knows why. The coverage turns within two days. You have also just disclosed something about a child to make your department look better.
+  <br>↳ Reputation +5 · Integrity -9 · flag `journalist_has_your_number`
+
+#### Your best social worker is leaving
+
+*`evt.social.worker_leaving` · weight 12 · social*
+
+> Agency work pays her forty per cent more for the same job, with none of the caseload responsibility and none of the panels. She has eleven years here and has cried in the car park twice this month.
+
+**Tell her to take it**
+
+- You say, as her manager, that you cannot match it and that she should go, and mean it. She goes. Three months later she is back on your caseload as an agency worker at forty per cent more, which the budget somehow finds.
+  <br>↳ Integrity +6 · team morale +4 · a member of staff leaves
+
+**Fight for a retention case**
+
+- *(weight 2)* Four weeks, three meetings and a business case comparing her salary to what agency cover costs. It is approved. She stays, and so do two others who were watching to see whether it was worth asking.
+  <br>↳ team morale +12 · Reputation +3 · Stress +6
+- *(weight 3)* Four weeks, three meetings, refused on the grounds that it would set a precedent. She leaves, the precedent is set anyway, and everyone who was watching saw exactly how that went.
+  <br>↳ team morale -10 · a member of staff leaves · Stress +7
+
+**Talk about the families who depend on her**
+
+- It works, which is the problem. She stays for another eighteen months out of an obligation you put there, and leaves at the end of them in a considerably worse state.
+  <br>↳ Integrity -6 · team morale -4 · Performance +2
+
+#### The review wants a name
+
+*`evt.social.review_blame` · weight 11 · social, level 3+*
+
+> The serious case review is nearly finished. What it has found is a system in which eleven people each did something slightly wrong under impossible pressure. What everyone reading it will want is one person who did something very wrong.
+
+**Write it as the systemic failure it was**
+
+- *(weight 3)* Eleven small failures and the conditions that produced them, named in order, with the resourcing decision at the top. It is harder to read and it is the only version anybody can learn from.
+  <br>↳ Integrity +8 · Reputation +4 · Political capital -6
+- *(weight 2)* You write it systemically and it is reported as a report that blamed nobody, which is treated as the same thing as a whitewash by people who have not read it.
+  <br>↳ Integrity +7 · Reputation -5 · schedules "A list of eleven questions" in 1 cycles
+
+**Let the account settle on the worker who was closest to it**
+
+- She was closest to it and she did get it wrong, and she was carrying forty-one cases at the time, and the review does not say the second part with any force. She leaves the profession within the year.
+  <br>↳ Integrity -9 · Political capital +5 · team morale -12 · flag `blamed_a_predecessor`
+
+#### A letter from someone who came through it
+
+*`evt.social.good_outcome` · weight 11 · social, year 6+*
+
+> A young man of twenty-three has written to the department. He was in your caseload eleven years ago and would like somebody to know that he is all right, and specifically why.
+
+**Write back properly**
+
+- An hour on a letter to somebody you last saw as a twelve-year-old. You do not tell anyone at work about it, and you keep his letter in a drawer for the rest of your career.
+  <br>↳ Stress -12 · Integrity +4
+
+**Read it out at the team meeting**
+
+- Nine people who have not had a good week hear that it sometimes works. Two of them are still in the profession three years later and one of them says, much later, that it was because of a Tuesday morning.
+  <br>↳ team morale +14 · Stress -8
+
+**Send it up as evidence of what the service achieves**
+
+- It goes into the annual report, anonymised, beside a chart. It is genuinely useful in the funding round and something about it being useful is not quite right.
+  <br>↳ Reputation +5 · Political capital +3 · Integrity -2
+
+#### You are still carrying one of them
+
+*`evt.social.the_one_you_remember` · weight 11 · social, year 5+*
+
+> There is a case from your third year that you think about. Nothing about it was found to be wrong. You have read the file since and cannot see what you would have done differently, and you think about it anyway.
+
+**Say it out loud to somebody who would understand**
+
+- Twenty minutes with a colleague who has one of her own. Neither of you offers the other any reassurance, because that is not what it is for, and both of you sleep better that week.
+  <br>↳ Stress -12 · team morale +5
+
+**Turn it into training**
+
+- You build a session around it, anonymised, for people three years in. It is the best training the department runs and giving it costs you something every single time.
+  <br>↳ Performance +5 · Integrity +4 · Stress +4
+
+**Put it back where you keep it**
+
+- You have a place for it and it goes back there, and this has worked for eleven years in the sense that you are still working.
+  <br>↳ Stress +5
+
+#### She wants to read her own file
+
+*`evt.social.data_request` · weight 11 · social*
+
+> A woman of thirty-one has asked for the records the department holds about her childhood. She is entitled to almost all of it. Some of it is other people’s accounts of her mother, written in the language of the time.
+
+**Give her all of it, and offer to go through it with her**
+
+- Four hundred pages and an afternoon. She reads sentences about herself written by people who never asked her anything, and at the end says that having it is better than not, and means it.
+  <br>↳ Integrity +8 · Reputation +3 · Stress +7
+
+**Redact what you must and post it**
+
+- Compliant, timely, and it arrives on a Tuesday in a jiffy bag with no warning about what is on page one hundred and nine.
+  <br>↳ Performance +2 · Integrity -4
+
+**Redact generously, to spare her**
+
+- You take out more than the law requires because some of it is cruel. It is kindly meant and it is you deciding what she is allowed to know about her own life.
+  <br>↳ Integrity -5 · Stress -2 · schedules "The ombudsman has taken the case" in 4 cycles
+
+#### Which of the three
+
+*`evt.social.cut_the_service` · weight 12 · social, level 3+*
+
+> The saving has to come from somewhere and there are three candidates: the day centre, the respite nights, or the early-help team. Each of them is somebody’s only thing.
+
+**The early-help team — the harm is furthest away**
+
+- It is the right answer for three years and the wrong one for the following ten, and everybody in the room knows both halves and takes it anyway because the saving is this year.
+  <br>↳ Performance +3 · Integrity -4 · Stress +6
+
+**The respite nights — the fewest people**
+
+- Forty families, each of whom was getting two nights a month, which was the two nights that made the other twenty-eight possible. Eleven of them are in crisis within the year.
+  <br>↳ Integrity -3 · Stress +8
+
+**Send it back with the consequences of each attached**
+
+- *(weight 3)* You put all three options up with the ten-year cost of each written beside the one-year saving. The saving is found elsewhere. It takes four months and two extremely bad meetings.
+  <br>↳ Integrity +8 · Reputation +5 · Political capital -6
+- *(weight 2)* You send it back, and it comes down again with the choice made for you and your analysis attached to it as an annex. The early-help team goes.
+  <br>↳ Integrity +5 · Political capital -4 · Stress +8
+
+#### Giving evidence
+
+*`evt.social.court` · weight 12 · social*
+
+> Four hours in a witness box being taken through your own case notes by a barrister whose job is to find the sentence you wrote at eleven at night after a fourteen-hour day.
+
+**Concede the sentence and explain the decision anyway**
+
+- You say the note was poor and that the decision was right, and set out why, and the distinction survives twenty minutes of pressure because it is a real one.
+  <br>↳ Integrity +7 · Reputation +5 · Stress +8
+
+**Defend every word of the file**
+
+- You defend the sentence written at eleven at night, and spend forty minutes doing it, and by the end the court is thinking about the sentence rather than the child.
+  <br>↳ Reputation -5 · Stress +10
+
+**Go back and change how the whole team records**
+
+- Afterwards, not during. A new recording standard, written by somebody who has been cross-examined on their own notes, and adopted across the service within the year.
+  <br>↳ Performance +5 · Reputation +4 · team morale +4 · Integrity +4
+
+#### He is not all right
+
+*`evt.social.colleague_struggling` · weight 12 · social*
+
+> One of your team has been sharp with a family, twice, and has filed nothing for three weeks. He is one of the best people you have and something has plainly happened.
+
+**Take his caseload off him for a month**
+
+- You redistribute nineteen cases, mostly to yourself, and tell him to go to the doctor. It is a bad month for everyone and he is still in the profession in ten years.
+  <br>↳ team morale +10 · Reputation +3 · Stress +10 · Integrity +5
+
+**Start the performance process**
+
+- It is the correct procedure for the facts as recorded. He is signed off within a fortnight and resigns from the process, and from the profession, in the spring.
+  <br>↳ team morale -14 · a member of staff leaves · Integrity -5
+
+**Ask him what has happened**
+
+- *(weight 3)* It is a case from last year and it is also his father. He has told nobody. Between the two of you there is a plan by the end of the afternoon.
+  <br>↳ team morale +8 · Integrity +5 · Stress +5
+- *(weight 2)* He says he is fine in a tone that means the opposite, and you have asked, which is not nothing and is also not enough.
+  <br>↳ team morale +2 · Stress +4
+
+#### The waiting list has halved
+
+*`evt.social.numbers_look_better` · weight 12 · social, level 3+*
+
+> The figure going to the committee is genuinely half what it was. It is half because the definition of what counts as waiting changed in April, and the paper does not mention April.
+
+**Add the paragraph about April**
+
+- One paragraph and the achievement evaporates. The committee asks a much better question than the one it was going to ask, and the answer to that one changes something.
+  <br>↳ Integrity +8 · Political capital -5 · Reputation +3
+
+**Show both definitions side by side**
+
+- Two lines on one chart, old basis and new. It is the honest presentation and it takes an extra afternoon and nobody who reads it can be misled.
+  <br>↳ Integrity +6 · Reputation +3 · Performance +3
+
+**It is the figure the system produces**
+
+- It is. The committee is pleased, the service is unchanged, and next year somebody will build a plan on a trend that does not exist.
+  <br>↳ Integrity -6 · Reputation +3 · flag `signed_off_inflated_figure`
 
 ### Milestones
 

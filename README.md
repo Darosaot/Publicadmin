@@ -13,8 +13,9 @@ being brilliant, by being well-connected, or by cutting corners — and the game
 
 ## How to play
 
-1. **Pick a department.** Legal, Projects, Finance, Procurement or Policy. Each has its own work,
-   its own kinds of trouble, and its own signature crisis waiting for you somewhere down the line.
+1. **Pick a department.** Legal, Projects, Finance, Procurement, Policy, Inspection or Social
+   Services. Each has its own work, its own kinds of trouble, and its own signature crisis waiting
+   for you somewhere down the line.
 2. **Each turn is one decision cycle** — a month at a junior desk, half a year once you run a
    directorate. Tasks arrive with deadlines, difficulty and consequences, and you have a limited
    pool of effort points to spread across them.
@@ -25,10 +26,16 @@ being brilliant, by being well-connected, or by cutting corners — and the game
    letter arrives. Each event is a decision, and decisions move your stats — sometimes months later.
 5. **Reputation opens doors.** Meet the thresholds and job offers appear on your Career screen.
    Accept, and everything gets bigger: the salary, the effort you command, and the trouble.
+6. **The ladder forks.** From the third rung the career is a tree, not a queue: stay on the line
+   and run bigger units, go **expert** and give up the office for harder files, go **political**
+   and rise or fall with your minister, or go **oversight** and inspect the administrations you
+   used to work in. Where you didn't go stays on the Career screen for the rest of the game.
 
 Six stats decide how it goes: **Reputation**, **Performance**, **Political Capital**,
 **Integrity**, **Stress** and your **Salary**. There are six ways it can end, from burnout to the
-Council of Ministers.
+Council of Ministers. Along the way you'll meet the same eight people over and over — a peer who
+started the same week, a journalist, an auditor who remembers your files — and the game keeps track
+of how you left things with each of them.
 
 The setting is a fictional European country — EU-funded projects, procurement directives,
 transparency requests and audits — so nothing here maps onto any real administration's law.
