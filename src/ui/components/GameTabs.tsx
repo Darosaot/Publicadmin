@@ -1,4 +1,4 @@
-import { registry } from '../../content';
+import { cast, registry } from '../../content';
 import { hasTeam } from '../../engine/team';
 import { useT } from '../../i18n';
 import { useActiveGame, useGame } from '../../state/GameProvider';
@@ -24,6 +24,12 @@ export function GameTabs({ current }: { current: GameView }) {
       // A vacancy or someone about to walk is worth a nudge.
       dot: game.staff.some((s) => s.morale < 30) || game.hiring !== undefined,
     });
+  }
+
+  // People appears the moment there is anybody in it, and not before: an empty contacts list
+  // is a worse introduction to the cast than no tab at all.
+  if (cast.some((person) => game.flags[person.metFlag])) {
+    tabs.push({ view: 'people', label: t('action.people') });
   }
 
   tabs.push({ view: 'career', label: t('action.career'), dot: game.offers.length > 0 });

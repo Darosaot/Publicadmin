@@ -5,11 +5,24 @@
  * place that knows stats are clamped to 0–100.
  */
 
+import { yearsElapsed } from './calendar';
 import { STAT_MAX, STAT_MIN } from './constants';
 import type { ContentRegistry } from './registry';
 import { spawnTask } from './tasks';
 import { adjustTeamMorale, averageMorale, createStaff } from './team';
 import type { Condition, Effect, GameState, PlayerStats, StatId } from './types';
+
+/**
+ * A flag read as a number.
+ *
+ * Flags started out boolean and some of them grew into quantities. An unset flag is 0, and a
+ * boolean one is 0 or 1, so a numeric read of any flag is always meaningful.
+ */
+export function flagValue(state: GameState, flag: string): number {
+  const raw = state.flags[flag];
+  if (typeof raw === 'number') return raw;
+  return raw ? 1 : 0;
+}
 
 /** Structural clone of the state. Cheap enough at this size, and keeps the engine honest. */
 export function cloneState(state: GameState): GameState {
@@ -70,6 +83,10 @@ export function applyEffects(
 
       case 'flag':
         next.flags[effect.flag] = effect.value ?? true;
+        break;
+
+      case 'flagDelta':
+        next.flags[effect.flag] = flagValue(next, effect.flag) + effect.delta;
         break;
 
       case 'spawnTask': {
@@ -161,7 +178,7 @@ export function statDeltas(before: PlayerStats, after: PlayerStats): Partial<Pla
 
 /** Why a condition failed, so the UI can tell the player what they're missing. */
 export interface ConditionFailure {
-  reason: 'level' | 'department' | 'turn' | 'stat' | 'salary' | 'flag' | 'team';
+  reason: 'level' | 'department' | 'track' | 'turn' | 'stat' | 'salary' | 'flag' | 'team';
   stat?: StatId;
   required?: number;
   comparison?: 'min' | 'max';
@@ -184,8 +201,14 @@ export function checkCondition(
   if (condition.departments && !condition.departments.includes(player.department)) {
     return { reason: 'department' };
   }
+  if (condition.tracks && !condition.tracks.includes(player.track)) {
+    return { reason: 'track' };
+  }
   if (condition.minTurn !== undefined && turn < condition.minTurn) {
     return { reason: 'turn', required: condition.minTurn, comparison: 'min' };
+  }
+  if (condition.minYearsElapsed !== undefined && yearsElapsed(state) < condition.minYearsElapsed) {
+    return { reason: 'turn', required: condition.minYearsElapsed, comparison: 'min' };
   }
   if (condition.minSalary !== undefined && player.salary < condition.minSalary) {
     return { reason: 'salary', required: condition.minSalary, comparison: 'min' };
@@ -231,6 +254,16 @@ export function checkCondition(
   if (condition.forbiddenFlags) {
     for (const flag of condition.forbiddenFlags) {
       if (flags[flag]) return { reason: 'flag' };
+    }
+  }
+  if (condition.minFlag) {
+    for (const [flag, required] of Object.entries(condition.minFlag)) {
+      if (flagValue(state, flag) < required) return { reason: 'flag' };
+    }
+  }
+  if (condition.maxFlag) {
+    for (const [flag, limit] of Object.entries(condition.maxFlag)) {
+      if (flagValue(state, flag) > limit) return { reason: 'flag' };
     }
   }
 

@@ -8,7 +8,7 @@
 
 ## 1. The pitch
 
-You are a public official. The game covers your whole working life, one month at a time, starting
+You are a public official. The game covers your whole working life, a decision at a time, starting
 at a desk in a small city council and ending — depending on how you play — in burnout, in quiet
 retirement, in disgrace, or in the Council of Ministers.
 
@@ -24,7 +24,9 @@ would like a word.
 
 ## 2. Core loop
 
-One **turn** is one **month**. A turn runs in four phases:
+One **turn** is one **decision cycle**, and a cycle covers more calendar time the more senior the
+post: a month at a junior desk, two at Senior Officer, a term as Head of Unit, half a year in a
+directorate. A turn runs in four phases:
 
 | Phase | What happens | Who decides |
 | --- | --- | --- |
@@ -33,7 +35,44 @@ One **turn** is one **month**. A turn runs in four phases:
 | **Events** | One to three events fire. Each is a short scene with 2–4 choices. Some consequences land immediately; some are scheduled for months later. | Player chooses, engine resolves |
 | **Report** | Salary is paid, the month is summarised, reviews and job offers are checked, and the game tests whether your career just ended. | Engine |
 
-Then the board refills and the next month begins.
+Then the board refills and the next cycle begins.
+
+### Why a cycle is not always a month
+
+The game covers a working life, and the writing has always said so — the retirement endings are
+titled "Thirty years", the Minister arc opens "twenty-two years ago you were three days into a job
+in Alderford". For a long time none of it was true: at one month a turn, 120 turns was a decade.
+
+Raising the turn count to 360 would have made it literal at the cost of three times the clicking,
+for a stretch of career where the interesting decisions are not three times as many. So the clock
+was split instead. `turn` counts decisions; `calendarMonth` counts elapsed time; each level carries
+a `monthsPerTurn`:
+
+| Tier | Months per cycle |
+| --- | --- |
+| 1 | 1 |
+| 2 | 2 |
+| 3 | 4 |
+| 4 | 6 |
+| 5 | 6 |
+
+The political track runs faster — three or four months a cycle rather than six — because a private
+office genuinely does work in weeks.
+
+Those numbers are not aesthetic. Simulated careers spend about 32 turns at level 1 and 41 at level
+2 — most of a career is early, because most careers plateau — and the figures above are what that
+distribution needs to land at **28.9 mean years of service**, which `npm run balance` reports and
+`tests/engine/autoplay.test.ts` pins between 24 and 36.
+
+It also says something true. A junior desk turns over monthly. A Director-General does not re-plan
+a directorate every four weeks, and their files genuinely run for years rather than months.
+
+**Deadlines stay in cycles**, which is why a task's `deadlineRange: [2, 4]` is two to four months
+at the bottom of the tree and a year to two years at the top. That is the intended reading.
+
+Content that depends on how long ago something happened uses `minYearsElapsed` rather than
+`minTurn` — the milestone about "a woman you have not seen in twenty years" waits for twenty
+actual years.
 
 ## 3. Stats
 
@@ -41,9 +80,9 @@ Five stats run 0–100 and are always clamped to that range. Salary is money and
 
 | Stat | Starts at | What it means | What moves it |
 | --- | --- | --- | --- |
-| **Reputation** | 20 | Your professional standing outside your own office. This is the stat that gates promotions and job offers. | Task quality, reviews, events; **decays 4.6% a month** |
-| **Performance** | 50 | The rolling quality of your department's actual output. It feeds your reviews, which feed Reputation. | Completed and failed tasks; **reverts 5% a month toward 50** |
-| **Political Capital** | 10 | Favours owed to you, and people who take your call. Spent to force decisions through and to survive scandals. | Networking, events; **decays 4.4% a month** |
+| **Reputation** | 20 | Your professional standing outside your own office. This is the stat that gates promotions and job offers. | Task quality, reviews, events; **decays 4.6% a cycle** |
+| **Performance** | 50 | The rolling quality of your department's actual output. It feeds your reviews, which feed Reputation. | Completed and failed tasks; **reverts 5% a cycle toward 50** |
+| **Political Capital** | 10 | Favours owed to you, and people who take your call. Spent to force decisions through and to survive scandals. | Networking, events; **decays 4.4% a cycle** |
 | **Integrity** | 70 | Your ethical track record. High integrity closes off shortcuts but protects you when investigators arrive. Low integrity opens shortcuts and quietly accumulates risk. | Events, almost exclusively. Does not decay — a record does not fade |
 | **Stress** | 20 | Accumulated load. At 100 you burn out and the game ends. | Every turn (+2), overtime, crises; reduced by Rest |
 | **Salary** | €2,100/mo | Your pay. A progress marker, and a reason to take an offer you might otherwise refuse. | Promotions, reviews |
@@ -61,10 +100,61 @@ this standard", not "survive long enough". Performance reverts toward the middle
 directions, which also stops the opposite failure: a bad month lowering Performance, which lowers
 quality, which produces more bad months.
 
-**Hidden state.** The engine also tracks *flags* — named booleans set by choices (`owes_favour_ruiz`,
-`signed_off_irregular_invoice`, `journalist_has_your_number`). Flags gate later events, so a
-decision in month 9 can produce a knock at the door in month 20. Flags are never shown directly;
-you find out they existed when they fire.
+**Hidden state.** The engine also tracks *flags* — named values set by choices
+(`accepted_supplier_gift`, `journalist_has_your_number`, `holds_leverage`). Flags gate later
+events, so a decision in your second year can produce a knock at the door in your twelfth. They are
+never shown directly; you find out they existed when they fire.
+
+A flag may be a boolean ("this happened") or a number, for the things that were always really a
+quantity — how much someone owes you, how warm a relationship is. Both read as truthy, so
+`requiredFlags` works on either, and `minFlag` / `maxFlag` compare numerically with an unset flag
+reading as 0.
+
+**A flag nothing reads is a dropped thread**, and the corpus had twenty-five of them: authored
+consequence that no player could ever encounter, because the payoff had never been written. Content
+validation now fails on any flag that is set but never gated on, and the *Reckonings* pool
+(`src/content/events/reckonings.ts`) is where those twenty-five promises are kept — seventeen
+events, every one of them unreachable unless you earned it, most waiting several years before they
+arrive.
+
+## 3a. The cast
+
+Eight people recur across a whole career, and what they think of you decides what they do when
+they next appear.
+
+| Person | Who they are |
+| --- | --- |
+| **Elena Vásquez** | Joined the same week you did. The control group for your career. |
+| **Rufus Halloran** | Your first director. Everything you believe about how this is done came from him, including the parts he got wrong. |
+| **Marta Oyelaran** | The union representative — the only person who will tell you the truth about your own unit. |
+| **Tomas Berg** | A journalist. Local paper, then the nationals. |
+| **Inés Reyes** | A councillor who becomes rather more. |
+| **Sofia Lindqvist** | The external auditor, who remembers every file of yours she has ever read. |
+| **Jozef Nowak** | A supplier's account manager, and genuinely good company. |
+| **Aurelia Kess** | The trainee who found something, and what you did about it. |
+
+Each has an introduction, a reappearance in the middle of a career, and a late scene where the
+relationship decides the outcome. In simulation, better than 84% of careers meet each of them, and
+a career contains about **15 scenes involving somebody it already knows**.
+
+### How they are stored, and why that matters
+
+A person is **content, not state**. Names, roles and every line they speak are fixed prose written
+at authoring time — which they have to be, because event text cannot interpolate anything. The
+only thing a save carries is a number, kept in `flags` under `rel.<id>`.
+
+Building the cast on flags rather than on a new `GameState` array was a deliberate choice and not
+just an economy. `cloneState` hand-enumerates every mutable field and `applyEffects` mutates in
+place, so a new object or array on the state would fall through the spread as a shared reference
+and silently corrupt the pre-effect snapshot, with nothing to catch it at compile time. `flags` was
+already cloned. This is why the flag type was widened to `boolean | number` first.
+
+**Standing does not decay.** Reputation and political capital fade because they measure how you are
+doing lately; what a particular person thinks of you is not that. Elena remembers whose name went
+on the correction whether or not you have spoken since — and a cast that forgets is not a cast.
+
+The **People screen** shows who you know and how you stand, described rather than scored: putting a
+figure on the page would invite optimising a relationship instead of having one.
 
 ## 4. Departments
 
@@ -199,13 +289,16 @@ A random event that fires goes on a **12-turn cooldown**, and events marked `onc
 
 ### The corpus
 
-165 events and 62 task templates. The events break down as 134 random, 21 follow-ups and 10
+213 events and 62 task templates. The events break down as 177 random, 21 follow-ups and 15
 milestones, and the random pool splits roughly evenly between work that could happen in any
 department and work that is specific to one of the five:
 
 | Pool | Events | What it covers |
 | --- | --- | --- |
 | Common | 38 | The building, the institution, your own life in it |
+| Cast | 24 | Eight people who recur, and remember |
+| Reckonings | 17 | Gated entirely on flags: the things that come back |
+| Tracks | 8 | Leaving the ladder, and the top of each branch |
 | Department | 70 | 14 each for legal, projects, finance, procurement and policy |
 | Management | 12 | Only reachable once you have a unit |
 | Leadership | 14 | Only from level 4, where the decisions are institutional |
@@ -243,21 +336,52 @@ unconditional outcome, so a decision can never dead-end.
 
 ### The ladder
 
-| Level | Post | Administration | Salary | Effort | Slots | Unit | Budget |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Administrative Officer | Alderford City Council (pop. 18,000) | €2,100 | 10 | 4 | — | — |
-| 2 | Senior Officer | Northbridge City Council (pop. 140,000) | €2,900 | 12 | 4 | — | — |
-| 3 | Head of Unit | Regional Government of Valmara | €3,900 | 14 | 6 | 4 | €11,500/mo |
-| 4 | Head of Department | National Agency for Public Investment | €5,200 | 16 | 7 | 6 | €18,500/mo |
-| 5 | Director-General | Ministry of Territorial Administration | €6,800 | 18 | 8 | 8 | €26,000/mo |
-| — | **Minister** | Government of Valmara | — | — | — | — | — |
+Everyone starts at the same desk in Alderford. After that it forks, and posts sharing a **tier**
+are alternatives rather than steps.
 
-Levels 3 to 5 come with an establishment and a budget line. **You arrive one post short**, because
-you always do.
+| Tier | Line (management) | Expert (specialist) | Political | Oversight |
+| --- | --- | --- | --- | --- |
+| 1 | Administrative Officer, Alderford | — | — | — |
+| 2 | Senior Officer, Northbridge | — | — | Case Officer, Audit Authority |
+| 3 | Head of Unit, the Region | Principal Specialist | Adviser, private office | Senior Auditor |
+| 4 | Head of Department, the Agency | Chief Adviser | Head of the Private Office | Director of Inspection |
+| 5 | Director-General, the Ministry | Chief Adviser to the Government | Special Adviser to the Cabinet | Ombudsman |
+| — | **Minister** | — | — | — |
 
-Minister is not a sixth playable level; it is the ending. Reaching it requires being a
-Director-General with Reputation ≥ 88 and Political Capital ≥ 70, which triggers a three-event
-confirmation arc you can still lose.
+The four branches are meant to be different games, not four labels on the same one:
+
+- **Line** is what the game already was: more people, more budget, more institution. A
+  Director-General runs eight staff and €26,000 a month.
+- **Expert** trades the unit away entirely. No staff, no budget, but a Chief Adviser to the
+  Government has **29 effort points against four files** — and because per-file credit scales as
+  `4 / taskSlots`, a short board pays far better per file. That is not a consolation: the first
+  balance pass gave the specialist posts more files and made the track measurably *worse*.
+- **Political** is fast, well paid and has no tenure. Cycles are three to four months rather than
+  six because a private office works in weeks, and an event arc can end your post when your
+  principal falls.
+- **Oversight** turns the game around: you inspect the administrations the other three work inside.
+  Its entry terms ask for reputation and performance and **never for political capital**, which is
+  the mechanical statement of what the branch is for.
+
+Tier 3 and up come with an establishment and a budget line — except on the expert track, where
+there is deliberately none. **You arrive one post short**, because you always do.
+
+### Edges, not rungs
+
+Entry terms belong to the **move**, not to the destination: the same post is reachable from
+different places on different terms, and a Head of Unit reaching the Agency is not doing the same
+thing as a Senior Auditor reaching it. A move marked *sideways* is a step across rather than up,
+and is exempt from the rule that a promotion must pay more — stepping off the line track onto the
+expert one costs money, which is the point.
+
+Each cycle the engine walks every edge out of your current post and rolls each one separately, so
+a fork arrives as a real choice on the career screen. Only one new offer is created per cycle
+though: being handed four posts in a month would read as a lottery rather than a career.
+
+Minister is not a sixth playable tier; it is the ending. Reaching it requires being at tier 5 —
+on any branch — with Reputation ≥ 88 and Political Capital ≥ 70, which triggers a three-event
+confirmation arc you can still lose. In practice the political track gets there most easily and
+the oversight track almost never, which is correct.
 
 ### Requirements to be offered the next post
 
@@ -365,8 +489,8 @@ Checked at the end of every month, in this order — the first one that matches 
 | **Disgrace** | Integrity falls to 8 or below | The file with your signature on it is now evidence. |
 | **Dismissed** | Reputation ≤ 10 and Performance ≤ 25 | Not a scandal. Just a quiet conversation about how this isn't working. |
 | **Minister** | The confirmation arc succeeds | Three variants depending on how you got there: the Reformer (high integrity), the Operator (high political capital), the Survivor (neither, but you're still standing). |
-| **Honoured retirement** | Month 120 with Reputation ≥ 60 | Thirty years of files. A room full of people who mean it. |
-| **Quiet retirement** | Month 120 with Reputation < 60 | Thirty years of files. A card, signed by the department. |
+| **Honoured retirement** | Cycle 120 with Reputation ≥ 60 | Thirty years of files. A room full of people who mean it. |
+| **Quiet retirement** | Cycle 120 with Reputation < 60 | Thirty years of files. A card, signed by the department. |
 
 ## 10. Balance reference
 
@@ -374,22 +498,25 @@ All of these live in `src/engine/constants.ts`.
 
 | Constant | Value |
 | --- | --- |
-| Turn length | 1 month |
-| Maximum campaign length | 120 turns |
+| Turn length | 1 decision cycle: 1 / 2 / 4 / 6 / 6 months by level |
+| Maximum campaign length | 120 turns, about 29 years |
 | Starting stats | Rep 20, Perf 50, PC 10, Integrity 70, Stress 20 |
-| Effort points by level | 10 / 12 / 14 / 16 / 18 |
-| Task slots by level | 4 / 4 / 6 / 7 / 8 |
-| Establishment by level | — / — / 4 / 6 / 8 |
-| Unit budget by level | — / — / €11,500 / €18,500 / €26,000 a month |
+| Effort points, line track | 10 / 12 / 14 / 16 / 18 |
+| Effort points, expert track | — / — / 21 / 25 / 29 |
+| Task slots, line track | 4 / 4 / 6 / 7 / 8 |
+| Task slots, expert track | — / — / 4 / 4 / 4 |
+| Establishment, line track | — / — / 4 / 6 / 8 |
+| Unit budget, line track | — / — / €11,500 / €18,500 / €26,000 a month |
+| Posts in the tree | 15 across 4 tracks |
 | Overtime | +3 points, +5 stress |
 | Rest | −3 stress per point |
 | Networking | +2 political capital per point |
 | Baseline stress per turn | +2 |
 | Task workload multiplier | ×1.35 |
 | Task effort level scaling | ×(1 + 0.08 × (level − 1)) |
-| Reputation decay | 4.6% a month |
-| Political capital decay | 4.4% a month |
-| Performance reversion | 5% a month toward 50 |
+| Reputation decay | 4.6% a cycle |
+| Political capital decay | 4.4% a cycle |
+| Performance reversion | 5% a cycle toward 50 |
 | Quality baseline | 58 |
 | Quality thresholds | Excellent ≥ 75, Good ≥ 45 |
 | Task failure | Performance −3, Reputation −2 |
@@ -418,9 +545,11 @@ Where it currently sits:
 
 | Measure | Value |
 | --- | --- |
-| Careers reaching Director-General | 58% |
-| Careers reaching Head of Unit or above | 82% |
+| Mean years of service | 28.9 |
+| Careers reaching a tier-5 post | 51% |
+| Careers reaching tier 3 or above | 84% |
 | Careers stuck at the starting post | 3% |
+| Mean level, by track | line 4.0, expert 3.9, political 4.3, oversight 3.7 |
 | Files finished on time | 95% |
 | Mean level reached | 4.1 |
 | Mean Reputation at the end | 78 |

@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { MAX_TURNS } from '../../src/engine/constants';
-import { ENDING_IDS, DEPARTMENT_IDS, STAT_IDS, type DepartmentId } from '../../src/engine/types';
+import {
+  ENDING_IDS,
+  DEPARTMENT_IDS,
+  STAT_IDS,
+  TRACK_IDS,
+  type DepartmentId,
+  type TrackId,
+} from '../../src/engine/types';
 import { playCareer, playMany, summarise } from './autoplay';
 
 /**
@@ -46,6 +53,16 @@ describe('simulated careers', () => {
     expect(top / summary.runs).toBeGreaterThan(0.05);
     expect(top / summary.runs).toBeLessThan(0.8);
     expect(bottom / summary.runs).toBeLessThan(0.25);
+  });
+
+  it('covers something like a working life, which is what the writing claims', () => {
+    // The endings are titled "Thirty years" and the Minister arc says "twenty-two years ago you
+    // were three days into a job in Alderford". For a long time none of that was true: a turn was
+    // a month, so 120 turns was a decade. A cycle now covers more calendar time the more senior
+    // the post, which costs the player no extra clicks and makes the prose honest.
+    const years = summary.meanYears;
+    expect(years, 'a career should be a career, not a decade').toBeGreaterThan(24);
+    expect(years, 'and not so long that the arithmetic stops being plausible').toBeLessThan(36);
   });
 
   it('leaves reputation meaningful rather than saturated', () => {
@@ -97,6 +114,100 @@ describe('simulated careers', () => {
       best.level - worst.level,
       `${best.department} outruns ${worst.department} by too much`,
     ).toBeLessThan(1.2);
+  });
+});
+
+describe('every track is a real career', () => {
+  // Played deliberately, one branch at a time. A branch nobody can climb is dead content, and a
+  // branch that is strictly better than the others makes the choice meaningless.
+  const byTrack = new Map<TrackId, ReturnType<typeof summarise>>(
+    TRACK_IDS.map((track) => [
+      track,
+      summarise(playMany(seeds.slice(0, 8), DEPARTMENT_IDS, 'balanced', track)),
+    ]),
+  );
+
+  it.each(TRACK_IDS)('%s is survivable and not a walkover', (track: TrackId) => {
+    const summary = byTrack.get(track)!;
+    expect(summary.meanLevel, `${track} goes nowhere`).toBeGreaterThan(2.5);
+    expect(summary.meanLevel, `${track} is a walkover`).toBeLessThan(5);
+    expect(summary.meanTurns).toBeGreaterThan(30);
+  });
+
+  it('does not make one branch obviously the right one', () => {
+    const levels = [...byTrack.entries()].map(([track, s]) => ({ track, level: s.meanLevel }));
+    const best = levels.reduce((a, b) => (a.level >= b.level ? a : b));
+    const worst = levels.reduce((a, b) => (a.level <= b.level ? a : b));
+
+    expect(
+      best.level - worst.level,
+      `${best.track} outruns ${worst.track} by too much`,
+    ).toBeLessThan(1.2);
+  });
+
+  it('actually reaches the branches, rather than reporting the line track four times', () => {
+    // The first per-track run looked healthy and was measuring nothing: only one offer exists per
+    // cycle, so preferring a track among simultaneous offers never changed a decision.
+    for (const track of TRACK_IDS) {
+      const runs = playMany(seeds.slice(0, 8), DEPARTMENT_IDS, 'balanced', track);
+      const ended = runs.filter((r) => r.track === track).length;
+      expect(ended / runs.length, `nobody ends up on ${track}`).toBeGreaterThan(0.5);
+    }
+  });
+});
+
+describe('the cast', () => {
+  it('gets met in ordinary play rather than only in theory', () => {
+    // Introductions are gated on not having met, so a career that never runs into anybody means
+    // the gates are wrong, not that the writing is unlucky.
+    const met = new Set<string>();
+    for (const run of results) {
+      for (const flag of Object.keys(run.finalState.flags)) {
+        if (flag.startsWith('met.')) met.add(flag);
+      }
+    }
+    expect(met.size, 'nobody in the cast is ever met').toBeGreaterThan(4);
+  });
+
+  it('remembers: standing moves in both directions across a career', () => {
+    const standings = results.flatMap((r) =>
+      Object.entries(r.finalState.flags)
+        .filter(([flag]) => flag.startsWith('rel.'))
+        .map(([, value]) => (typeof value === 'number' ? value : 0)),
+    );
+
+    expect(standings.length, 'no relationship was ever scored').toBeGreaterThan(10);
+    expect(standings.some((v) => v > 10), 'nobody ever warms to you').toBe(true);
+    expect(standings.some((v) => v < -5), 'nobody is ever put off').toBe(true);
+  });
+
+  it('never meets the same person twice for the first time', () => {
+    // The introductions are `unknown`-gated, so firing one twice would mean the gate is not
+    // holding — and the player would be introduced to a twenty-year colleague in their last year.
+    for (const run of results) {
+      const intros = run.finalState.firedEvents.filter((id) => id.endsWith('_meet'));
+      expect(new Set(intros).size).toBe(intros.length);
+    }
+  });
+});
+
+describe('decisions come back', () => {
+  it('fires consequence events that only a past choice can unlock', () => {
+    // The reckonings pool is gated entirely on flags set years earlier, so an event from it
+    // firing is proof that a decision was remembered. If this drops to zero, either the flags
+    // stopped being set or the gates are unreachable in practice — both silent failures.
+    const reckonings = results.flatMap((r) =>
+      r.finalState.firedEvents.filter((id) => id.startsWith('evt.reckon.')),
+    );
+    expect(new Set(reckonings).size, 'no consequence event ever fired').toBeGreaterThan(3);
+  });
+
+  it('reaches them through the corrupt path too, where most of the flags are set', () => {
+    const ruthless = playMany(seeds.slice(0, 6), DEPARTMENT_IDS, 'ruthless');
+    const anyFlags = ruthless.some((r) =>
+      Object.keys(r.finalState.flags).some((f) => f !== 'minister_track'),
+    );
+    expect(anyFlags, 'a ruthless career should leave a trail').toBe(true);
   });
 });
 

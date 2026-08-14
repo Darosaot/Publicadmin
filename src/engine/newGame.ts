@@ -2,7 +2,7 @@
 
 import { SAVE_VERSION, STARTING_STATS } from './constants';
 import { adjustStat } from './effects';
-import { getCareerLevel, type ContentRegistry } from './registry';
+import { startingPost, type ContentRegistry } from './registry';
 import { seedToState } from './rng';
 import { refillBoard } from './tasks';
 import type { DepartmentId, GameState, PlayerStats, StatId } from './types';
@@ -19,7 +19,7 @@ export function randomSeed(): number {
 
 export function createGame(options: NewGameOptions, registry: ContentRegistry): GameState {
   const seed = options.seed ?? randomSeed();
-  const level = getCareerLevel(registry, 1);
+  const start = startingPost(registry);
 
   const stats: PlayerStats = { ...STARTING_STATS };
   const department = registry.departments[options.department];
@@ -36,14 +36,17 @@ export function createGame(options: NewGameOptions, registry: ContentRegistry): 
     rngState: seedToState(seed),
 
     turn: 1,
+    calendarMonth: 0,
     phase: 'allocation',
 
     player: {
       name: options.name.trim() || 'Alex Moreau',
       department: options.department,
-      level: 1,
+      postId: start.id,
+      level: start.tier,
+      track: start.track,
       turnsAtLevel: 0,
-      salary: level.baseSalary,
+      salary: start.baseSalary,
     },
 
     stats,
@@ -70,7 +73,7 @@ export function createGame(options: NewGameOptions, registry: ContentRegistry): 
       {
         turn: 1,
         messageKey: 'log.career_started',
-        params: { org: level.orgShortKey, department: department.nameKey },
+        params: { org: start.orgShortKey, department: department.nameKey },
         tone: 'neutral',
       },
     ],

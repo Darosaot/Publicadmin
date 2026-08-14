@@ -19,6 +19,7 @@ import {
   COACHING_MORALE_GAIN,
   COACHING_SKILL_GAIN,
   HIRING_MONTHS,
+  LOG_LIMIT,
   ONE_TO_ONE_MORALE_GAIN,
   STAFF_ATTRITION_CHANCE,
   STAFF_ATTRITION_MORALE,
@@ -30,7 +31,7 @@ import {
   STAFF_START_SKILL,
   TRAINING_SKILL_GAIN,
 } from './constants';
-import { getCareerLevel, type ContentRegistry } from './registry';
+import { getPost, type ContentRegistry } from './registry';
 import { nextChance, nextInt, pick } from './rng';
 import type {
   Allocation,
@@ -47,7 +48,7 @@ function clamp(value: number): number {
 }
 
 export function headcountFor(state: GameState, registry: ContentRegistry): number {
-  return getCareerLevel(registry, state.player.level).headcount ?? 0;
+  return getPost(registry, state.player.postId).headcount ?? 0;
 }
 
 export function hasTeam(state: GameState, registry: ContentRegistry): boolean {
@@ -105,12 +106,33 @@ export function createStaff(
  * Deliberately one short of the establishment: every new post comes with a vacancy someone has
  * been meaning to fill, which puts recruitment in front of the player immediately.
  */
-export function setupTeamForLevel(state: GameState, registry: ContentRegistry): GameState {
-  const level = getCareerLevel(registry, state.player.level);
-  const headcount = level.headcount ?? 0;
+export function setupTeamForPost(state: GameState, registry: ContentRegistry): GameState {
+  const post = getPost(registry, state.player.postId);
+  const headcount = post.headcount ?? 0;
 
   if (headcount === 0) {
-    return { ...state, staff: [], hiring: undefined, budget: undefined };
+    // The expert track has no unit, so a move onto it hands one over. Losing eight people you
+    // spent years building is not something to do silently in a state update — the log is the
+    // only place the player will ever be told, so it says so.
+    const handover =
+      state.staff.length > 0
+        ? [
+            {
+              turn: state.turn,
+              messageKey: 'log.unit_handed_over',
+              params: { count: String(state.staff.length) },
+              tone: 'bad' as const,
+            },
+          ]
+        : [];
+
+    return {
+      ...state,
+      staff: [],
+      hiring: undefined,
+      budget: undefined,
+      log: [...state.log, ...handover].slice(-LOG_LIMIT),
+    };
   }
 
   // A plausible shape: one senior, then officers, with juniors making up the rest.
@@ -135,7 +157,7 @@ export function setupTeamForLevel(state: GameState, registry: ContentRegistry): 
   }
 
   const budget: Budget = {
-    monthly: level.monthlyBudget ?? 0,
+    monthly: post.monthlyBudget ?? 0,
     balance: 0,
     yearStartTurn: next.turn,
     spentThisMonth: 0,

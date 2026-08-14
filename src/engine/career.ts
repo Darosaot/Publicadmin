@@ -19,10 +19,10 @@ import {
   REVIEW_OUTCOMES,
 } from './constants';
 import { adjustStat } from './effects';
-import { getCareerLevel, maxCareerLevel, type ContentRegistry } from './registry';
+import { edgeBetween, getPost, maxTier, postsFrom, type ContentRegistry } from './registry';
 import { nextChance, nextRange } from './rng';
 import { refillBoard } from './tasks';
-import { setupTeamForLevel } from './team';
+import { setupTeamForPost } from './team';
 import type { GameState, JobOffer, ReviewRating, ReviewReport } from './types';
 
 /** Worst to best, so "drop one band" is a single step down this list. */
@@ -69,11 +69,16 @@ export function runReview(state: GameState): { state: GameState; report: ReviewR
 
 /* ------------------------------------------------------------------ offers */
 
-export function meetsRequirements(state: GameState, registry: ContentRegistry, level: number): boolean {
-  const target = registry.careerLevels.find((l) => l.level === level);
-  if (!target?.promotion) return false;
+/** Whether the player qualifies for one particular move out of their current post. */
+export function meetsRequirements(
+  state: GameState,
+  registry: ContentRegistry,
+  toPostId: string,
+): boolean {
+  const edge = edgeBetween(registry, state.player.postId, toPostId);
+  if (!edge) return false;
 
-  const req = target.promotion;
+  const req = edge.requires;
   if (state.stats.reputation < req.minReputation) return false;
   if (state.stats.performance < req.minPerformance) return false;
   if (req.minPoliticalCapital !== undefined && state.stats.politicalCapital < req.minPoliticalCapital) {
@@ -83,10 +88,14 @@ export function meetsRequirements(state: GameState, registry: ContentRegistry, l
   return true;
 }
 
-export function offerChance(state: GameState, registry: ContentRegistry, level: number): number {
-  const target = registry.careerLevels.find((l) => l.level === level);
-  if (!target?.promotion) return 0;
-  const surplus = state.stats.reputation - target.promotion.minReputation;
+export function offerChance(
+  state: GameState,
+  registry: ContentRegistry,
+  toPostId: string,
+): number {
+  const edge = edgeBetween(registry, state.player.postId, toPostId);
+  if (!edge) return 0;
+  const surplus = state.stats.reputation - edge.requires.minReputation;
   return Math.min(
     OFFER_MAX_CHANCE,
     OFFER_BASE_CHANCE + Math.max(0, surplus) * OFFER_CHANCE_PER_REPUTATION_POINT,
@@ -94,35 +103,48 @@ export function offerChance(state: GameState, registry: ContentRegistry, level: 
 }
 
 /**
- * Rolls for a new offer to the next level up. Returns the new state and any offer created.
+ * Rolls for a new offer.
+ *
+ * The ladder is a graph, so there is rarely one next post: an eligible Senior Officer might be
+ * offered a unit to run, a specialist post with no unit at all, a seat in a private office or a
+ * move into the audit authority. Each edge is rolled separately and each can produce a live offer,
+ * so a fork arrives as a genuine choice on the career screen rather than as a single yes/no.
+ *
+ * Only one new offer is created per cycle, though. Being handed four posts in one month would read
+ * as a lottery rather than a career.
  */
 export function checkForOffer(
   state: GameState,
   registry: ContentRegistry,
 ): { state: GameState; offer?: JobOffer } {
-  const nextLevel = state.player.level + 1;
+  let next: GameState = state;
 
-  if (nextLevel > maxCareerLevel(registry)) return { state };
-  if (state.offers.some((o) => o.toLevel === nextLevel)) return { state };
-  if (!meetsRequirements(state, registry, nextLevel)) return { state };
+  for (const candidate of postsFrom(registry, state.player.postId)) {
+    if (next.offers.some((o) => o.toPost === candidate.id)) continue;
+    if (!meetsRequirements(next, registry, candidate.id)) continue;
 
-  const roll = nextChance(state.rngState, offerChance(state, registry, nextLevel));
-  let next: GameState = { ...state, rngState: roll.rngState };
-  if (!roll.value) return { state: next };
+    const roll = nextChance(next.rngState, offerChance(next, registry, candidate.id));
+    next = { ...next, rngState: roll.rngState };
+    if (!roll.value) continue;
 
-  const target = getCareerLevel(registry, nextLevel);
-  const jitter = nextRange(next.rngState, -OFFER_SALARY_VARIANCE, OFFER_SALARY_VARIANCE);
-  next = { ...next, rngState: jitter.rngState };
+    const jitter = nextRange(next.rngState, -OFFER_SALARY_VARIANCE, OFFER_SALARY_VARIANCE);
+    next = { ...next, rngState: jitter.rngState };
 
-  const offer: JobOffer = {
-    id: `offer-${nextLevel}-${next.turn}`,
-    toLevel: nextLevel,
-    salary: Math.round(target.baseSalary * (1 + jitter.value)),
-    createdTurn: next.turn,
-    expiresTurn: next.turn + OFFER_EXPIRY_TURNS,
-  };
+    const edge = edgeBetween(registry, next.player.postId, candidate.id);
+    const offer: JobOffer = {
+      id: `offer-${candidate.id}-${next.turn}`,
+      toPost: candidate.id,
+      toTier: candidate.tier,
+      ...(edge?.sideways ? { sideways: true } : {}),
+      salary: Math.round(candidate.baseSalary * (1 + jitter.value)),
+      createdTurn: next.turn,
+      expiresTurn: next.turn + OFFER_EXPIRY_TURNS,
+    };
 
-  return { state: { ...next, offers: [...next.offers, offer] }, offer };
+    return { state: { ...next, offers: [...next.offers, offer] }, offer };
+  }
+
+  return { state: next };
 }
 
 export function expireOffers(state: GameState): GameState {
@@ -142,13 +164,15 @@ export function acceptOffer(
   const offer = state.offers.find((o) => o.id === offerId);
   if (!offer) return state;
 
-  const target = getCareerLevel(registry, offer.toLevel);
+  const target = getPost(registry, offer.toPost);
 
   const promoted: GameState = {
     ...state,
     player: {
       ...state.player,
-      level: offer.toLevel,
+      postId: target.id,
+      level: target.tier,
+      track: target.track,
       turnsAtLevel: 0,
       salary: offer.salary,
     },
@@ -165,8 +189,8 @@ export function acceptOffer(
     ],
   };
 
-  // The unit you inherit comes with the post — or vanishes, if the new post has none.
-  return refillBoard(setupTeamForLevel(promoted, registry), registry);
+  // The unit you inherit comes with the post — or is handed over, if the new post has none.
+  return refillBoard(setupTeamForPost(promoted, registry), registry);
 }
 
 export function declineOffer(state: GameState, offerId: string): GameState {
@@ -182,7 +206,7 @@ export function declineOffer(state: GameState, offerId: string): GameState {
  */
 export function checkMinisterTrack(state: GameState, registry: ContentRegistry): GameState {
   if (state.flags.minister_track) return state;
-  if (state.player.level < maxCareerLevel(registry)) return state;
+  if (state.player.level < maxTier(registry)) return state;
   if (state.stats.reputation < MINISTER_MIN_REPUTATION) return state;
   if (state.stats.politicalCapital < MINISTER_MIN_POLITICAL_CAPITAL) return state;
 

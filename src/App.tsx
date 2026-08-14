@@ -7,6 +7,7 @@ import { CareerScreen } from './ui/screens/CareerScreen';
 import { DashboardScreen } from './ui/screens/DashboardScreen';
 import { EndingScreen } from './ui/screens/EndingScreen';
 import { NewGameScreen } from './ui/screens/NewGameScreen';
+import { PeopleScreen } from './ui/screens/PeopleScreen';
 import { TeamScreen } from './ui/screens/TeamScreen';
 import { TitleScreen } from './ui/screens/TitleScreen';
 
@@ -37,6 +38,8 @@ function Router() {
         <CareerScreen game={game} />
       ) : state.view === 'team' ? (
         <TeamScreen game={game} />
+      ) : state.view === 'people' ? (
+        <PeopleScreen game={game} />
       ) : (
         <DashboardScreen game={game} />
       )}

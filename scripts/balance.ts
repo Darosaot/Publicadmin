@@ -8,7 +8,7 @@
  * nothing should dominate.
  */
 
-import { DEPARTMENT_IDS } from '../src/engine/types';
+import { DEPARTMENT_IDS, TRACK_IDS } from '../src/engine/types';
 import { playMany, summarise, type RunResult } from '../tests/engine/autoplay';
 
 const seeds = Array.from({ length: 40 }, (_, i) => i * 7919 + 13);
@@ -32,7 +32,8 @@ for (const level of [1, 2, 3, 4, 5]) {
 }
 
 console.log('\nAverages');
-console.log(`  months survived        ${round(summary.meanTurns)}`);
+console.log(`  cycles played          ${round(summary.meanTurns)}`);
+console.log(`  years of service       ${round(summary.meanYears)}`);
 console.log(`  level                  ${round(summary.meanLevel)}`);
 console.log(`  reputation             ${round(summary.meanReputation)}`);
 console.log(`  political capital      ${round(summary.meanPoliticalCapital)}`);
@@ -48,7 +49,20 @@ for (const department of DEPARTMENT_IDS) {
   console.log(
     `  ${department.padEnd(12)} level ${round(sub.meanLevel)}  ` +
       `rep ${round(sub.meanReputation)}  stress ${round(sub.meanStress)}  ` +
-      `integrity ${round(sub.meanIntegrity)}  months ${round(sub.meanTurns)}`,
+      `integrity ${round(sub.meanIntegrity)}  years ${round(sub.meanYears)}`,
+  );
+}
+
+console.log('\nBy track, played deliberately');
+for (const track of TRACK_IDS) {
+  const runs = playMany(seeds.slice(0, 16), DEPARTMENT_IDS, 'balanced', track);
+  const sub = summarise(runs);
+  const onTrack = runs.filter((r) => r.track === track).length;
+  console.log(
+    `  ${track.padEnd(11)} level ${round(sub.meanLevel)}  rep ${round(sub.meanReputation)}  ` +
+      `pc ${round(sub.meanPoliticalCapital)}  integrity ${round(sub.meanIntegrity)}  ` +
+      `stress ${round(sub.meanStress)}  ` +
+      `stayed on it ${((100 * onTrack) / runs.length).toFixed(0)}%`,
   );
 }
 
@@ -64,7 +78,7 @@ for (const strategy of ['ruthless', 'reckless'] as const) {
     .join(', ');
   console.log(
     `  ${strategy.padEnd(9)} integrity ${round(sub.meanIntegrity)}  ` +
-      `stress ${round(sub.meanStress)}  months ${round(sub.meanTurns)}`,
+      `stress ${round(sub.meanStress)}  years ${round(sub.meanYears)}`,
   );
   console.log(`            ${endings}`);
 }

@@ -5,10 +5,10 @@
  * build rather than crashing a player's third year in office.
  */
 
-import { ENDING_IDS, type DepartmentId } from '../engine/types';
+import { ENDING_IDS, TRACK_IDS, type DepartmentId } from '../engine/types';
 import { DEPARTMENT_IDS } from '../engine/types';
 import { EN_STRINGS } from './authoring';
-import { careerLevels } from './careers';
+import { posts } from './careers';
 import { departments } from './departments';
 import { endingCopy } from './endings';
 import { allEvents, eventRegistry } from './events';
@@ -16,6 +16,7 @@ import { allTasks, taskRegistry } from './tasks';
 
 export function validateContent(): string[] {
   const problems: string[] = [];
+  const tiers = [...new Set(posts.map((p) => p.tier))].sort((a, b) => a - b);
   const has = (key: string) => EN_STRINGS[key] !== undefined;
 
   const requireString = (key: string, where: string) => {
@@ -98,6 +99,60 @@ export function validateContent(): string[] {
     problems.push(...validateEffects(task.onFail ?? [], `task ${task.id} onFail`));
   }
 
+  /* --------------------------------------------------------------- flags */
+
+  /**
+   * A flag nothing reads is a dropped thread.
+   *
+   * Flags are the game's memory, and writing one is a promise that the decision will matter
+   * later. It is very easy to make that promise while authoring a scene and never keep it — at
+   * one point twenty-five of the twenty-seven flags in the corpus were write-only, which is a
+   * great deal of authored consequence that no player could ever encounter.
+   */
+  const written = new Set<string>();
+  const read = new Set<string>();
+
+  const noteEffects = (effects: readonly { kind: string; flag?: string }[]) => {
+    for (const effect of effects) {
+      if ((effect.kind === 'flag' || effect.kind === 'flagDelta') && effect.flag) {
+        written.add(effect.flag);
+      }
+    }
+  };
+  const noteCondition = (condition: { requiredFlags?: string[]; forbiddenFlags?: string[]; minFlag?: Record<string, number>; maxFlag?: Record<string, number> } | undefined) => {
+    if (!condition) return;
+    for (const flag of condition.requiredFlags ?? []) read.add(flag);
+    for (const flag of condition.forbiddenFlags ?? []) read.add(flag);
+    for (const flag of Object.keys(condition.minFlag ?? {})) read.add(flag);
+    for (const flag of Object.keys(condition.maxFlag ?? {})) read.add(flag);
+  };
+
+  for (const event of allEvents) {
+    noteCondition(event.conditions);
+    for (const choice of event.choices) {
+      noteCondition(choice.conditions);
+      for (const outcome of choice.outcomes) {
+        noteCondition(outcome.conditions);
+        noteEffects(outcome.effects);
+      }
+    }
+  }
+  for (const task of allTasks) {
+    for (const effects of Object.values(task.onComplete ?? {})) noteEffects(effects);
+    noteEffects(task.onFail ?? []);
+  }
+
+  // The engine itself sets and reads this one, so the corpus never will.
+  read.add('minister_track');
+
+  for (const flag of [...written].sort()) {
+    if (!read.has(flag)) {
+      problems.push(
+        `flag "${flag}" is set but nothing ever reads it — either gate something on it or drop it`,
+      );
+    }
+  }
+
   /* --------------------------------------------------------- departments */
 
   for (const id of DEPARTMENT_IDS) {
@@ -117,53 +172,109 @@ export function validateContent(): string[] {
       problems.push(`department ${id}: no random event targets this department`);
     }
 
-    // Tasks are level-banded so the desk changes as you climb. The risk that introduces is
-    // starving a level: capping the clerical work without writing enough senior work to replace
-    // it leaves a Director-General with three templates on repeat.
-    for (const level of careerLevels) {
+    // Tasks are tier-banded so the desk changes as you climb. The risk that introduces is
+    // starving a tier: capping the clerical work without writing enough senior work to replace it
+    // leaves a Director-General with three templates on repeat.
+    //
+    // Checked per tier rather than per post — several posts share a tier, and the hungriest of
+    // them sets the bar.
+    for (const tier of tiers) {
+      const slots = Math.max(...posts.filter((p) => p.tier === tier).map((p) => p.taskSlots));
       const eligible = allTasks.filter(
         (task) =>
           (task.departments === 'any' || task.departments.includes(id)) &&
-          (task.minLevel ?? 1) <= level.level &&
-          (task.maxLevel ?? Infinity) >= level.level,
+          (task.minLevel ?? 1) <= tier &&
+          (task.maxLevel ?? Infinity) >= tier,
       );
-      const needed = level.taskSlots + 2;
+      const needed = slots + 2;
       if (eligible.length < needed) {
         problems.push(
-          `department ${id} at level ${level.level}: only ${eligible.length} eligible task ` +
-            `templates for ${level.taskSlots} slots (want at least ${needed} for variety)`,
+          `department ${id} at tier ${tier}: only ${eligible.length} eligible task ` +
+            `templates for ${slots} slots (want at least ${needed} for variety)`,
         );
       }
       // And the band should actually differ, or the levelling is cosmetic.
       const departmentSpecific = eligible.filter((t) => t.departments !== 'any');
       if (departmentSpecific.length === 0) {
-        problems.push(`department ${id} at level ${level.level}: no department-specific work`);
+        problems.push(`department ${id} at tier ${tier}: no department-specific work`);
       }
     }
   }
 
   /* -------------------------------------------------------------- career */
 
-  const levels = [...careerLevels].sort((a, b) => a.level - b.level);
-  levels.forEach((level, index) => {
-    requireString(level.titleKey, `career level ${level.level}`);
-    requireString(level.orgKey, `career level ${level.level}`);
-    requireString(level.orgShortKey, `career level ${level.level}`);
+  const byId = new Map(posts.map((p) => [p.id, p]));
 
-    if (level.level !== index + 1) {
-      problems.push(`career levels must be contiguous from 1; found ${level.level} at index ${index}`);
+  const seenPostIds = new Set<string>();
+  for (const post of posts) {
+    if (seenPostIds.has(post.id)) problems.push(`duplicate post id: ${post.id}`);
+    seenPostIds.add(post.id);
+
+    requireString(post.titleKey, `post ${post.id}`);
+    requireString(post.orgKey, `post ${post.id}`);
+    requireString(post.orgShortKey, `post ${post.id}`);
+
+    if (post.effortPoints <= 0 || post.taskSlots <= 0) {
+      problems.push(`post ${post.id}: effort points and slots must be positive`);
     }
-    if (index > 0 && !level.promotion) {
-      problems.push(`career level ${level.level}: needs promotion requirements`);
+    if (post.monthsPerTurn <= 0) {
+      problems.push(`post ${post.id}: a cycle has to cover at least one month`);
     }
-    if (level.effortPoints <= 0 || level.taskSlots <= 0) {
-      problems.push(`career level ${level.level}: effort points and slots must be positive`);
+    if (post.tier < 1) problems.push(`post ${post.id}: tier must be 1 or more`);
+
+    for (const edge of post.from) {
+      const source = byId.get(edge.from);
+      if (!source) {
+        problems.push(`post ${post.id}: reachable from "${edge.from}", which does not exist`);
+        continue;
+      }
+      if (source.tier > post.tier) {
+        problems.push(`post ${post.id}: cannot be entered from the more senior ${edge.from}`);
+      }
+      // A move that is not marked sideways is a promotion, and a promotion pays more. Sideways
+      // moves are exempt: stepping off the line track onto the expert one is meant to cost money.
+      if (!edge.sideways && post.baseSalary <= source.baseSalary) {
+        problems.push(
+          `post ${post.id}: promotion from ${edge.from} does not pay more — mark it sideways if that is deliberate`,
+        );
+      }
     }
-    const previous = levels[index - 1];
-    if (previous && level.baseSalary <= previous.baseSalary) {
-      problems.push(`career level ${level.level}: salary should exceed level ${previous.level}`);
+  }
+
+  // Exactly one starting post, and every other post reachable from it. This replaces the old
+  // "levels must be contiguous from 1" rule, which a graph cannot satisfy.
+  const roots = posts.filter((p) => p.from.length === 0);
+  if (roots.length !== 1) {
+    problems.push(`there must be exactly one starting post; found ${roots.length}`);
+  }
+
+  const root = roots[0];
+  if (root) {
+    const reached = new Set([root.id]);
+    let growing = true;
+    while (growing) {
+      growing = false;
+      for (const post of posts) {
+        if (reached.has(post.id)) continue;
+        if (post.from.some((edge) => reached.has(edge.from))) {
+          reached.add(post.id);
+          growing = true;
+        }
+      }
     }
-  });
+    for (const post of posts) {
+      if (!reached.has(post.id)) {
+        problems.push(`post ${post.id}: no career can ever reach it`);
+      }
+    }
+  }
+
+  // Every track needs somewhere to end up, or it is a branch that quietly rejoins the trunk.
+  for (const track of TRACK_IDS) {
+    if (!posts.some((p) => p.track === track && p.tier === Math.max(...tiers))) {
+      problems.push(`track "${track}" has no post at the top tier`);
+    }
+  }
 
   /* ------------------------------------------------------------- endings */
 

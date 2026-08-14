@@ -1,4 +1,5 @@
 import type { GameEvent } from '../../engine/types';
+import { castEvents } from './cast';
 import { commonEvents } from './common';
 import { commonExtraEvents } from './common-extra';
 import { departmentExtraEvents } from './departments-extra';
@@ -11,10 +12,13 @@ import { managementEvents } from './management';
 import { milestoneEvents } from './milestones';
 import { policyEvents } from './policy';
 import { procurementEvents } from './procurement';
+import { reckoningEvents } from './reckonings';
+import { trackEvents } from './tracks';
 import { projectsEvents } from './projects';
 
 export const allEvents: GameEvent[] = [
   ...commonEvents,
+  ...castEvents,
   ...commonExtraEvents,
   ...legalEvents,
   ...projectsEvents,
@@ -27,6 +31,8 @@ export const allEvents: GameEvent[] = [
   ...milestoneEvents,
   ...followupEvents,
   ...followupExtraEvents,
+  ...reckoningEvents,
+  ...trackEvents,
 ];
 
 export const eventRegistry: Record<string, GameEvent> = Object.fromEntries(

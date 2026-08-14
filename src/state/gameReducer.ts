@@ -23,7 +23,7 @@ import {
 } from '../engine/turn';
 import type { Allocation, GameState, Seniority } from '../engine/types';
 
-export type GameView = 'desk' | 'team' | 'career';
+export type GameView = 'desk' | 'team' | 'people' | 'career';
 
 export interface AppState {
   /** Null means the title screen. */

@@ -1122,47 +1122,66 @@ input {
   gap: var(--s-2);
 }
 
-.ladder {
+/* The career tree: tiers stacked, and the posts within a tier laid out side by side. */
+.tree {
   display: flex;
   flex-direction: column;
+  gap: var(--s-5);
+}
+
+.tree__tier-label {
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--c-border);
+  margin-bottom: var(--s-3);
+}
+
+.tree__posts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--s-3);
+  align-items: start;
 }
 
 .rung {
-  display: flex;
-  align-items: center;
-  gap: var(--s-4);
-  padding: var(--s-3) 0;
+  padding: var(--s-3) var(--s-3) var(--s-3) var(--s-4);
   position: relative;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  background: var(--c-surface);
+  min-width: 0;
 }
 
-.rung:not(:last-child)::before {
+/* A stripe in the track's colour, so a branch is recognisable at a glance. */
+.rung::after {
   content: '';
   position: absolute;
-  left: 7px;
-  top: 50%;
-  bottom: -50%;
-  width: 2px;
-  background: var(--c-border);
-}
-
-.rung__marker {
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  border: 2px solid var(--c-border-strong);
-  background: var(--c-surface);
-  flex-shrink: 0;
-  z-index: 1;
-}
-
-.rung--past .rung__marker {
+  inset: 0 auto 0 0;
+  width: 3px;
+  border-radius: var(--r-md) 0 0 var(--r-md);
   background: var(--c-border-strong);
 }
 
-.rung--current .rung__marker {
+.rung--line::after { background: var(--c-brand); }
+.rung--expert::after { background: #6b8f71; }
+.rung--political::after { background: #a8763e; }
+.rung--oversight::after { background: #6b7fa8; }
+
+.rung--current {
   border-color: var(--c-brand);
-  background: var(--c-brand);
-  box-shadow: 0 0 0 4px var(--c-brand-soft);
+  box-shadow: 0 0 0 2px var(--c-brand-soft);
+}
+
+.rung--past,
+.rung--closed {
+  opacity: 0.55;
+}
+
+.rung--missed {
+  border-style: dashed;
+}
+
+.rung__unit {
+  font-size: var(--fs-xs);
 }
 
 .rung__body {
@@ -1172,11 +1191,6 @@ input {
 .rung__title {
   font-size: var(--fs-base);
   font-weight: 700;
-}
-
-.rung--future .rung__title,
-.rung--future .rung__org {
-  color: var(--c-text-faint);
 }
 
 .rung__org {
@@ -1189,8 +1203,13 @@ input {
   font-variant-numeric: tabular-nums;
 }
 
+/* The status sits above the title on its own line: inline it competed for width and left
+   "Head of Department" wrapping across three lines in a four-post tier. */
 .rung__status {
-  white-space: nowrap;
+  display: block;
+  font-size: var(--fs-xs);
+  margin-bottom: var(--s-1);
+  color: var(--c-text-faint);
 }
 
 .rung--current .rung__status {
@@ -1545,4 +1564,84 @@ input {
 .task__foot {
   gap: var(--s-2);
   align-items: center;
+}
+
+
+/* ------------------------------------------------------------------ people */
+
+.people {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: var(--s-3);
+}
+
+.person {
+  padding: var(--s-4);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  background: var(--c-surface);
+}
+
+.person__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-2);
+  margin-bottom: var(--s-1);
+}
+
+.person__name {
+  font-size: var(--fs-base);
+  font-weight: 700;
+}
+
+.person__tone {
+  white-space: nowrap;
+  font-size: var(--fs-xs);
+  color: var(--c-text-muted);
+}
+
+.person--warm .person__tone { color: var(--c-good); }
+.person--cold .person__tone { color: var(--c-bad); }
+
+.person__role {
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+  margin-bottom: var(--s-3);
+}
+
+/* A bar with a centre mark rather than a number: standing runs both ways from neutral, and
+   showing the figure would invite optimising a relationship instead of having one. */
+.person__track {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--c-border);
+  overflow: hidden;
+  margin-bottom: var(--s-3);
+}
+
+.person__fill {
+  height: 100%;
+  background: var(--c-text-faint);
+  transition: width 200ms ease;
+}
+
+.person--warm .person__fill,
+.person--good .person__fill { background: var(--c-good); }
+.person--wary .person__fill,
+.person--cold .person__fill { background: var(--c-bad); }
+
+.person__mid {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--c-surface);
+}
+
+.person__blurb {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
 }

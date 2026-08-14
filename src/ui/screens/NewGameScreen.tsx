@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { careerLevels, departmentList } from '../../content';
+import { departmentList, registry } from '../../content';
+import { startingPost } from '../../engine/registry';
 import type { DepartmentId, StatId } from '../../engine/types';
 import { useT } from '../../i18n';
 import { URL_SEED, useGame } from '../../state/GameProvider';
@@ -11,7 +12,7 @@ export function NewGameScreen({ onBack }: { onBack: () => void }) {
 
   const [name, setName] = useState('');
   const [department, setDepartment] = useState<DepartmentId | null>(null);
-  const startingLevel = careerLevels[0]!;
+  const firstPost = startingPost(registry);
 
   const start = () => {
     if (!department) return;
@@ -31,8 +32,8 @@ export function NewGameScreen({ onBack }: { onBack: () => void }) {
         <h1 className="newgame__heading">{t('newgame.heading')}</h1>
 
         <p className="newgame__post">
-          {t('newgame.starting_at')}: <strong>{t(startingLevel.titleKey)}</strong>,{' '}
-          {t(startingLevel.orgKey)} · {formatSalary(startingLevel.baseSalary)}
+          {t('newgame.starting_at')}: <strong>{t(firstPost.titleKey)}</strong>,{' '}
+          {t(firstPost.orgKey)} · {formatSalary(firstPost.baseSalary)}
         </p>
 
         <label className="field">

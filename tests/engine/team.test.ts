@@ -21,7 +21,7 @@ import {
   resolveAttrition,
   resolveBudget,
   resolveStaffMonth,
-  setupTeamForLevel,
+  setupTeamForPost,
   staffCost,
   staffOutput,
   startHiring,
@@ -48,10 +48,10 @@ function manager(seed = 3, overrides: Partial<GameState> = {}): GameState {
   const base = junior(seed);
   const promoted: GameState = {
     ...base,
-    player: { ...base.player, level: 3 },
+    player: { ...base.player, postId: 'post.test.head', level: 3, track: 'line' },
     ...overrides,
   };
-  return setupTeamForLevel(promoted, registry);
+  return setupTeamForPost(promoted, registry);
 }
 
 function allocate(overrides: Partial<Allocation> = {}): Allocation {
@@ -87,7 +87,7 @@ describe('who has a unit', () => {
 
   it('arrives one short of the establishment, so there is a post to fill', () => {
     const state = manager();
-    const headcount = registry.careerLevels.find((l) => l.level === 3)!.headcount!;
+    const headcount = registry.posts.find((p) => p.id === 'post.test.head')!.headcount!;
     expect(state.staff).toHaveLength(headcount - 1);
   });
 
@@ -97,10 +97,24 @@ describe('who has a unit', () => {
     expect(new Set(state.staff.map((s) => s.id)).size).toBe(state.staff.length);
   });
 
-  it('takes the unit away again if a post has none', () => {
-    const stripped = setupTeamForLevel({ ...manager(), player: { ...manager().player, level: 1 } }, registry);
+  it('hands the unit over when the new post has none, and says so', () => {
+    // Moving onto the expert track costs you the whole unit. Doing that silently would be the
+    // engine deleting years of the player's work without telling them.
+    const before = manager();
+    const stripped = setupTeamForPost(
+      { ...before, player: { ...before.player, postId: 'post.test.specialist', track: 'expert' } },
+      registry,
+    );
+
     expect(stripped.staff).toHaveLength(0);
     expect(stripped.budget).toBeUndefined();
+    expect(stripped.log.at(-1)?.messageKey).toBe('log.unit_handed_over');
+  });
+
+  it('says nothing about a handover when there was no unit to hand over', () => {
+    const start = junior();
+    const stripped = setupTeamForPost(start, registry);
+    expect(stripped.log.some((l) => l.messageKey === 'log.unit_handed_over')).toBe(false);
   });
 });
 

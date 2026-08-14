@@ -58,11 +58,24 @@ export interface Condition {
   maxLevel?: number;
   departments?: DepartmentId[];
   minTurn?: number;
+  /**
+   * Whole years of service elapsed.
+   *
+   * Distinct from `minTurn` and the one to use whenever the prose says how long ago something
+   * was: turns and years stopped being the same thing once a senior cycle covered a quarter.
+   */
+  minYearsElapsed?: number;
+  /** Restricts to particular career tracks. */
+  tracks?: TrackId[];
   minStat?: Partial<PlayerStats>;
   maxStat?: Partial<PlayerStats>;
   minSalary?: number;
   requiredFlags?: string[];
   forbiddenFlags?: string[];
+  /** Numeric flags at or above a value. A flag that has never been set reads as 0. */
+  minFlag?: Record<string, number>;
+  /** Numeric flags at or below a value. */
+  maxFlag?: Record<string, number>;
   /** True: only with a unit under you. False: only before you have one. */
   requiresTeam?: boolean;
   /** Gates on the state of the unit itself. */
@@ -75,6 +88,8 @@ export type Effect =
   | { kind: 'stat'; stat: StatId; delta: number }
   | { kind: 'salary'; delta: number }
   | { kind: 'flag'; flag: string; value?: boolean }
+  /** Moves a numeric flag. Absent counts as 0, so the first delta sets it. */
+  | { kind: 'flagDelta'; flag: string; delta: number }
   | { kind: 'spawnTask'; templateId: string }
   | { kind: 'queueEvent'; eventId: string; delayTurns?: number }
   | { kind: 'endGame'; ending: EndingId }
@@ -212,8 +227,38 @@ export interface PromotionRequirement {
   minTurnsAtLevel: number;
 }
 
-export interface CareerLevel {
-  level: number;
+/**
+ * The four ways a career can go after the second rung.
+ *
+ * `line` is management: more people, more budget, more of the institution. `expert` trades the
+ * unit for the hardest files and the authority that comes with them. `political` is fast, powerful
+ * and has no tenure at all. `oversight` inspects the administrations the other three work inside.
+ */
+export type TrackId = 'line' | 'expert' | 'political' | 'oversight';
+
+export const TRACK_IDS: readonly TrackId[] = ['line', 'expert', 'political', 'oversight'];
+
+/** One way into a post. Entry terms belong to the edge, because the same post can be reached
+ *  from different places on different terms. */
+export interface PostEdge {
+  /** The post you must currently hold. */
+  from: string;
+  requires: PromotionRequirement;
+  /** A move across rather than up: the salary rule does not apply to it. */
+  sideways?: boolean;
+}
+
+export interface Post {
+  id: string;
+  /**
+   * Seniority band, 1–5.
+   *
+   * Several posts share a tier — that is what makes the ladder a tree. Everything that used to
+   * key off "level" still keys off this: effort scaling, credit scaling, and every `minLevel` /
+   * `maxLevel` gate in the corpus.
+   */
+  tier: number;
+  track: TrackId;
   titleKey: string;
   orgKey: string;
   orgShortKey: string;
@@ -221,18 +266,29 @@ export interface CareerLevel {
   effortPoints: number;
   taskSlots: number;
   /**
+   * Calendar months one turn of this post covers.
+   *
+   * A junior desk turns over monthly. A directorate does not: the decisions are the same number
+   * per cycle, but the cycle is a quarter. This is what lets a 120-turn game be a thirty-year
+   * career rather than a ten-year one, without asking the player for three times the clicks.
+   */
+  monthsPerTurn: number;
+  /**
    * How many people report to you, and the money you answer for. Absent below the first
    * management post: until then you are the one being managed.
    */
   headcount?: number;
   monthlyBudget?: number;
-  /** What it takes to be offered *this* level. Absent on level 1. */
-  promotion?: PromotionRequirement;
+  /** Every way into this post. Empty means it is where a career starts. */
+  from: PostEdge[];
 }
 
 export interface JobOffer {
   id: string;
-  toLevel: number;
+  toPost: string;
+  /** The tier of the post offered, so the UI can say whether this is up or across. */
+  toTier: number;
+  sideways?: boolean;
   salary: number;
   createdTurn: number;
   expiresTurn: number;
@@ -340,12 +396,25 @@ export interface GameState {
   rngState: number;
 
   turn: number;
+  /**
+   * Months elapsed since the first day, which is not the same as `turn`.
+   *
+   * A turn is one decision cycle. At a junior desk that is a month; a Director-General does not
+   * re-plan their directorate every four weeks, so the same 120 turns cover a whole working life
+   * instead of a decade. Deadlines stay in turns — a senior file genuinely runs longer.
+   */
+  calendarMonth: number;
   phase: Phase;
 
   player: {
     name: string;
     department: DepartmentId;
+    postId: string;
+    /** Always the current post's tier. Kept on the player so content gating stays a plain
+     *  numeric comparison and does not need the registry. */
     level: number;
+    /** Likewise denormalised from the post, so `Condition.tracks` costs nothing to check. */
+    track: TrackId;
     turnsAtLevel: number;
     salary: number;
   };
@@ -365,7 +434,15 @@ export interface GameState {
   scheduledEvents: { eventId: string; onTurn: number }[];
   firedEvents: string[];
   cooldowns: Record<string, number>;
-  flags: Record<string, boolean>;
+  /**
+   * Named state set by choices, and the game's memory.
+   *
+   * Values may be boolean or numeric. Booleans are the original form — "this happened" — and
+   * numbers are for the things that were always really a quantity and had been flattened to a
+   * bit: how much a person owes you, how warm a relationship is. Both read as truthy/falsy, so
+   * `requiredFlags` and `forbiddenFlags` work the same on either.
+   */
+  flags: Record<string, boolean | number>;
 
   offers: JobOffer[];
 

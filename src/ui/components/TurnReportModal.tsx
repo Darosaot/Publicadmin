@@ -1,5 +1,5 @@
 import { registry } from '../../content';
-import { getCareerLevel } from '../../engine/registry';
+import { getPost } from '../../engine/registry';
 import { STAT_IDS, type GameState, type StatId } from '../../engine/types';
 import { useT } from '../../i18n';
 import { useGame } from '../../state/GameProvider';
@@ -131,7 +131,7 @@ export function TurnReportModal({ game }: { game: GameState }) {
 
       {report.newOffers.map((offer) => (
         <p key={offer.id} className="report__offer">
-          {t('report.new_offer', { org: getCareerLevel(registry, offer.toLevel).orgShortKey })}
+          {t('report.new_offer', { org: getPost(registry, offer.toPost).orgShortKey })}
         </p>
       ))}
     </Modal>

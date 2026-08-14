@@ -1,6 +1,7 @@
 import { endingBodyKey, endingCopy, registry } from '../../content';
+import { yearsElapsed } from '../../engine/calendar';
 import { isPositiveEnding } from '../../engine/endings';
-import { getCareerLevel } from '../../engine/registry';
+import { getPost } from '../../engine/registry';
 import { STAT_IDS, type GameState } from '../../engine/types';
 import { useT } from '../../i18n';
 import { useGame } from '../../state/GameProvider';
@@ -14,7 +15,7 @@ export function EndingScreen({ game }: { game: GameState }) {
   if (!ending) return null;
 
   const copy = endingCopy[ending];
-  const level = getCareerLevel(registry, game.player.level);
+  const post = getPost(registry, game.player.postId);
   const positive = isPositiveEnding(ending);
 
   return (
@@ -42,9 +43,9 @@ export function EndingScreen({ game }: { game: GameState }) {
           </dl>
 
           <p className="ending__summary">
-            {t('ending.final_post')}: <strong>{t(level.titleKey)}</strong>, {t(level.orgKey)}
+            {t('ending.final_post')}: <strong>{t(post.titleKey)}</strong>, {t(post.orgKey)}
             <br />
-            {t('ending.months', { turns: game.turn })}
+            {t('ending.months', { years: yearsElapsed(game) })}
           </p>
         </section>
 

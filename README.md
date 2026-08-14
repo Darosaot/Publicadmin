@@ -15,8 +15,9 @@ being brilliant, by being well-connected, or by cutting corners — and the game
 
 1. **Pick a department.** Legal, Projects, Finance, Procurement or Policy. Each has its own work,
    its own kinds of trouble, and its own signature crisis waiting for you somewhere down the line.
-2. **Each turn is one month.** Tasks arrive on your desk with deadlines, difficulty and
-   consequences. You have a limited pool of effort points to spread across them.
+2. **Each turn is one decision cycle** — a month at a junior desk, half a year once you run a
+   directorate. Tasks arrive with deadlines, difficulty and consequences, and you have a limited
+   pool of effort points to spread across them.
 3. **Choose where the effort goes.** Spread thin and everything is mediocre; go deep on one file
    and something else misses its deadline. Leaving slack lets you recover from stress; working
    overtime buys points you pay for later.

@@ -46,7 +46,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'Northbridge',
     body: 'A hundred and forty thousand people instead of eighteen thousand. The building has a lift, the department has a structure chart, and on your second day someone asks your opinion in a meeting because of the post you now hold rather than because they know you.',
-    conditions: { minLevel: 2, maxLevel: 2 },
+    conditions: { minLevel: 2, maxLevel: 2, tracks: ['line'] },
     choices: [
       {
         id: 'listen',
@@ -87,7 +87,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'The Region',
     body: 'Regional government. Your unit has eleven people in it and you are responsible for what all eleven of them do, which is a different job from the one you have been good at. Your first decision is how to spend your own week.',
-    conditions: { minLevel: 3, maxLevel: 3 },
+    conditions: { minLevel: 3, maxLevel: 3, tracks: ['line'] },
     choices: [
       {
         id: 'do_the_work',
@@ -126,7 +126,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'The Agency',
     body: 'National level. The decisions have a nought on the end that was not there before, and the distance between you and the person affected by them is now four organisations and a data table. Somebody asks you to sign something on your third day that would have taken you a fortnight to check in Alderford.',
-    conditions: { minLevel: 4, maxLevel: 4 },
+    conditions: { minLevel: 4, maxLevel: 4, tracks: ['line'] },
     choices: [
       {
         id: 'check',
@@ -164,7 +164,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'The Ministry',
     body: 'Director-General. There is a car, which you did not ask for, and a private office, which you did not know was a thing. On the first morning the outgoing DG tells you the only thing worth knowing: "Everything that reaches this desk has already been decided by someone. Your job is to find out by whom, and whether they were entitled to."',
-    conditions: { minLevel: 5, maxLevel: 5 },
+    conditions: { minLevel: 5, maxLevel: 5, tracks: ['line'] },
     choices: [
       {
         id: 'trace',
@@ -202,7 +202,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'You could stay here',
     body: 'It occurs to you, in an unremarkable week, that you are good at this job and that you could do it until you retire. The work is real, the hours are survivable, and nobody who matters to you would think less of you for it.',
-    conditions: { minTurn: 30, maxLevel: 2 },
+    conditions: { minYearsElapsed: 6, maxLevel: 2 },
     choices: [
       {
         id: 'stay',
@@ -230,7 +230,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'The reason',
     body: 'A new joiner, three weeks in, asks why you did this rather than the private sector, where you would have earned considerably more. She is not being rude; she genuinely wants to know, and you find you have to think about it.',
-    conditions: { minTurn: 45 },
+    conditions: { minYearsElapsed: 10 },
     choices: [
       {
         id: 'public_good',
@@ -263,7 +263,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'Someone from Alderford',
     body: 'At a conference, a woman you have not seen in twenty years — she sat opposite you in your first office — tells you that the thing you set up back then is still running, essentially unchanged, and still working.',
-    conditions: { minTurn: 66 },
+    conditions: { minYearsElapsed: 20 },
     choices: [
       {
         id: 'proud',
@@ -290,7 +290,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'The version of you that exists in the files',
     body: 'You are asked to give a talk to a group of new entrants on ethics in public administration. Preparing it, you go back through your own decisions, and there are several you would prefer the audience not to hear about.',
-    conditions: { maxStat: { integrity: 30 }, minTurn: 24 },
+    conditions: { maxStat: { integrity: 30 }, minYearsElapsed: 4 },
     choices: [
       {
         id: 'honest_talk',

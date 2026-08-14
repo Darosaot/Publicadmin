@@ -644,7 +644,7 @@ export const leadershipEvents = [
     title: 'A letter marked private',
     body: 'You have been proposed for a state honour, for services to public administration. The letter asks, in careful language, whether you would accept if it were offered.',
     weight: 9,
-    conditions: { ...senior, minStat: { reputation: 65 }, minTurn: 60 },
+    conditions: { ...senior, minStat: { reputation: 65 }, minYearsElapsed: 18 },
     choices: [
       {
         id: 'accept',

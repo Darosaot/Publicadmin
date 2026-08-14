@@ -25,7 +25,7 @@ import {
 import { isChoiceAvailable } from '../../src/engine/events';
 import { createGame } from '../../src/engine/newGame';
 import { nextInt, seedToState } from '../../src/engine/rng';
-import { getCareerLevel } from '../../src/engine/registry';
+import { getPost, postsFrom } from '../../src/engine/registry';
 import { averageMorale, headcountFor, staffCost, staffOutput, startHiring } from '../../src/engine/team';
 import {
   acceptOffer,
@@ -42,6 +42,7 @@ import type {
   DepartmentId,
   EndingId,
   GameState,
+  TrackId,
 } from '../../src/engine/types';
 
 export interface RunResult {
@@ -49,7 +50,12 @@ export interface RunResult {
   finalState: GameState;
   seed: number;
   department: DepartmentId;
+  /** Which branch of the tree the career ended on. */
+  track: TrackId;
+  postId: string;
   turns: number;
+  /** Calendar months the career actually covered, which is not the turn count. */
+  months: number;
   level: number;
   ending?: EndingId;
   stats: GameState['stats'];
@@ -146,11 +152,21 @@ function planAllocation(game: GameState, strategy: Strategy): Allocation {
     budget -= rest;
   }
 
-  // Build allies when the next post will ask for them — and at the top of the ladder, where the
+  // Build allies for the post you are actually aiming at — and at the top of the tree, where the
   // only thing left to climb is the Minister threshold.
-  const nextLevel = registry.careerLevels.find((l) => l.level === game.player.level + 1);
-  const needsCapital = nextLevel
-    ? (nextLevel.promotion?.minPoliticalCapital ?? 0)
+  //
+  // This has to match how the bot picks offers, or it does not work at all. Taking the *cheapest*
+  // requirement across the fork looked reasonable and was a bug: from Head of Unit two of the four
+  // onward posts want no political capital, so the minimum was zero, so the bot never networked,
+  // so it never reached the line-track posts that want forty. Careers piled up at tier 3 with a
+  // political capital of thirteen.
+  const onward = postsFrom(registry, game.player.postId);
+  const target =
+    onward.length === 0
+      ? undefined
+      : onward.reduce((best, post) => (post.baseSalary > best.baseSalary ? post : best));
+  const needsCapital = target
+    ? (target.from.find((e) => e.from === game.player.postId)?.requires.minPoliticalCapital ?? 0)
     : MINISTER_MIN_POLITICAL_CAPITAL;
 
   if (budget > 2 && game.stats.politicalCapital < needsCapital) {
@@ -222,8 +238,16 @@ export function playCareer(
   department: DepartmentId,
   strategy: Strategy = 'balanced',
   maxTurns = 200,
-  /** Stop as soon as this level is reached, rather than playing the career out. */
+  /** Stop as soon as this tier is reached, rather than playing the career out. */
   stopAtLevel?: number,
+  /**
+   * Which branch to take when the tree forks.
+   *
+   * Left undefined the bot climbs by money, which is what an ambitious player does by default and
+   * which keeps the headline balance figure comparable with the old single ladder. Set it to
+   * measure one branch on its own — every track has to be survivable, and none may be a walkover.
+   */
+  preferredTrack?: TrackId,
 ): RunResult {
   let game = createGame({ name: 'Bot', department, seed }, registry);
   // A second stream so the bot's decisions do not consume the game's randomness.
@@ -239,10 +263,28 @@ export function playCareer(
 
     switch (game.phase) {
       case 'allocation': {
-        // Take any post on offer: the bot is ambitious.
-        const offer = game.offers[0];
-        if (offer) {
-          game = acceptOffer(game, registry, offer.id);
+        // Take a post when one is offered: the bot is ambitious. With a graph there can be
+        // several live at once, so it picks — by track if one was asked for, otherwise by money.
+        // Only one offer is created per cycle, so preferring a track among simultaneous offers
+        // does nothing — the bot has to actually turn down the ones it does not want. Without a
+        // preference it climbs by money, which is what an ambitious player does.
+        //
+        // The tree forks at tier 3, so the expert and political branches cannot be joined from
+        // Alderford at all. A bot that refuses everything off its track therefore has to be
+        // willing to travel: when nothing on the preferred track is reachable from here, it takes
+        // the best offer going, which is also what a real player has to do.
+        const reachableOnTrack =
+          preferredTrack !== undefined &&
+          postsFrom(registry, game.player.postId).some((p) => p.track === preferredTrack);
+
+        const offers =
+          preferredTrack && reachableOnTrack
+            ? game.offers.filter((o) => getPost(registry, o.toPost).track === preferredTrack)
+            : [...game.offers];
+
+        if (offers.length > 0) {
+          const chosen = offers.reduce((best, o) => (o.salary > best.salary ? o : best));
+          game = acceptOffer(game, registry, chosen.id);
           promotions += 1;
           break;
         }
@@ -299,7 +341,10 @@ export function playCareer(
     finalState: game,
     seed,
     department,
+    track: game.player.track,
+    postId: game.player.postId,
     turns: game.turn,
+    months: game.calendarMonth,
     level: game.player.level,
     ending: game.ending,
     stats: game.stats,
@@ -314,11 +359,12 @@ export function playMany(
   seeds: number[],
   departments: readonly DepartmentId[],
   strategy: Strategy = 'balanced',
+  preferredTrack?: TrackId,
 ): RunResult[] {
   const results: RunResult[] = [];
   for (const department of departments) {
     for (const seed of seeds) {
-      results.push(playCareer(seed, department, strategy));
+      results.push(playCareer(seed, department, strategy, 200, undefined, preferredTrack));
     }
   }
   return results;
@@ -342,6 +388,7 @@ export function summarise(results: RunResult[]) {
     byEnding,
     byLevel,
     meanTurns: mean((r) => r.turns),
+    meanYears: mean((r) => r.months) / 12,
     meanLevel: mean((r) => r.level),
     meanReputation: mean((r) => r.stats.reputation),
     meanStress: mean((r) => r.stats.stress),
@@ -356,6 +403,6 @@ export function summarise(results: RunResult[]) {
   };
 }
 
-export function getCareerTitle(level: number): string {
-  return getCareerLevel(registry, level).titleKey;
+export function getPostTitle(postId: string): string {
+  return getPost(registry, postId).titleKey;
 }

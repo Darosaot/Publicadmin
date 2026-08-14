@@ -104,9 +104,12 @@ The same shape gates events and individual choices:
 {
   minLevel?: number;              maxLevel?: number;
   departments?: DepartmentId[];   minTurn?: number;
+  minYearsElapsed?: number;        tracks?: TrackId[];
   minStat?: { reputation?: 40, politicalCapital?: 25, … };
   maxStat?: { integrity?: 30, … };
   requiredFlags?: string[];       forbiddenFlags?: string[];
+  minFlag?: Record<string, number>;
+  maxFlag?: Record<string, number>;
   requiresTeam?: boolean;         minStaffCount?: number;
   minTeamMorale?: number;         maxTeamMorale?: number;
 }
@@ -114,6 +117,12 @@ The same shape gates events and individual choices:
 
 A choice whose conditions fail is **rendered but disabled**, with a generated hint explaining what
 you're missing. That's intentional — the player should see the option they can't afford.
+
+**`minTurn` counts decision cycles; `minYearsElapsed` counts calendar years, and they stopped
+being the same number once a senior cycle covered half a year.** Use `minTurn` when you mean "not
+in the first few turns" and `minYearsElapsed` whenever the prose says how long ago something
+happened. An event whose body opens "a case you handled two years ago" needs
+`minYearsElapsed: 2`, or it will fire in the player's first year.
 
 ## Effects
 
@@ -125,6 +134,7 @@ is almost always a flag plus a follow-up event.
 | Stat change | `{ kind: 'stat', stat, delta }` | Clamped to 0–100 automatically |
 | Salary change | `{ kind: 'salary', delta }` | In euros per month |
 | Set a flag | `{ kind: 'flag', flag, value? }` | `value` defaults to `true` |
+| Move a numeric flag | `{ kind: 'flagDelta', flag, delta }` | Unset counts as 0, so the first delta sets it |
 | Add a task | `{ kind: 'spawnTask', templateId }` | Lands on the board immediately |
 | Schedule an event | `{ kind: 'queueEvent', eventId, delayTurns? }` | The consequence mechanism |
 | End the game | `{ kind: 'endGame', ending }` | Short-circuits everything else |
@@ -192,6 +202,88 @@ departments drift more than 1.2 levels apart; `npm run balance` prints the real 
 
 Only names and numbers are interpolated (`{name}`, `{amount}`), so no sentence depends on English
 grammar for its structure.
+
+## Writing for a track
+
+The career is a graph of **posts** grouped into **tiers**, and a tier is what `minLevel` and
+`maxLevel` have always meant — so every existing gate still works untouched. What is new is
+`tracks`, for content that only makes sense on one branch:
+
+```ts
+conditions: { tracks: ['oversight'], minLevel: 3 }
+```
+
+Use it when the *scene* would not happen elsewhere: an inspection, a reshuffle rumour, a question
+put to you because nobody reports to you. Do not use it to make a track easier or harder — that is
+a job for the post's numbers in `careers.ts`, where it can be measured.
+
+Two things to keep in mind:
+
+- **A post with no unit is not a lesser post.** The expert track has no staff and no budget, so
+  management events (`requiresTeam: true`) simply never fire there. It needs its own material or
+  it is the same game with fewer options.
+- **`npm run balance` reports per track**, and `tests/engine/autoplay.test.ts` fails if the best
+  and worst drift more than 1.2 mean levels apart. Adding a pile of content to one branch is
+  exactly how that gap opens.
+
+## Writing for the cast
+
+Eight people in `src/content/cast.ts` recur across a career. Each exports helpers that turn into
+ordinary effects and conditions, so an event names them in the prose and gates on the relationship:
+
+```ts
+import { vasquez } from '../cast';
+
+defineEvent('evt.cast.vasquez_panel', {
+  conditions: { ...vasquez.known, minLevel: 4, minYearsElapsed: 12 },
+  choices: [
+    {
+      id: 'lean',
+      label: 'Remind her, gently, of the early years',
+      conditions: vasquez.warm(20),        // → { requiredFlags, minFlag }
+      text: 'You mention Alderford, and the supervisor you both had…',
+      effects: [vasquez.standing(-14)],    // → { kind: 'flagDelta' }
+    },
+  ],
+});
+```
+
+The helpers are `standing(n)`, `meet(n)`, `known`, `unknown`, `warm(n)` and `cold(n)`.
+
+Four rules:
+
+- **Names go in the prose, literally.** `EventModal` renders the body with no params, so there is
+  no interpolation — and there does not need to be, since a cast member's name is fixed at
+  authoring time. Write "Elena Vásquez" into the sentence.
+- **Gate introductions `unknown` and everything else `known`**, or a career will be introduced to a
+  twenty-year colleague in its final year.
+- **Give the reappearances `minYearsElapsed`.** The point of a cast is time passing.
+- **Use conditional outcomes, not separate events, for how they take it.** The same scene resolving
+  differently against `warm` and `cold` is the whole mechanism; a `warm`-gated *event* would just
+  hide content from most players.
+
+## Flags, and keeping the promise
+
+Setting a flag is a promise that the decision will matter later. It is very easy to make that
+promise while writing a scene and never keep it — at one point **twenty-five of the twenty-seven
+flags in the corpus were write-only**, which is a great deal of consequence no player could reach.
+
+Validation now fails on a flag that is set but never read, so the payoff has to be written in the
+same commit as the promise. The payoff usually belongs in `events/reckonings.ts`, where everything
+is gated on a flag and nothing can fire unless it was earned.
+
+Three things make a reckoning land:
+
+- **Give it years.** Add `minYearsElapsed`. A consequence that arrives the following month is a
+  puzzle; one that arrives a decade later is a memory.
+- **Make it a decision, not a punishment.** The interesting part is being asked again, with more
+  information and less room, about something you have not thought about since.
+- **Use conditional outcomes for the second flag.** A choice gated on one flag can carry an
+  outcome gated on another, which is how "you did this once before" gets written. Remember that
+  every choice still needs one unconditional outcome.
+
+Numeric flags exist for the things that are really quantities — standing with a person, how many
+times you have taken the shortcut. Use `flagDelta` to move one and `minFlag` to gate on it.
 
 ## Adding a follow-up
 
