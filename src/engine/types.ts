@@ -63,6 +63,12 @@ export interface Condition {
   minSalary?: number;
   requiredFlags?: string[];
   forbiddenFlags?: string[];
+  /** True: only with a unit under you. False: only before you have one. */
+  requiresTeam?: boolean;
+  /** Gates on the state of the unit itself. */
+  minTeamMorale?: number;
+  maxTeamMorale?: number;
+  minStaffCount?: number;
 }
 
 export type Effect =
@@ -71,7 +77,15 @@ export type Effect =
   | { kind: 'flag'; flag: string; value?: boolean }
   | { kind: 'spawnTask'; templateId: string }
   | { kind: 'queueEvent'; eventId: string; delayTurns?: number }
-  | { kind: 'endGame'; ending: EndingId };
+  | { kind: 'endGame'; ending: EndingId }
+  /* ---- management, no-ops for a player who has no unit yet ---- */
+  | { kind: 'teamMorale'; delta: number }
+  | { kind: 'teamSkill'; delta: number }
+  | { kind: 'budget'; delta: number }
+  /** Changes the standing monthly allocation, not a one-off. */
+  | { kind: 'budgetMonthly'; delta: number }
+  | { kind: 'loseStaff' }
+  | { kind: 'gainStaff'; seniority: Seniority };
 
 /* ------------------------------------------------------------------ tasks */
 
@@ -102,6 +116,55 @@ export interface ActiveTask {
   /** Absolute turn number by which the task must be finished. */
   deadlineTurn: number;
   spawnedTurn: number;
+  /** Who is carrying the file this month, if you handed it to someone. */
+  assignedTo?: string;
+}
+
+/* ------------------------------------------------------------------- staff */
+
+export type Seniority = 'junior' | 'officer' | 'senior';
+
+export const SENIORITIES: readonly Seniority[] = ['junior', 'officer', 'senior'];
+
+/**
+ * A person in your unit.
+ *
+ * Names are literal strings rather than translation keys: they are proper nouns, generated at
+ * hire time from a pool, and translating them would be wrong in any language.
+ */
+export interface StaffMember {
+  id: string;
+  name: string;
+  seniority: Seniority;
+  /** How good they are at the work, 0–100. Grows with coaching and experience. */
+  skill: number;
+  /** How willing they are to do it, 0–100. Decays without attention; drives attrition. */
+  morale: number;
+  /** Monthly cost to the unit budget. */
+  salary: number;
+  monthsInPost: number;
+}
+
+/** A recruitment in progress. Posts take months to fill, as they do. */
+export interface Hiring {
+  seniority: Seniority;
+  monthsRemaining: number;
+}
+
+/**
+ * The unit's money.
+ *
+ * `balance` accumulates across the year and is judged annually. Overspending is the obvious
+ * failure; a large underspend is also punished, because a budget you did not need is a budget
+ * you will not be given again.
+ */
+export interface Budget {
+  monthly: number;
+  balance: number;
+  /** Turn on which the current budget year began. */
+  yearStartTurn: number;
+  /** Discretionary commitments made this month, cleared at resolution. */
+  spentThisMonth: number;
 }
 
 /* ----------------------------------------------------------------- events */
@@ -157,6 +220,12 @@ export interface CareerLevel {
   baseSalary: number;
   effortPoints: number;
   taskSlots: number;
+  /**
+   * How many people report to you, and the money you answer for. Absent below the first
+   * management post: until then you are the one being managed.
+   */
+  headcount?: number;
+  monthlyBudget?: number;
   /** What it takes to be offered *this* level. Absent on level 1. */
   promotion?: PromotionRequirement;
 }
@@ -188,6 +257,21 @@ export interface Allocation {
   rest: number;
   networking: number;
   overtime: boolean;
+
+  /* ---- management, available once you have a unit ---- */
+
+  /** Task uid -> staff id. Handing a file over costs a point of oversight, not the whole job. */
+  delegations: Record<string, string>;
+  /** Staff ids being coached this month: slower than doing it yourself, permanent. */
+  coaching: string[];
+  /** Staff ids getting your actual attention this month. */
+  oneToOnes: string[];
+  /** Keep a recruitment moving. */
+  recruiting: boolean;
+  /** Buy in agency staff for the month: money for effort. */
+  agencyTemps: number;
+  /** Staff ids sent on a training course, paid from the budget rather than your time. */
+  training: string[];
 }
 
 export interface CompletedTaskReport {
@@ -208,6 +292,17 @@ export interface ReviewReport {
   salaryDelta: number;
 }
 
+/** What the unit did with its month. */
+export interface TeamReport {
+  /** Progress delivered by staff on files you handed over. */
+  delegatedProgress: { staffName: string; taskTemplateId: string; progress: number }[];
+  departures: { name: string; reason: 'morale' | 'promoted_away' }[];
+  arrivals: { name: string; seniority: Seniority }[];
+  /** Spend against the monthly allocation: negative means over. */
+  budgetDelta?: number;
+  budgetVerdict?: 'overspent' | 'underspent';
+}
+
 /** Everything that happened in one month, for the end-of-turn report screen. */
 export interface TurnReport {
   turn: number;
@@ -218,6 +313,7 @@ export interface TurnReport {
   review?: ReviewReport;
   newOffers: JobOffer[];
   promotedTo?: number;
+  team?: TeamReport;
 }
 
 export interface LogEntry {
@@ -258,6 +354,12 @@ export interface GameState {
 
   tasks: ActiveTask[];
   nextTaskUid: number;
+
+  /** Empty until you reach a post that has a unit under it. */
+  staff: StaffMember[];
+  nextStaffUid: number;
+  hiring?: Hiring;
+  budget?: Budget;
 
   pendingEvents: PendingEvent[];
   scheduledEvents: { eventId: string; onTurn: number }[];

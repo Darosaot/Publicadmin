@@ -14,6 +14,8 @@ export interface ContentRegistry {
   careerLevels: CareerLevel[];
   tasks: Record<string, TaskTemplate>;
   events: Record<string, GameEvent>;
+  /** Names drawn on for new staff. Proper nouns, so literal strings rather than keys. */
+  staffNames: string[];
 }
 
 export function getCareerLevel(registry: ContentRegistry, level: number): CareerLevel {

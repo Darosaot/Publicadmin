@@ -12,16 +12,26 @@
  */
 
 import {
+  AGENCY_TEMP_COST,
+  AGENCY_TEMP_EFFORT,
+  AGENCY_TEMP_MAX,
   BASELINE_STRESS_PER_TURN,
+  COACHING_EFFORT_COST,
+  DELEGATION_EFFORT_COST,
   LOG_LIMIT,
   NETWORK_PC_GAIN,
+  ONE_TO_ONE_EFFORT_COST,
   OVERTIME_POINTS,
   OVERTIME_STRESS,
   PERFORMANCE_BASELINE,
   PERFORMANCE_REVERSION_RATE,
   POLITICAL_CAPITAL_DECAY_RATE,
+  RECRUITING_EFFORT_COST,
   REPUTATION_DECAY_RATE,
   REST_STRESS_RELIEF,
+  STAFF_MORALE_ON_TASK_EXCELLENT,
+  STAFF_MORALE_ON_TASK_FAILURE,
+  TRAINING_COST,
   TASK_FAILURE_EFFECTS,
   TASK_QUALITY_EFFECTS,
 } from './constants';
@@ -38,6 +48,17 @@ import {
 } from './career';
 import { getCareerLevel, type ContentRegistry } from './registry';
 import { isComplete, isDue, refillBoard, rollQuality } from './tasks';
+import {
+  adjustStaffMorale,
+  applyAssignments,
+  delegatedQualityBase,
+  findStaff,
+  hasTeam,
+  resolveAttrition,
+  resolveBudget,
+  resolveStaffMonth,
+  staffOutput,
+} from './team';
 import type {
   Allocation,
   CompletedTaskReport,
@@ -45,25 +66,62 @@ import type {
   FailedTaskReport,
   GameState,
   LogEntry,
+  TeamReport,
   TurnReport,
 } from './types';
 
 export function emptyAllocation(): Allocation {
-  return { tasks: {}, rest: 0, networking: 0, overtime: false };
+  return {
+    tasks: {},
+    rest: 0,
+    networking: 0,
+    overtime: false,
+    delegations: {},
+    coaching: [],
+    oneToOnes: [],
+    recruiting: false,
+    agencyTemps: 0,
+    training: [],
+  };
 }
 
 export function effortAvailable(
   state: GameState,
   registry: ContentRegistry,
   overtime: boolean,
+  agencyTemps = 0,
 ): number {
   const base = getCareerLevel(registry, state.player.level).effortPoints;
-  return base + (overtime ? OVERTIME_POINTS : 0);
+  const bought = Math.min(Math.max(0, agencyTemps), AGENCY_TEMP_MAX) * AGENCY_TEMP_EFFORT;
+  return base + (overtime ? OVERTIME_POINTS : 0) + bought;
+}
+
+/** The effort cost of the management half of a month. */
+export function managementCost(allocation: Allocation): number {
+  return (
+    Object.keys(allocation.delegations).length * DELEGATION_EFFORT_COST +
+    allocation.coaching.length * COACHING_EFFORT_COST +
+    allocation.oneToOnes.length * ONE_TO_ONE_EFFORT_COST +
+    (allocation.recruiting ? RECRUITING_EFFORT_COST : 0)
+  );
 }
 
 export function allocationTotal(allocation: Allocation): number {
   const taskPoints = Object.values(allocation.tasks).reduce((sum, n) => sum + Math.max(0, n), 0);
-  return taskPoints + Math.max(0, allocation.rest) + Math.max(0, allocation.networking);
+  return (
+    taskPoints +
+    Math.max(0, allocation.rest) +
+    Math.max(0, allocation.networking) +
+    managementCost(allocation)
+  );
+}
+
+/** What the month's discretionary decisions cost the unit budget. */
+export function discretionarySpend(allocation: Allocation): number {
+  return (
+    Math.min(Math.max(0, allocation.agencyTemps), AGENCY_TEMP_MAX) * AGENCY_TEMP_COST +
+    allocation.training.length * TRAINING_COST
+  );
 }
 
 /**
@@ -77,15 +135,56 @@ export function normalizeAllocation(
   registry: ContentRegistry,
   allocation: Allocation,
 ): Allocation {
-  const budget = effortAvailable(state, registry, allocation.overtime);
+  const managing = hasTeam(state, registry);
+  const staffIds = new Set(state.staff.map((s) => s.id));
+  const taskIds = new Set(state.tasks.map((t) => t.uid));
+
+  const agencyTemps = managing
+    ? Math.min(Math.max(0, Math.floor(allocation.agencyTemps)), AGENCY_TEMP_MAX)
+    : 0;
+
   const normalized: Allocation = {
     tasks: {},
     rest: 0,
     networking: 0,
     overtime: allocation.overtime,
+    delegations: {},
+    coaching: [],
+    oneToOnes: [],
+    recruiting: false,
+    agencyTemps,
+    training: [],
   };
 
-  let remaining = budget;
+  let remaining = effortAvailable(state, registry, allocation.overtime, agencyTemps);
+
+  // Management comes off the top: these commitments are made before the desk work.
+  if (managing) {
+    for (const [taskUid, staffId] of Object.entries(allocation.delegations)) {
+      if (!taskIds.has(taskUid) || !staffIds.has(staffId)) continue;
+      if (remaining < DELEGATION_EFFORT_COST) break;
+      normalized.delegations[taskUid] = staffId;
+      remaining -= DELEGATION_EFFORT_COST;
+    }
+    for (const staffId of allocation.coaching) {
+      if (!staffIds.has(staffId) || normalized.coaching.includes(staffId)) continue;
+      if (remaining < COACHING_EFFORT_COST) break;
+      normalized.coaching.push(staffId);
+      remaining -= COACHING_EFFORT_COST;
+    }
+    for (const staffId of allocation.oneToOnes) {
+      if (!staffIds.has(staffId) || normalized.oneToOnes.includes(staffId)) continue;
+      if (remaining < ONE_TO_ONE_EFFORT_COST) break;
+      normalized.oneToOnes.push(staffId);
+      remaining -= ONE_TO_ONE_EFFORT_COST;
+    }
+    if (allocation.recruiting && state.hiring && remaining >= RECRUITING_EFFORT_COST) {
+      normalized.recruiting = true;
+      remaining -= RECRUITING_EFFORT_COST;
+    }
+    normalized.training = allocation.training.filter((id) => staffIds.has(id));
+  }
+
   for (const task of state.tasks) {
     const wanted = Math.max(0, Math.floor(allocation.tasks[task.uid] ?? 0));
     const spend = Math.min(wanted, remaining);
@@ -119,8 +218,12 @@ export function resolveTurn(
   const statsBefore = { ...state.stats };
 
   let next: GameState = { ...state, stats: { ...state.stats } };
+  const team: TeamReport = { delegatedProgress: [], departures: [], arrivals: [] };
 
-  // Effort onto the board.
+  // Record who is carrying what before anyone does any work.
+  next = applyAssignments(next, allocation);
+
+  // Your own effort onto the board.
   next = {
     ...next,
     tasks: next.tasks.map((task) => {
@@ -129,22 +232,54 @@ export function resolveTurn(
     }),
   };
 
+  // Then the unit's. Their output is computed from this month's skill and morale, before any
+  // coaching lands, so investing in someone pays from next month rather than instantly.
+  next = {
+    ...next,
+    tasks: next.tasks.map((task) => {
+      if (!task.assignedTo) return task;
+      const member = findStaff(next, task.assignedTo);
+      if (!member) return task;
+
+      const contribution = staffOutput(member);
+      team.delegatedProgress.push({
+        staffName: member.name,
+        taskTemplateId: task.templateId,
+        progress: contribution,
+      });
+      return { ...task, progress: task.progress + contribution };
+    }),
+  };
+
   const completed: CompletedTaskReport[] = [];
   const failed: FailedTaskReport[] = [];
   const followUpEffects: Effect[] = [];
   const logEntries: LogEntry[] = [];
   const survivors: typeof next.tasks = [];
+  /** Morale consequences for the people whose files landed well or badly. */
+  const staffMoraleDeltas: Record<string, number> = {};
 
   for (const task of next.tasks) {
     const template = registry.tasks[task.templateId];
+    const carrier = task.assignedTo ? findStaff(next, task.assignedTo) : undefined;
 
     if (isComplete(task)) {
-      const roll = rollQuality(next, task);
+      // A delegated file is judged on the ability of whoever actually did it.
+      const roll = rollQuality(
+        next,
+        task,
+        carrier ? delegatedQualityBase(carrier) : undefined,
+      );
       next = { ...next, rngState: roll.rngState };
 
       const tierEffect = TASK_QUALITY_EFFECTS[roll.tier];
       adjustStat(next.stats, 'performance', tierEffect.performance);
       adjustStat(next.stats, 'reputation', tierEffect.reputation);
+
+      if (carrier && roll.tier === 'excellent') {
+        staffMoraleDeltas[carrier.id] =
+          (staffMoraleDeltas[carrier.id] ?? 0) + STAFF_MORALE_ON_TASK_EXCELLENT;
+      }
 
       const extra = template?.onComplete?.[roll.tier];
       if (extra) followUpEffects.push(...extra);
@@ -163,6 +298,12 @@ export function resolveTurn(
       adjustStat(next.stats, 'performance', TASK_FAILURE_EFFECTS.performance);
       adjustStat(next.stats, 'reputation', TASK_FAILURE_EFFECTS.reputation);
 
+      // Missing a deadline lands on whoever was holding it, not only on you.
+      if (carrier) {
+        staffMoraleDeltas[carrier.id] =
+          (staffMoraleDeltas[carrier.id] ?? 0) + STAFF_MORALE_ON_TASK_FAILURE;
+      }
+
       if (template?.onFail) followUpEffects.push(...template.onFail);
 
       failed.push({ templateId: task.templateId });
@@ -179,6 +320,10 @@ export function resolveTurn(
   }
 
   next = { ...next, tasks: survivors };
+
+  for (const [staffId, delta] of Object.entries(staffMoraleDeltas)) {
+    next = adjustStaffMorale(next, staffId, delta);
+  }
 
   // Monthly drift: standing and allies fade, form returns to the middle. See `constants.ts`.
   adjustStat(
@@ -208,6 +353,47 @@ export function resolveTurn(
     adjustStat(next.stats, 'politicalCapital', allocation.networking * NETWORK_PC_GAIN);
   }
 
+  // The unit's month: attention paid, recruitment advanced, money spent, people lost.
+  if (hasTeam(next, registry)) {
+    const staffMonth = resolveStaffMonth(next, registry, allocation);
+    next = staffMonth.state;
+    team.arrivals.push(...staffMonth.report.arrivals);
+
+    const budgetResult = resolveBudget(next, discretionarySpend(allocation));
+    next = budgetResult.state;
+    team.budgetDelta = budgetResult.delta;
+    team.budgetVerdict = budgetResult.verdict;
+
+    if (budgetResult.verdict) {
+      logEntries.push({
+        turn: next.turn,
+        messageKey: `log.budget_${budgetResult.verdict}`,
+        tone: 'bad',
+      });
+    }
+
+    const attrition = resolveAttrition(next, registry);
+    next = attrition.state;
+    team.departures.push(...attrition.report.departures);
+
+    for (const departure of attrition.report.departures) {
+      logEntries.push({
+        turn: next.turn,
+        messageKey: 'log.staff_left',
+        params: { name: departure.name },
+        tone: 'bad',
+      });
+    }
+    for (const arrival of team.arrivals) {
+      logEntries.push({
+        turn: next.turn,
+        messageKey: 'log.staff_joined',
+        params: { name: arrival.name },
+        tone: 'good',
+      });
+    }
+  }
+
   next = applyEffects(next, followUpEffects, registry);
 
   next = {
@@ -226,6 +412,7 @@ export function resolveTurn(
     statDeltas: statDeltas(statsBefore, next.stats),
     salaryDelta: 0,
     newOffers: [],
+    team: hasTeam(next, registry) ? team : undefined,
   };
   next = { ...next, lastReport: report };
 
@@ -279,6 +466,7 @@ export function finalizeTurn(state: GameState, registry: ContentRegistry): GameS
     newOffers: [...(previous?.newOffers ?? [])],
     review: previous?.review,
     promotedTo: previous?.promotedTo,
+    team: previous?.team,
   };
 
   if (isReviewDue(next)) {

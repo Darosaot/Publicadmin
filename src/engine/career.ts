@@ -22,6 +22,7 @@ import { adjustStat } from './effects';
 import { getCareerLevel, maxCareerLevel, type ContentRegistry } from './registry';
 import { nextChance, nextRange } from './rng';
 import { refillBoard } from './tasks';
+import { setupTeamForLevel } from './team';
 import type { GameState, JobOffer, ReviewRating, ReviewReport } from './types';
 
 /** Worst to best, so "drop one band" is a single step down this list. */
@@ -164,7 +165,8 @@ export function acceptOffer(
     ],
   };
 
-  return refillBoard(promoted, registry);
+  // The unit you inherit comes with the post — or vanishes, if the new post has none.
+  return refillBoard(setupTeamForLevel(promoted, registry), registry);
 }
 
 export function declineOffer(state: GameState, offerId: string): GameState {

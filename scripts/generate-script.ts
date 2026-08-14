@@ -45,6 +45,18 @@ function describeEffect(effect: Effect): string {
     }
     case 'endGame':
       return `**ends the career: ${effect.ending}**`;
+    case 'teamMorale':
+      return `team morale ${signed(effect.delta)}`;
+    case 'teamSkill':
+      return `team skill ${signed(effect.delta)}`;
+    case 'budget':
+      return `budget balance ${signed(effect.delta)}`;
+    case 'budgetMonthly':
+      return `monthly budget ${signed(effect.delta)}`;
+    case 'loseStaff':
+      return 'a member of staff leaves';
+    case 'gainStaff':
+      return `a ${effect.seniority} joins`;
   }
 }
 

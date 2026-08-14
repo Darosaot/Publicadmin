@@ -103,6 +103,83 @@ export const TASK_QUALITY_EFFECTS = {
  */
 export const TASK_FAILURE_EFFECTS = { performance: -3, reputation: -2 } as const;
 
+/* ------------------------------------------------------- staff and budget */
+
+/**
+ * The unit.
+ *
+ * The economics are meant to make delegation genuinely attractive rather than a formality: a
+ * capable, well-treated officer out-produces the effort point you spend briefing them, and a
+ * demoralised one does not. That is the whole management game — you are not doing the work any
+ * more, you are deciding who does it and whether they are in a state to.
+ */
+
+/** Effort points it costs to hand a file over, coach someone, or sit down with them. */
+export const DELEGATION_EFFORT_COST = 1;
+export const COACHING_EFFORT_COST = 2;
+export const ONE_TO_ONE_EFFORT_COST = 1;
+export const RECRUITING_EFFORT_COST = 2;
+
+/** Monthly output by grade, before skill and morale are applied. */
+export const STAFF_BASE_OUTPUT: Record<'junior' | 'officer' | 'senior', number> = {
+  junior: 3,
+  officer: 5,
+  senior: 7,
+};
+
+export const STAFF_SALARY: Record<'junior' | 'officer' | 'senior', number> = {
+  junior: 1800,
+  officer: 2600,
+  senior: 3600,
+};
+
+/** Starting ranges when a person is generated. */
+export const STAFF_START_SKILL: Record<'junior' | 'officer' | 'senior', [number, number]> = {
+  junior: [20, 45],
+  officer: [40, 70],
+  senior: [60, 88],
+};
+export const STAFF_START_MORALE: [number, number] = [50, 75];
+
+/** Nobody stays motivated by default. */
+export const STAFF_MORALE_DRIFT = -1;
+export const ONE_TO_ONE_MORALE_GAIN = 9;
+export const COACHING_SKILL_GAIN = 4;
+export const COACHING_MORALE_GAIN = 3;
+export const TRAINING_SKILL_GAIN = 6;
+export const TRAINING_COST = 1500;
+
+/** Experience alone teaches a little, slowly. */
+export const STAFF_SKILL_DRIFT_PER_YEAR = 2;
+
+/** What a delegated file that fails does to the person who was carrying it. */
+export const STAFF_MORALE_ON_TASK_FAILURE = -6;
+export const STAFF_MORALE_ON_TASK_EXCELLENT = 4;
+
+/** Below this, people start looking. */
+export const STAFF_ATTRITION_MORALE = 30;
+export const STAFF_ATTRITION_CHANCE = 0.18;
+
+export const HIRING_MONTHS: Record<'junior' | 'officer' | 'senior', number> = {
+  junior: 2,
+  officer: 3,
+  senior: 4,
+};
+
+/** Agency cover: money for effort, at a poor exchange rate. */
+export const AGENCY_TEMP_COST = 3200;
+export const AGENCY_TEMP_EFFORT = 2;
+export const AGENCY_TEMP_MAX = 3;
+
+/** The budget year is judged as a whole, and both directions of failure cost you. */
+export const BUDGET_YEAR_MONTHS = 12;
+export const BUDGET_OVERSPEND_TOLERANCE = 0.04;
+export const BUDGET_UNDERSPEND_TOLERANCE = 0.12;
+export const BUDGET_OVERSPEND_REPUTATION = -6;
+export const BUDGET_UNDERSPEND_REPUTATION = -3;
+/** An underspent budget is a smaller budget next year. */
+export const BUDGET_UNDERSPEND_CUT = 0.1;
+
 /* ------------------------------------------------------------------ events */
 
 /** One event is guaranteed each month; a second arrives this often. */

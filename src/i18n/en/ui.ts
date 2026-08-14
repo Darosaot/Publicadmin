@@ -146,4 +146,8 @@ export const uiStrings: Record<string, string> = {
   'log.review_concerning': 'Performance review: concerning.',
   'log.offer_received': 'An offer arrived from {org}.',
   'log.took_post': 'Took the post of {title} at {org}.',
+  'log.staff_left': '{name} resigned.',
+  'log.staff_joined': '{name} joined the unit.',
+  'log.budget_overspent': 'The budget year closed overspent.',
+  'log.budget_underspent': 'The budget year closed underspent — next year’s allocation is cut.',
 };
