@@ -22,10 +22,13 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 
   webServer: {
+    // Build first. `vite preview` serves whatever is already in `dist/`, so without this the
+    // suite happily passes against a stale bundle and a broken change looks green.
+    //
     // Bind explicitly to IPv4 rather than letting `vite preview` default to `localhost`. On CI
     // runners `localhost` resolves to the IPv6 loopback first, so the server listens on ::1 while
     // Playwright polls 127.0.0.1 and the run dies on a bare "timed out waiting for webServer".
-    command: `npm run preview -- --host 127.0.0.1 --port ${PORT} --strictPort`,
+    command: `npm run build && npm run preview -- --host 127.0.0.1 --port ${PORT} --strictPort`,
     url: `http://127.0.0.1:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

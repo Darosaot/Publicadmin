@@ -20,7 +20,7 @@ import { formatSalary } from '../format';
 /** The unit: who works for you, how they are, and what it all costs. */
 export function TeamScreen({ game }: { game: GameState }) {
   const t = useT();
-  const { state, dispatch, effortRemaining } = useGame();
+  const { state, dispatch, effortTotal, effortSpent, effortRemaining } = useGame();
   const { allocation } = state;
 
   const establishment = headcountFor(game, registry);
@@ -71,6 +71,21 @@ export function TeamScreen({ game }: { game: GameState }) {
         </section>
 
         <aside className="layout__side">
+          {/* Nearly everything on this screen costs a point of the month, so the month has to be
+              visible from here too, not only from the desk. */}
+          <section className="panel effort">
+            <h2 className="panel__title">{t('dash.personal_heading')}</h2>
+            <p className="effort__count" data-testid="effort-remaining">
+              {t('dash.effort_remaining', { remaining: effortRemaining, total: effortTotal })}
+            </p>
+            <div className="effort__track">
+              <div
+                className="effort__fill"
+                style={{ width: `${effortTotal ? (effortSpent / effortTotal) * 100 : 0}%` }}
+              />
+            </div>
+          </section>
+
           <section className="panel">
             <h2 className="panel__title">{t('team.budget_heading')}</h2>
 
