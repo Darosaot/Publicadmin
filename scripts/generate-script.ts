@@ -10,7 +10,7 @@
 
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { allEvents, allTasks, careerLevels, departmentList, endingCopy } from '../src/content';
+import { allEvents, allTasks, posts, departmentList, endingCopy } from '../src/content';
 import { translate } from '../src/i18n/translate';
 import type { Condition, Effect, GameEvent, TaskTemplate } from '../src/engine/types';
 import { ENDING_IDS, STAT_IDS } from '../src/engine/types';
@@ -187,7 +187,8 @@ function build(): string {
   out.push('');
   out.push(
     `The complete corpus: ${allEvents.length} events, ${allTasks.length} task templates, ` +
-      `${departmentList.length} departments, ${careerLevels.length} career levels and ` +
+      `${departmentList.length} departments, ${posts.length} posts across ` +
+      `${new Set(posts.map((p) => p.track)).size} tracks and ` +
       `${ENDING_IDS.length} endings. Stat effects are shown after each outcome.`,
   );
   out.push('');
@@ -212,29 +213,49 @@ function build(): string {
 
   /* -------------------------------------------------------------- career */
 
-  out.push('## The ladder');
+  out.push('## The career tree');
   out.push('');
-  out.push('| Level | Post | Administration | Salary | Effort | Slots | To be offered this post |');
-  out.push('| --- | --- | --- | --- | --- | --- | --- |');
-  for (const level of careerLevels) {
-    const promotion = level.promotion
-      ? [
-          `Rep ${level.promotion.minReputation}`,
-          `Perf ${level.promotion.minPerformance}`,
-          level.promotion.minPoliticalCapital
-            ? `PC ${level.promotion.minPoliticalCapital}`
-            : undefined,
-          `${level.promotion.minTurnsAtLevel} months in post`,
-        ]
-          .filter(Boolean)
-          .join(', ')
-      : 'starting post';
-    out.push(
-      `| ${level.level} | ${t(level.titleKey)} | ${t(level.orgKey)} | €${level.baseSalary} | ` +
-        `${level.effortPoints} | ${level.taskSlots} | ${promotion} |`,
-    );
+  out.push(
+    'Everyone starts in Alderford. After that the tree forks, and posts sharing a tier are ' +
+      'alternatives rather than steps.',
+  );
+  out.push('');
+
+  const byTier = [...new Set(posts.map((p) => p.tier))].sort((a, b) => a - b);
+  for (const tier of byTier) {
+    out.push(`### Tier ${tier}`);
+    out.push('');
+    out.push('| Post | Track | Administration | Salary | Effort | Slots | Cycle | Unit | Reached from |');
+    out.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+    for (const post of posts.filter((p) => p.tier === tier)) {
+      const routes =
+        post.from.length === 0
+          ? 'where every career starts'
+          : post.from
+              .map((edge) => {
+                const source = posts.find((p) => p.id === edge.from);
+                const req = [
+                  `Rep ${edge.requires.minReputation}`,
+                  `Perf ${edge.requires.minPerformance}`,
+                  edge.requires.minPoliticalCapital
+                    ? `PC ${edge.requires.minPoliticalCapital}`
+                    : undefined,
+                  `${edge.requires.minTurnsAtLevel} cycles in post`,
+                ]
+                  .filter(Boolean)
+                  .join(', ');
+                const label = source ? t(source.titleKey) : edge.from;
+                return `**${label}**${edge.sideways ? ' (across)' : ''} — ${req}`;
+              })
+              .join('<br>');
+      const unit = post.headcount ? `${post.headcount} staff, €${post.monthlyBudget}/mo` : 'none';
+      out.push(
+        `| ${t(post.titleKey)} | ${post.track} | ${t(post.orgKey)} | €${post.baseSalary} | ` +
+          `${post.effortPoints} | ${post.taskSlots} | ${post.monthsPerTurn} mo | ${unit} | ${routes} |`,
+      );
+    }
+    out.push('');
   }
-  out.push('');
 
   /* --------------------------------------------------------------- tasks */
 

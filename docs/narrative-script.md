@@ -3,7 +3,7 @@
 > **Generated file.** Produced from the shipped content by `npm run docs:script`. Edit the
 > content in `src/content/` and regenerate — changes made directly to this file are lost.
 
-The complete corpus: 182 events, 62 task templates, 5 departments, 5 career levels and 6 endings. Stat effects are shown after each outcome.
+The complete corpus: 189 events, 62 task templates, 5 departments, 15 posts across 4 tracks and 6 endings. Stat effects are shown after each outcome.
 
 ## Departments
 
@@ -47,15 +47,49 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 > Your words end up in the council chamber with someone else’s name on them. That is the job. Occasionally one of them changes something, and you never find out which.
 
-## The ladder
+## The career tree
 
-| Level | Post | Administration | Salary | Effort | Slots | To be offered this post |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | Administrative Officer | Alderford City Council | €2100 | 10 | 4 | starting post |
-| 2 | Senior Officer | Northbridge City Council | €2900 | 12 | 4 | Rep 35, Perf 50, 8 months in post |
-| 3 | Head of Unit | Regional Government of Valmara | €3900 | 14 | 6 | Rep 50, Perf 55, PC 25, 10 months in post |
-| 4 | Head of Department | National Agency for Public Investment | €5200 | 16 | 7 | Rep 65, Perf 60, PC 40, 12 months in post |
-| 5 | Director-General | Ministry of Territorial Administration | €6800 | 18 | 8 | Rep 78, Perf 65, PC 55, 12 months in post |
+Everyone starts in Alderford. After that the tree forks, and posts sharing a tier are alternatives rather than steps.
+
+### Tier 1
+
+| Post | Track | Administration | Salary | Effort | Slots | Cycle | Unit | Reached from |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Administrative Officer | line | Alderford City Council | €2100 | 10 | 4 | 1 mo | none | where every career starts |
+
+### Tier 2
+
+| Post | Track | Administration | Salary | Effort | Slots | Cycle | Unit | Reached from |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Senior Officer | line | Northbridge City Council | €2900 | 12 | 4 | 2 mo | none | **Administrative Officer** — Rep 35, Perf 50, 8 cycles in post |
+| Case Officer | oversight | National Audit Authority | €2800 | 12 | 4 | 2 mo | none | **Administrative Officer** — Rep 38, Perf 55, 8 cycles in post |
+
+### Tier 3
+
+| Post | Track | Administration | Salary | Effort | Slots | Cycle | Unit | Reached from |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Head of Unit | line | Regional Government of Valmara | €3900 | 14 | 6 | 4 mo | 4 staff, €11500/mo | **Senior Officer** — Rep 50, Perf 55, PC 25, 10 cycles in post<br>**Case Officer** (across) — Rep 50, Perf 55, PC 25, 10 cycles in post |
+| Principal Specialist | expert | Regional Government of Valmara | €3800 | 21 | 4 | 4 mo | none | **Senior Officer** — Rep 48, Perf 62, 10 cycles in post<br>**Case Officer** (across) — Rep 48, Perf 62, 10 cycles in post |
+| Adviser | political | the Minister’s private office | €4100 | 17 | 3 | 3 mo | none | **Senior Officer** — Rep 42, Perf 50, PC 35, 8 cycles in post |
+| Senior Auditor | oversight | National Audit Authority | €3700 | 14 | 5 | 4 mo | 3 staff, €8000/mo | **Case Officer** — Rep 52, Perf 60, 10 cycles in post<br>**Senior Officer** (across) — Rep 52, Perf 60, 10 cycles in post |
+
+### Tier 4
+
+| Post | Track | Administration | Salary | Effort | Slots | Cycle | Unit | Reached from |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Head of Department | line | National Agency for Public Investment | €5200 | 16 | 7 | 6 mo | 6 staff, €18500/mo | **Head of Unit** — Rep 65, Perf 60, PC 40, 12 cycles in post<br>**Senior Auditor** (across) — Rep 65, Perf 60, PC 40, 12 cycles in post<br>**Principal Specialist** (across) — Rep 65, Perf 60, PC 40, 12 cycles in post |
+| Chief Adviser | expert | National Agency for Public Investment | €5000 | 25 | 4 | 6 mo | none | **Principal Specialist** — Rep 62, Perf 70, 12 cycles in post<br>**Head of Unit** (across) — Rep 62, Perf 70, 12 cycles in post |
+| Head of the Private Office | political | Ministry of Territorial Administration | €5400 | 15 | 5 | 4 mo | 3 staff, €9000/mo | **Adviser** — Rep 55, Perf 55, PC 55, 10 cycles in post<br>**Head of Unit** (across) — Rep 55, Perf 55, PC 55, 10 cycles in post |
+| Director of Inspection | oversight | Public Services Inspectorate | €5100 | 16 | 6 | 6 mo | 5 staff, €15000/mo | **Senior Auditor** — Rep 66, Perf 66, 12 cycles in post<br>**Head of Unit** (across) — Rep 66, Perf 66, 12 cycles in post |
+
+### Tier 5
+
+| Post | Track | Administration | Salary | Effort | Slots | Cycle | Unit | Reached from |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Director-General | line | Ministry of Territorial Administration | €6800 | 18 | 8 | 6 mo | 8 staff, €26000/mo | **Head of Department** — Rep 78, Perf 65, PC 55, 12 cycles in post<br>**Head of the Private Office** (across) — Rep 78, Perf 65, PC 55, 12 cycles in post<br>**Director of Inspection** (across) — Rep 78, Perf 65, PC 55, 12 cycles in post |
+| Chief Adviser to the Government | expert | Office of the Council of Ministers | €6500 | 29 | 4 | 6 mo | none | **Chief Adviser** — Rep 74, Perf 74, 12 cycles in post<br>**Head of Department** (across) — Rep 74, Perf 74, 12 cycles in post |
+| Special Adviser to the Cabinet | political | Office of the Council of Ministers | €7000 | 16 | 6 | 4 mo | 4 staff, €14000/mo | **Head of the Private Office** — Rep 68, Perf 58, PC 72, 10 cycles in post<br>**Head of Department** (across) — Rep 68, Perf 58, PC 72, 10 cycles in post |
+| Ombudsman | oversight | Office of the Ombudsman | €6600 | 18 | 7 | 6 mo | 7 staff, €22000/mo | **Director of Inspection** — Rep 80, Perf 70, 12 cycles in post<br>**Head of Department** (across) — Rep 80, Perf 70, 12 cycles in post |
 
 ## Tasks
 

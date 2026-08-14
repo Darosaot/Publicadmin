@@ -65,6 +65,8 @@ export interface Condition {
    * was: turns and years stopped being the same thing once a senior cycle covered a quarter.
    */
   minYearsElapsed?: number;
+  /** Restricts to particular career tracks. */
+  tracks?: TrackId[];
   minStat?: Partial<PlayerStats>;
   maxStat?: Partial<PlayerStats>;
   minSalary?: number;
@@ -225,8 +227,38 @@ export interface PromotionRequirement {
   minTurnsAtLevel: number;
 }
 
-export interface CareerLevel {
-  level: number;
+/**
+ * The four ways a career can go after the second rung.
+ *
+ * `line` is management: more people, more budget, more of the institution. `expert` trades the
+ * unit for the hardest files and the authority that comes with them. `political` is fast, powerful
+ * and has no tenure at all. `oversight` inspects the administrations the other three work inside.
+ */
+export type TrackId = 'line' | 'expert' | 'political' | 'oversight';
+
+export const TRACK_IDS: readonly TrackId[] = ['line', 'expert', 'political', 'oversight'];
+
+/** One way into a post. Entry terms belong to the edge, because the same post can be reached
+ *  from different places on different terms. */
+export interface PostEdge {
+  /** The post you must currently hold. */
+  from: string;
+  requires: PromotionRequirement;
+  /** A move across rather than up: the salary rule does not apply to it. */
+  sideways?: boolean;
+}
+
+export interface Post {
+  id: string;
+  /**
+   * Seniority band, 1–5.
+   *
+   * Several posts share a tier — that is what makes the ladder a tree. Everything that used to
+   * key off "level" still keys off this: effort scaling, credit scaling, and every `minLevel` /
+   * `maxLevel` gate in the corpus.
+   */
+  tier: number;
+  track: TrackId;
   titleKey: string;
   orgKey: string;
   orgShortKey: string;
@@ -247,13 +279,16 @@ export interface CareerLevel {
    */
   headcount?: number;
   monthlyBudget?: number;
-  /** What it takes to be offered *this* level. Absent on level 1. */
-  promotion?: PromotionRequirement;
+  /** Every way into this post. Empty means it is where a career starts. */
+  from: PostEdge[];
 }
 
 export interface JobOffer {
   id: string;
-  toLevel: number;
+  toPost: string;
+  /** The tier of the post offered, so the UI can say whether this is up or across. */
+  toTier: number;
+  sideways?: boolean;
   salary: number;
   createdTurn: number;
   expiresTurn: number;
@@ -374,7 +409,12 @@ export interface GameState {
   player: {
     name: string;
     department: DepartmentId;
+    postId: string;
+    /** Always the current post's tier. Kept on the player so content gating stays a plain
+     *  numeric comparison and does not need the registry. */
     level: number;
+    /** Likewise denormalised from the post, so `Condition.tracks` costs nothing to check. */
+    track: TrackId;
     turnsAtLevel: number;
     salary: number;
   };

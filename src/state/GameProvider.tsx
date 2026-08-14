@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { registry } from '../content';
-import { getCareerLevel } from '../engine/registry';
+import { getPost } from '../engine/registry';
 import { hasSave, saveGame } from '../engine/save';
 import { allocationTotal, effortAvailable, normalizeAllocation } from '../engine/turn';
 import type { GameState } from '../engine/types';
@@ -83,7 +83,7 @@ export function useActiveGame(): GameState {
 
 export function useCurrentLevel() {
   const game = useActiveGame();
-  return getCareerLevel(registry, game.player.level);
+  return getPost(registry, game.player.postId);
 }
 
 export function saveExists(): boolean {

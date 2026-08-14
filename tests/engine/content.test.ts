@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createGame } from '../../src/engine/newGame';
 import { eligibleRandomEvents } from '../../src/engine/events';
-import { registry, allEvents, allTasks, careerLevels, EN_STRINGS } from '../../src/content';
+import { registry, allEvents, allTasks, posts, EN_STRINGS } from '../../src/content';
 import { validateContent } from '../../src/content/validate';
 import { translate } from '../../src/i18n/translate';
 import { DEPARTMENT_IDS, type DepartmentId } from '../../src/engine/types';
@@ -71,7 +71,7 @@ describe('every department is playable', () => {
 
   it.each(departments)('%s has work available at level 1', (department: DepartmentId) => {
     const state = createGame({ name: 'Test', department, seed: 5 }, registry);
-    expect(state.tasks.length).toBe(careerLevels[0]!.taskSlots);
+    expect(state.tasks.length).toBe(posts.find((p) => p.from.length === 0)!.taskSlots);
   });
 
   it.each(departments)('%s has random events available at level 1', (department: DepartmentId) => {
@@ -105,7 +105,7 @@ describe('the desk changes with the post', () => {
 
   it.each(DEPARTMENT_IDS)('%s sees different work at the top than at the bottom', (department: DepartmentId) => {
     const junior = eligibleAt(department, 1);
-    const top = eligibleAt(department, careerLevels[careerLevels.length - 1]!.level);
+    const top = eligibleAt(department, Math.max(...posts.map((p) => p.tier)));
 
     // Work that has been left behind, and work that has opened up.
     const retired = [...junior].filter((id) => !top.has(id));
@@ -140,9 +140,9 @@ describe('translation', () => {
 
   it('translates a parameter that is itself a key', () => {
     // The engine logs content keys, not prose; the log line has to resolve them.
-    expect(translate('en', 'log.offer_received', { org: 'career.3.org_short' })).toBe(
-      'An offer arrived from the Region.',
-    );
+    expect(
+      translate('en', 'log.offer_received', { org: 'post.region.head_of_unit.org_short' }),
+    ).toBe('An offer arrived from the Region.');
   });
 
   it('leaves an unknown parameter visible rather than blank', () => {

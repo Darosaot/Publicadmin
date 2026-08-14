@@ -48,13 +48,16 @@ for a stretch of career where the interesting decisions are not three times as m
 was split instead. `turn` counts decisions; `calendarMonth` counts elapsed time; each level carries
 a `monthsPerTurn`:
 
-| Level | Post | Months per cycle |
-| --- | --- | --- |
-| 1 | Administrative Officer | 1 |
-| 2 | Senior Officer | 2 |
-| 3 | Head of Unit | 4 |
-| 4 | Head of Department | 6 |
-| 5 | Director-General | 6 |
+| Tier | Months per cycle |
+| --- | --- |
+| 1 | 1 |
+| 2 | 2 |
+| 3 | 4 |
+| 4 | 6 |
+| 5 | 6 |
+
+The political track runs faster — three or four months a cycle rather than six — because a private
+office genuinely does work in weeks.
 
 Those numbers are not aesthetic. Simulated careers spend about 32 turns at level 1 and 41 at level
 2 — most of a career is early, because most careers plateau — and the figures above are what that
@@ -65,7 +68,7 @@ It also says something true. A junior desk turns over monthly. A Director-Genera
 a directorate every four weeks, and their files genuinely run for years rather than months.
 
 **Deadlines stay in cycles**, which is why a task's `deadlineRange: [2, 4]` is two to four months
-at the bottom of the ladder and a year to two years at the top. That is the intended reading.
+at the bottom of the tree and a year to two years at the top. That is the intended reading.
 
 Content that depends on how long ago something happened uses `minYearsElapsed` rather than
 `minTurn` — the milestone about "a woman you have not seen in twenty years" waits for twenty
@@ -292,21 +295,52 @@ unconditional outcome, so a decision can never dead-end.
 
 ### The ladder
 
-| Level | Post | Administration | Salary | Effort | Slots | Unit | Budget |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Administrative Officer | Alderford City Council (pop. 18,000) | €2,100 | 10 | 4 | — | — |
-| 2 | Senior Officer | Northbridge City Council (pop. 140,000) | €2,900 | 12 | 4 | — | — |
-| 3 | Head of Unit | Regional Government of Valmara | €3,900 | 14 | 6 | 4 | €11,500/mo |
-| 4 | Head of Department | National Agency for Public Investment | €5,200 | 16 | 7 | 6 | €18,500/mo |
-| 5 | Director-General | Ministry of Territorial Administration | €6,800 | 18 | 8 | 8 | €26,000/mo |
-| — | **Minister** | Government of Valmara | — | — | — | — | — |
+Everyone starts at the same desk in Alderford. After that it forks, and posts sharing a **tier**
+are alternatives rather than steps.
 
-Levels 3 to 5 come with an establishment and a budget line. **You arrive one post short**, because
-you always do.
+| Tier | Line (management) | Expert (specialist) | Political | Oversight |
+| --- | --- | --- | --- | --- |
+| 1 | Administrative Officer, Alderford | — | — | — |
+| 2 | Senior Officer, Northbridge | — | — | Case Officer, Audit Authority |
+| 3 | Head of Unit, the Region | Principal Specialist | Adviser, private office | Senior Auditor |
+| 4 | Head of Department, the Agency | Chief Adviser | Head of the Private Office | Director of Inspection |
+| 5 | Director-General, the Ministry | Chief Adviser to the Government | Special Adviser to the Cabinet | Ombudsman |
+| — | **Minister** | — | — | — |
 
-Minister is not a sixth playable level; it is the ending. Reaching it requires being a
-Director-General with Reputation ≥ 88 and Political Capital ≥ 70, which triggers a three-event
-confirmation arc you can still lose.
+The four branches are meant to be different games, not four labels on the same one:
+
+- **Line** is what the game already was: more people, more budget, more institution. A
+  Director-General runs eight staff and €26,000 a month.
+- **Expert** trades the unit away entirely. No staff, no budget, but a Chief Adviser to the
+  Government has **29 effort points against four files** — and because per-file credit scales as
+  `4 / taskSlots`, a short board pays far better per file. That is not a consolation: the first
+  balance pass gave the specialist posts more files and made the track measurably *worse*.
+- **Political** is fast, well paid and has no tenure. Cycles are three to four months rather than
+  six because a private office works in weeks, and an event arc can end your post when your
+  principal falls.
+- **Oversight** turns the game around: you inspect the administrations the other three work inside.
+  Its entry terms ask for reputation and performance and **never for political capital**, which is
+  the mechanical statement of what the branch is for.
+
+Tier 3 and up come with an establishment and a budget line — except on the expert track, where
+there is deliberately none. **You arrive one post short**, because you always do.
+
+### Edges, not rungs
+
+Entry terms belong to the **move**, not to the destination: the same post is reachable from
+different places on different terms, and a Head of Unit reaching the Agency is not doing the same
+thing as a Senior Auditor reaching it. A move marked *sideways* is a step across rather than up,
+and is exempt from the rule that a promotion must pay more — stepping off the line track onto the
+expert one costs money, which is the point.
+
+Each cycle the engine walks every edge out of your current post and rolls each one separately, so
+a fork arrives as a real choice on the career screen. Only one new offer is created per cycle
+though: being handed four posts in a month would read as a lottery rather than a career.
+
+Minister is not a sixth playable tier; it is the ending. Reaching it requires being at tier 5 —
+on any branch — with Reputation ≥ 88 and Political Capital ≥ 70, which triggers a three-event
+confirmation arc you can still lose. In practice the political track gets there most easily and
+the oversight track almost never, which is correct.
 
 ### Requirements to be offered the next post
 
@@ -426,10 +460,13 @@ All of these live in `src/engine/constants.ts`.
 | Turn length | 1 decision cycle: 1 / 2 / 4 / 6 / 6 months by level |
 | Maximum campaign length | 120 turns, about 29 years |
 | Starting stats | Rep 20, Perf 50, PC 10, Integrity 70, Stress 20 |
-| Effort points by level | 10 / 12 / 14 / 16 / 18 |
-| Task slots by level | 4 / 4 / 6 / 7 / 8 |
-| Establishment by level | — / — / 4 / 6 / 8 |
-| Unit budget by level | — / — / €11,500 / €18,500 / €26,000 a month |
+| Effort points, line track | 10 / 12 / 14 / 16 / 18 |
+| Effort points, expert track | — / — / 21 / 25 / 29 |
+| Task slots, line track | 4 / 4 / 6 / 7 / 8 |
+| Task slots, expert track | — / — / 4 / 4 / 4 |
+| Establishment, line track | — / — / 4 / 6 / 8 |
+| Unit budget, line track | — / — / €11,500 / €18,500 / €26,000 a month |
+| Posts in the tree | 15 across 4 tracks |
 | Overtime | +3 points, +5 stress |
 | Rest | −3 stress per point |
 | Networking | +2 political capital per point |
@@ -468,9 +505,10 @@ Where it currently sits:
 | Measure | Value |
 | --- | --- |
 | Mean years of service | 28.9 |
-| Careers reaching Director-General | 58% |
-| Careers reaching Head of Unit or above | 82% |
+| Careers reaching a tier-5 post | 51% |
+| Careers reaching tier 3 or above | 84% |
 | Careers stuck at the starting post | 3% |
+| Mean level, by track | line 4.0, expert 3.9, political 4.3, oversight 3.7 |
 | Files finished on time | 95% |
 | Mean level reached | 4.1 |
 | Mean Reputation at the end | 78 |

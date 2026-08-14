@@ -10,7 +10,7 @@
  */
 
 import { SAVE_VERSION } from './constants';
-import type { ContentRegistry } from './registry';
+import { startingPost, type ContentRegistry } from './registry';
 import type { GameState } from './types';
 
 export const SAVE_KEY = 'padmin.save';
@@ -33,6 +33,52 @@ const MIGRATIONS: Record<number, (raw: RawSave) => RawSave> = {
    * been running.
    */
   1: (raw) => ({ ...raw, calendarMonth: typeof raw.turn === 'number' ? raw.turn : 0 }),
+
+  /**
+   * 2 -> 3: the ladder became a tree.
+   *
+   * Before this there was one post per level, so a v2 career's level maps to exactly one post —
+   * the line-track one at that tier, which is the ladder it was climbing. Offers in flight are
+   * remapped the same way; anything that cannot be mapped is dropped rather than guessed at,
+   * which costs the player one offer and never a crash.
+   */
+  2: (raw) => {
+    const player = (raw.player ?? {}) as Record<string, unknown>;
+    const tier = typeof player.level === 'number' ? player.level : 1;
+    const offers = Array.isArray(raw.offers) ? raw.offers : [];
+
+    return {
+      ...raw,
+      player: {
+        ...player,
+        postId: LINE_TRACK_BY_TIER[tier] ?? LINE_TRACK_BY_TIER[1],
+        track: 'line',
+      },
+      offers: offers.flatMap((raw_offer) => {
+        const offer = raw_offer as Record<string, unknown>;
+        const toTier = typeof offer.toLevel === 'number' ? offer.toLevel : undefined;
+        const toPost = toTier === undefined ? undefined : LINE_TRACK_BY_TIER[toTier];
+        if (!toPost || toTier === undefined) return [];
+        const { toLevel: _dropped, ...rest } = offer;
+        return [{ ...rest, toPost, toTier }];
+      }),
+    };
+  },
+};
+
+/**
+ * The line track, by tier — the ladder every pre-v3 career was on.
+ *
+ * Deliberately a literal rather than a lookup into the content: a migration has to keep working
+ * when the content moves on, and reading today's posts to reconstruct yesterday's save is how
+ * migrations rot.
+ */
+const LINE_TRACK_BY_TIER: Record<number, string> = {
+  1: 'post.alderford.officer',
+  2: 'post.northbridge.senior',
+  3: 'post.region.head_of_unit',
+  4: 'post.agency.head_of_department',
+  5: 'post.ministry.director_general',
 };
 
 export function serialize(state: GameState): string {
@@ -85,7 +131,9 @@ function hasRequiredShape(raw: RawSave): boolean {
     typeof player === 'object' &&
     player !== null &&
     typeof player.department === 'string' &&
-    typeof player.level === 'number'
+    typeof player.level === 'number' &&
+    typeof player.postId === 'string' &&
+    typeof player.track === 'string'
   );
 }
 
@@ -96,8 +144,18 @@ function hasRequiredShape(raw: RawSave): boolean {
  * happened to have it queued.
  */
 function pruneUnknownContent(state: GameState, registry: ContentRegistry): GameState {
+  // A post that no longer exists would throw on the next lookup and take the career with it, so
+  // an unrecognised one falls back to where careers start. Losing your post is a bad outcome; a
+  // save that cannot be opened at all is a worse one.
+  const known = registry.posts.some((p) => p.id === state.player.postId);
+  const post = known ? undefined : startingPost(registry);
+
   return {
     ...state,
+    player: post
+      ? { ...state.player, postId: post.id, level: post.tier, track: post.track }
+      : state.player,
+    offers: state.offers.filter((o) => registry.posts.some((p) => p.id === o.toPost)),
     tasks: state.tasks.filter((t) => registry.tasks[t.templateId] !== undefined),
     pendingEvents: state.pendingEvents.filter((p) => registry.events[p.eventId] !== undefined),
     scheduledEvents: state.scheduledEvents.filter(

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { SAVE_KEY, serialize } from '../../src/engine/save';
-import type { DepartmentId, GameState } from '../../src/engine/types';
+import type { DepartmentId, GameState, TrackId } from '../../src/engine/types';
 import { playCareer } from '../engine/autoplay';
 
 /**
@@ -11,15 +11,23 @@ import { playCareer } from '../engine/autoplay';
  * special-casing. It is generated here rather than committed as a fixture so it can never go stale
  * against the save format or the content ids.
  */
-function careerAtLevel(level: number, department: DepartmentId): GameState {
+function careerAtLevel(level: number, department: DepartmentId, track: TrackId): GameState {
   for (let attempt = 1; attempt <= 200; attempt += 1) {
-    const run = playCareer(attempt * 7919 + 13, department, 'balanced', 200, level);
-    if (run.finalState.player.level >= level && !run.finalState.ending) return run.finalState;
+    const run = playCareer(attempt * 7919 + 13, department, 'balanced', 200, level, track);
+    if (run.finalState.player.level >= level && run.finalState.player.track === track && !run.finalState.ending) {
+      return run.finalState;
+    }
   }
-  throw new Error(`Could not fast-forward a ${department} career to level ${level}`);
+  throw new Error(`Could not fast-forward a ${department} career to ${track} tier ${level}`);
 }
 
-const managing = careerAtLevel(4, 'procurement');
+// The line track, explicitly: left to chase salary the bot ends up in a private office, and this
+// file is about running a unit.
+const managing = careerAtLevel(4, 'procurement', 'line');
+
+// And one career that took the branch with no unit at all, to prove the office half really does
+// disappear rather than merely being hidden.
+const specialist = careerAtLevel(3, 'legal', 'expert');
 
 /** Loads a career straight into the browser, as if it had been played there. */
 async function resume(page: Page, game: GameState) {
@@ -118,6 +126,34 @@ test('a senior post runs on a slower clock than a junior one', async ({ page }) 
   const saved = await page.evaluate((key) => localStorage.getItem(key as string), SAVE_KEY);
   const after = JSON.parse(saved ?? '{}') as { calendarMonth: number };
   expect(after.calendarMonth - before).toBe(6);
+});
+
+test('the specialist branch has no office at all, not merely a hidden one', async ({ page }) => {
+  await resume(page, specialist);
+
+  await expect(page.locator('.statsbar__post')).toContainText('Principal Specialist');
+  await expect(page.getByRole('button', { name: 'Team' })).toHaveCount(0);
+
+  // No unit means no delegation: the files are yours to the end.
+  await expect(page.locator('.task').first().getByRole('combobox')).toHaveCount(0);
+});
+
+test('the career screen shows the branch not taken', async ({ page }) => {
+  await resume(page, managing);
+  await page.getByRole('button', { name: 'Career' }).click();
+
+  // Every post in the tree is on screen, and exactly one of them is where the player is.
+  await expect(page.locator('.rung')).toHaveCount(15);
+  await expect(page.locator('.rung--current')).toHaveCount(1);
+  await expect(page.locator('.rung--current .rung__title')).toHaveText('Head of Department');
+
+  // The three tier-4 posts on other branches are shown as the jobs not taken, which is the whole
+  // reason for drawing the tree rather than a ladder.
+  await expect(page.locator('.rung--missed')).toHaveCount(3);
+  await expect(page.locator('.rung--missed').first()).toBeVisible();
+
+  // And every tier-5 post is reachable from a Head of Department, so all four are open.
+  await expect(page.locator('.rung--open')).toHaveCount(4);
 });
 
 test('the Team tab only exists once there is a team', async ({ page }) => {

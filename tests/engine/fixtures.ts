@@ -7,7 +7,7 @@
 
 import type { ContentRegistry } from '../../src/engine/registry';
 import type {
-  CareerLevel,
+  Post,
   Department,
   DepartmentId,
   GameEvent,
@@ -25,9 +25,16 @@ function department(id: DepartmentId): Department {
   };
 }
 
-export const testCareerLevels: CareerLevel[] = [
+/**
+ * A three-tier career with one fork, so tests can exercise the graph without depending on the
+ * shipped fifteen-post tree. Tier 3 offers a choice: a unit to run, or a specialist post with
+ * none — which is exactly the shape the engine has to handle.
+ */
+export const testPosts: Post[] = [
   {
-    level: 1,
+    id: 'post.test.junior',
+    tier: 1,
+    track: 'line',
     titleKey: 'career.1.title',
     orgKey: 'career.1.org',
     orgShortKey: 'career.1.org_short',
@@ -35,9 +42,12 @@ export const testCareerLevels: CareerLevel[] = [
     effortPoints: 10,
     taskSlots: 3,
     monthsPerTurn: 1,
+    from: [],
   },
   {
-    level: 2,
+    id: 'post.test.senior',
+    tier: 2,
+    track: 'line',
     titleKey: 'career.2.title',
     orgKey: 'career.2.org',
     orgShortKey: 'career.2.org_short',
@@ -45,10 +55,17 @@ export const testCareerLevels: CareerLevel[] = [
     effortPoints: 11,
     taskSlots: 4,
     monthsPerTurn: 1,
-    promotion: { minReputation: 35, minPerformance: 50, minTurnsAtLevel: 8 },
+    from: [
+      {
+        from: 'post.test.junior',
+        requires: { minReputation: 35, minPerformance: 50, minTurnsAtLevel: 8 },
+      },
+    ],
   },
   {
-    level: 3,
+    id: 'post.test.head',
+    tier: 3,
+    track: 'line',
     titleKey: 'career.3.title',
     orgKey: 'career.3.org',
     orgShortKey: 'career.3.org_short',
@@ -58,12 +75,35 @@ export const testCareerLevels: CareerLevel[] = [
     monthsPerTurn: 2,
     headcount: 3,
     monthlyBudget: 9000,
-    promotion: {
-      minReputation: 50,
-      minPerformance: 55,
-      minPoliticalCapital: 25,
-      minTurnsAtLevel: 10,
-    },
+    from: [
+      {
+        from: 'post.test.senior',
+        requires: {
+          minReputation: 50,
+          minPerformance: 55,
+          minPoliticalCapital: 25,
+          minTurnsAtLevel: 10,
+        },
+      },
+    ],
+  },
+  {
+    id: 'post.test.specialist',
+    tier: 3,
+    track: 'expert',
+    titleKey: 'career.3.title',
+    orgKey: 'career.3.org',
+    orgShortKey: 'career.3.org_short',
+    baseSalary: 3800,
+    effortPoints: 15,
+    taskSlots: 3,
+    monthsPerTurn: 2,
+    from: [
+      {
+        from: 'post.test.senior',
+        requires: { minReputation: 48, minPerformance: 62, minTurnsAtLevel: 10 },
+      },
+    ],
   },
 ];
 
@@ -289,7 +329,7 @@ export function makeTestRegistry(): ContentRegistry {
 
   return {
     departments,
-    careerLevels: testCareerLevels,
+    posts: testPosts,
     tasks: Object.fromEntries(testTasks.map((t) => [t.id, t])),
     events: Object.fromEntries(testEvents.map((e) => [e.id, e])),
     staffNames: ['Ada Fixture', 'Bo Sample', 'Cato Stub', 'Dita Mock', 'Enzo Proxy'],

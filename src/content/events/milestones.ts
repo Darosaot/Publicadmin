@@ -46,7 +46,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'Northbridge',
     body: 'A hundred and forty thousand people instead of eighteen thousand. The building has a lift, the department has a structure chart, and on your second day someone asks your opinion in a meeting because of the post you now hold rather than because they know you.',
-    conditions: { minLevel: 2, maxLevel: 2 },
+    conditions: { minLevel: 2, maxLevel: 2, tracks: ['line'] },
     choices: [
       {
         id: 'listen',
@@ -87,7 +87,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'The Region',
     body: 'Regional government. Your unit has eleven people in it and you are responsible for what all eleven of them do, which is a different job from the one you have been good at. Your first decision is how to spend your own week.',
-    conditions: { minLevel: 3, maxLevel: 3 },
+    conditions: { minLevel: 3, maxLevel: 3, tracks: ['line'] },
     choices: [
       {
         id: 'do_the_work',
@@ -126,7 +126,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'The Agency',
     body: 'National level. The decisions have a nought on the end that was not there before, and the distance between you and the person affected by them is now four organisations and a data table. Somebody asks you to sign something on your third day that would have taken you a fortnight to check in Alderford.',
-    conditions: { minLevel: 4, maxLevel: 4 },
+    conditions: { minLevel: 4, maxLevel: 4, tracks: ['line'] },
     choices: [
       {
         id: 'check',
@@ -164,7 +164,7 @@ export const milestoneEvents = [
     kind: 'milestone',
     title: 'The Ministry',
     body: 'Director-General. There is a car, which you did not ask for, and a private office, which you did not know was a thing. On the first morning the outgoing DG tells you the only thing worth knowing: "Everything that reaches this desk has already been decided by someone. Your job is to find out by whom, and whether they were entitled to."',
-    conditions: { minLevel: 5, maxLevel: 5 },
+    conditions: { minLevel: 5, maxLevel: 5, tracks: ['line'] },
     choices: [
       {
         id: 'trace',

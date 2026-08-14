@@ -8,7 +8,7 @@
  * nothing should dominate.
  */
 
-import { DEPARTMENT_IDS } from '../src/engine/types';
+import { DEPARTMENT_IDS, TRACK_IDS } from '../src/engine/types';
 import { playMany, summarise, type RunResult } from '../tests/engine/autoplay';
 
 const seeds = Array.from({ length: 40 }, (_, i) => i * 7919 + 13);
@@ -50,6 +50,19 @@ for (const department of DEPARTMENT_IDS) {
     `  ${department.padEnd(12)} level ${round(sub.meanLevel)}  ` +
       `rep ${round(sub.meanReputation)}  stress ${round(sub.meanStress)}  ` +
       `integrity ${round(sub.meanIntegrity)}  years ${round(sub.meanYears)}`,
+  );
+}
+
+console.log('\nBy track, played deliberately');
+for (const track of TRACK_IDS) {
+  const runs = playMany(seeds.slice(0, 16), DEPARTMENT_IDS, 'balanced', track);
+  const sub = summarise(runs);
+  const onTrack = runs.filter((r) => r.track === track).length;
+  console.log(
+    `  ${track.padEnd(11)} level ${round(sub.meanLevel)}  rep ${round(sub.meanReputation)}  ` +
+      `pc ${round(sub.meanPoliticalCapital)}  integrity ${round(sub.meanIntegrity)}  ` +
+      `stress ${round(sub.meanStress)}  ` +
+      `stayed on it ${((100 * onTrack) / runs.length).toFixed(0)}%`,
   );
 }
 

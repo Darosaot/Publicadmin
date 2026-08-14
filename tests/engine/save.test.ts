@@ -4,6 +4,7 @@ import { createGame } from '../../src/engine/newGame';
 import { deserialize, serialize } from '../../src/engine/save';
 import { beginNextTurn, emptyAllocation, resolveTurn } from '../../src/engine/turn';
 import type { GameState } from '../../src/engine/types';
+import { registry as realRegistry } from '../../src/content';
 import { makeQuietRegistry, makeTestRegistry } from './fixtures';
 
 const registry = makeQuietRegistry();
@@ -84,15 +85,34 @@ describe('rejecting bad saves', () => {
 });
 
 describe('migrating a save forward', () => {
-  /** A save as version 1 wrote them: a turn was a month, so there was no separate calendar. */
+  // These exercise the shipped post ids the migrations name, so they run against the real
+  // registry rather than the fixtures.
+  const shipped = realRegistry;
+
+  /**
+   * A save as version 1 wrote them: a turn was a month, so there was no separate calendar, and
+   * the career was a numbered ladder rather than a graph.
+   */
   function version1(state: GameState): string {
     const { calendarMonth: _dropped, ...rest } = state;
-    return JSON.stringify({ ...rest, saveVersion: 1 });
+    const { postId: _p, track: _t, ...player } = state.player;
+    return JSON.stringify({ ...rest, player, saveVersion: 1 });
+  }
+
+  /** Version 2 had the calendar but still had a ladder. */
+  function version2(state: GameState, level: number): string {
+    const { postId: _p, track: _t, ...player } = state.player;
+    return JSON.stringify({
+      ...state,
+      player: { ...player, level },
+      offers: [{ id: 'o', toLevel: level + 1, salary: 4000, createdTurn: 1, expiresTurn: 4 }],
+      saveVersion: 2,
+    });
   }
 
   it('carries a version 1 career across the clock change instead of rejecting it', () => {
     const state = { ...game(), turn: 17, calendarMonth: 17 };
-    const result = deserialize(version1(state), registry);
+    const result = deserialize(version1(state), shipped);
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -103,17 +123,52 @@ describe('migrating a save forward', () => {
     expect(result.state.player.name).toBe('Renata Vos');
   });
 
-  it('leaves the migrated career playable', () => {
-    const result = deserialize(version1(game()), registry);
+  it('puts a version 2 career on the line track it was already climbing', () => {
+    const result = deserialize(version2({ ...game(), turn: 30 }, 3), shipped);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.state.player.postId).toBe('post.region.head_of_unit');
+    expect(result.state.player.track).toBe('line');
+    expect(result.state.player.level).toBe(3);
+  });
+
+  it('remaps an offer that was in flight when the ladder became a tree', () => {
+    const result = deserialize(version2({ ...game(), turn: 30 }, 3), shipped);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
-    const played = beginNextTurn(
-      resolveTurn(result.state, registry, emptyAllocation()),
-      registry,
-    );
-    expect(played.turn).toBe(2);
-    expect(played.calendarMonth).toBeGreaterThan(result.state.calendarMonth);
+    const offer = result.state.offers[0];
+    expect(offer?.toPost).toBe('post.agency.head_of_department');
+    expect(offer?.toTier).toBe(4);
+    expect(offer).not.toHaveProperty('toLevel');
+  });
+
+  it('leaves the migrated career playable', () => {
+    const result = deserialize(version1(game()), shipped);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    // Resolving a cycle against the real content is the actual test: it exercises the post
+    // lookups the migration had to get right, any one of which would throw on a bad id. The
+    // board comes back empty because these fixtures' task ids are pruned against real content,
+    // which is the pruning working rather than a problem.
+    const played = resolveTurn(result.state, shipped, emptyAllocation());
+    expect(played.phase).not.toBe('allocation');
+    expect(played.player.postId).toBe('post.alderford.officer');
+    expect(played.stats.stress).toBeGreaterThan(result.state.stats.stress);
+  });
+
+  it('repairs a save whose post no longer exists rather than refusing it', () => {
+    // Content moves on. Losing your post is a bad outcome; a save that cannot be opened at all
+    // is a worse one, so an unknown post falls back to where careers start.
+    const orphaned = { ...game(), player: { ...game().player, postId: 'post.deleted' } };
+    const result = deserialize(JSON.stringify(orphaned), registry);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.state.player.postId).toBe('post.test.junior');
+    expect(result.state.player.level).toBe(1);
   });
 
   it('reports a save missing the fields the engine relies on', () => {

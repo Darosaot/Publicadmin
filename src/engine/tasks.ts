@@ -23,7 +23,7 @@ import {
   TASK_EFFORT_MULTIPLIER,
   REFERENCE_TASK_SLOTS,
 } from './constants';
-import { getCareerLevel, type ContentRegistry } from './registry';
+import { getPost, type ContentRegistry } from './registry';
 import { nextInt, nextRange, weightedPick } from './rng';
 import type { ActiveTask, GameState, QualityTier, TaskTemplate } from './types';
 
@@ -71,7 +71,7 @@ export function isTemplateEligible(
 
 /** Tops the board back up to the level's slot count. */
 export function refillBoard(state: GameState, registry: ContentRegistry): GameState {
-  const slots = getCareerLevel(registry, state.player.level).taskSlots;
+  const slots = getPost(registry, state.player.postId).taskSlots;
   let next = state;
 
   const allEligible = Object.values(registry.tasks).filter((t) => isTemplateEligible(t, next));

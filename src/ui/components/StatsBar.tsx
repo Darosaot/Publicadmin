@@ -1,14 +1,14 @@
 import { MAX_TURNS } from '../../engine/constants';
 import { STAT_IDS, type GameState } from '../../engine/types';
 import { useT } from '../../i18n';
-import { getCareerLevel } from '../../engine/registry';
+import { getPost } from '../../engine/registry';
 import { registry } from '../../content';
 import { formatDate, formatSalary } from '../format';
 import { Meter } from './Meter';
 
 export function StatsBar({ game }: { game: GameState }) {
   const t = useT();
-  const level = getCareerLevel(registry, game.player.level);
+  const post = getPost(registry, game.player.postId);
   const deltas = game.lastReport?.statDeltas ?? {};
 
   return (
@@ -17,7 +17,7 @@ export function StatsBar({ game }: { game: GameState }) {
         <p className="eyebrow">{formatDate(t, game)}</p>
         <h1 className="statsbar__name">{game.player.name}</h1>
         <p className="statsbar__post">
-          {t(level.titleKey)} · {t(level.orgKey)}
+          {t(post.titleKey)} · {t(post.orgKey)}
         </p>
         <p className="statsbar__meta">
           <span className="statsbar__salary">{formatSalary(game.player.salary)}</span>

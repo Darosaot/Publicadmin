@@ -79,20 +79,32 @@ describe('reviews', () => {
   });
 });
 
+const SENIOR = 'post.test.senior';
+const HEAD = 'post.test.head';
+const SPECIALIST = 'post.test.specialist';
+
 describe('promotion requirements', () => {
   it('checks reputation, performance, political capital and time served', () => {
-    expect(meetsRequirements(promotable(), registry, 2)).toBe(true);
+    expect(meetsRequirements(promotable(), registry, SENIOR)).toBe(true);
 
     const green = game({ player: { ...game().player, turnsAtLevel: 2 } }, { reputation: 45, performance: 60 });
-    expect(meetsRequirements(green, registry, 2)).toBe(false);
-
-    const unknown = game({ player: { ...game().player, turnsAtLevel: 20 } }, { reputation: 90, performance: 90 });
-    expect(meetsRequirements(unknown, registry, 2)).toBe(true);
-    expect(meetsRequirements(unknown, registry, 3)).toBe(false); // political capital still 10
+    expect(meetsRequirements(green, registry, SENIOR)).toBe(false);
   });
 
-  it('has no requirements to satisfy for a level that does not exist', () => {
-    expect(meetsRequirements(promotable(), registry, 9)).toBe(false);
+  it('is judged per edge, not per destination', () => {
+    // From Senior Officer both tier-3 posts are open, on different terms: the unit wants
+    // political capital, the specialist post wants the quality of the work.
+    const senior = game(
+      { player: { ...game().player, postId: SENIOR, level: 2, turnsAtLevel: 20 } },
+      { reputation: 55, performance: 65, politicalCapital: 10 },
+    );
+    expect(meetsRequirements(senior, registry, HEAD)).toBe(false); // political capital still 10
+    expect(meetsRequirements(senior, registry, SPECIALIST)).toBe(true);
+  });
+
+  it('offers nothing for a post that cannot be reached from here', () => {
+    expect(meetsRequirements(promotable(), registry, HEAD)).toBe(false);
+    expect(meetsRequirements(promotable(), registry, 'post.nope')).toBe(false);
   });
 
   it('improves the odds the further past the bar you are, up to a ceiling', () => {
@@ -100,9 +112,9 @@ describe('promotion requirements', () => {
     const strong = game({}, { reputation: 60 });
     const stellar = game({}, { reputation: 100 });
 
-    expect(offerChance(bare, registry, 2)).toBeCloseTo(0.35);
-    expect(offerChance(strong, registry, 2)).toBeCloseTo(0.6);
-    expect(offerChance(stellar, registry, 2)).toBeCloseTo(0.8);
+    expect(offerChance(bare, registry, SENIOR)).toBeCloseTo(0.35);
+    expect(offerChance(strong, registry, SENIOR)).toBeCloseTo(0.6);
+    expect(offerChance(stellar, registry, SENIOR)).toBeCloseTo(0.8);
   });
 });
 
@@ -123,10 +135,11 @@ describe('offers', () => {
     }
   });
 
-  it('does not stack a second offer for the same level', () => {
+  it('does not stack a second offer for the same post', () => {
     const existing: JobOffer = {
-      id: 'offer-2-1',
-      toLevel: 2,
+      id: 'offer-senior-1',
+      toPost: SENIOR,
+      toTier: 2,
       salary: 2900,
       createdTurn: 1,
       expiresTurn: 4,
@@ -135,8 +148,28 @@ describe('offers', () => {
     expect(checkForOffer(state, registry).offer).toBeUndefined();
   });
 
-  it('stops offering once the ladder runs out', () => {
-    const top = game({ player: { ...game().player, level: 3, turnsAtLevel: 40 } }, { reputation: 100, performance: 100, politicalCapital: 100 });
+  it('can offer either branch of a fork, on its own terms', () => {
+    // Strong on every axis, standing at the fork: over enough seeds both tier-3 posts show up.
+    const seen = new Set<string>();
+    for (let seed = 0; seed < 60; seed += 1) {
+      const state = {
+        ...game(
+          { player: { ...game().player, postId: SENIOR, level: 2, turnsAtLevel: 20 } },
+          { reputation: 90, performance: 90, politicalCapital: 90 },
+        ),
+        rngState: seed * 7919 + 1,
+      };
+      const offer = checkForOffer(state, registry).offer;
+      if (offer) seen.add(offer.toPost);
+    }
+    expect(seen).toEqual(new Set([HEAD, SPECIALIST]));
+  });
+
+  it('stops offering once the tree runs out', () => {
+    const top = game(
+      { player: { ...game().player, postId: HEAD, level: 3, turnsAtLevel: 40 } },
+      { reputation: 100, performance: 100, politicalCapital: 100 },
+    );
     expect(checkForOffer(top, registry).offer).toBeUndefined();
   });
 
@@ -151,20 +184,20 @@ describe('offers', () => {
   });
 
   it('expires offers once their window closes', () => {
-    const offer: JobOffer = { id: 'o', toLevel: 2, salary: 2900, createdTurn: 1, expiresTurn: 4 };
+    const offer: JobOffer = { id: 'o', toPost: SENIOR, toTier: 2, salary: 2900, createdTurn: 1, expiresTurn: 4 };
     expect(expireOffers(game({ turn: 4, offers: [offer] })).offers).toHaveLength(1);
     expect(expireOffers(game({ turn: 5, offers: [offer] })).offers).toHaveLength(0);
   });
 
   it('drops an offer that is declined', () => {
-    const offer: JobOffer = { id: 'o', toLevel: 2, salary: 2900, createdTurn: 1, expiresTurn: 4 };
+    const offer: JobOffer = { id: 'o', toPost: SENIOR, toTier: 2, salary: 2900, createdTurn: 1, expiresTurn: 4 };
     expect(declineOffer(game({ offers: [offer] }), 'o').offers).toHaveLength(0);
   });
 });
 
 describe('taking the job', () => {
   it('moves the player up, pays the new salary and hands them a fresh desk', () => {
-    const offer: JobOffer = { id: 'o', toLevel: 2, salary: 3050, createdTurn: 1, expiresTurn: 4 };
+    const offer: JobOffer = { id: 'o', toPost: SENIOR, toTier: 2, salary: 3050, createdTurn: 1, expiresTurn: 4 };
     const state = promotable({ offers: [offer] });
     const next = acceptOffer(state, registry, 'o');
 
@@ -178,7 +211,7 @@ describe('taking the job', () => {
   });
 
   it('scales the workload on the new desk to the bigger post', () => {
-    const offer: JobOffer = { id: 'o', toLevel: 2, salary: 3050, createdTurn: 1, expiresTurn: 4 };
+    const offer: JobOffer = { id: 'o', toPost: SENIOR, toTier: 2, salary: 3050, createdTurn: 1, expiresTurn: 4 };
     const next = acceptOffer(promotable({ offers: [offer] }), registry, 'o');
     const easy = next.tasks.find((t) => t.templateId === 'task.test.easy');
     // baseEffort 4 at level 2 rounds to 4 * 1.12 = 4.48 -> 4; the hard one shows the scaling.

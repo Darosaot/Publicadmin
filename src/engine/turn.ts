@@ -46,7 +46,7 @@ import {
   isReviewDue,
   runReview,
 } from './career';
-import { getCareerLevel, type ContentRegistry } from './registry';
+import { getPost, type ContentRegistry } from './registry';
 import { creditScale, isComplete, isDue, refillBoard, rollQuality, scaleCredit } from './tasks';
 import {
   adjustStaffMorale,
@@ -91,7 +91,7 @@ export function effortAvailable(
   overtime: boolean,
   agencyTemps = 0,
 ): number {
-  const base = getCareerLevel(registry, state.player.level).effortPoints;
+  const base = getPost(registry, state.player.postId).effortPoints;
   const bought = Math.min(Math.max(0, agencyTemps), AGENCY_TEMP_MAX) * AGENCY_TEMP_EFFORT;
   return base + (overtime ? OVERTIME_POINTS : 0) + bought;
 }
@@ -252,7 +252,7 @@ export function resolveTurn(
   };
 
   // One file is worth less to a director with eight of them than to an officer with four.
-  const credit = creditScale(getCareerLevel(registry, next.player.level).taskSlots);
+  const credit = creditScale(getPost(registry, next.player.postId).taskSlots);
 
   const completed: CompletedTaskReport[] = [];
   const failed: FailedTaskReport[] = [];
@@ -494,7 +494,7 @@ export function finalizeTurn(state: GameState, registry: ContentRegistry): GameS
     const offerLog: LogEntry = {
       turn: next.turn,
       messageKey: 'log.offer_received',
-      params: { org: getCareerLevel(registry, offered.offer.toLevel).orgShortKey },
+      params: { org: getPost(registry, offered.offer.toPost).orgShortKey },
       tone: 'good',
     };
     next = { ...next, log: [...next.log, offerLog].slice(-LOG_LIMIT) };
@@ -513,7 +513,7 @@ export function beginNextTurn(state: GameState, registry: ContentRegistry): Game
   if (state.phase !== 'report' || state.ending) return state;
 
   // The calendar moves by the length of the cycle you have just worked, not by a flat month.
-  const worked = getCareerLevel(registry, state.player.level).monthsPerTurn;
+  const worked = getPost(registry, state.player.postId).monthsPerTurn;
 
   let next: GameState = {
     ...state,

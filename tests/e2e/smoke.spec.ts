@@ -123,15 +123,18 @@ test('an event blocks the month until it is decided', async ({ page }) => {
   await expect(dialog.locator('.outcome')).toBeVisible();
 });
 
-test('the career screen shows the ladder and what the next post needs', async ({ page }) => {
+test('the career screen shows the tree and what each way onward needs', async ({ page }) => {
   await startCareer(page, 'Policy');
 
   await page.getByRole('button', { name: 'Career' }).click();
-  await expect(page.getByRole('heading', { name: 'The ladder' })).toBeVisible();
-  await expect(page.locator('.rung')).toHaveCount(5);
+  await expect(page.getByRole('heading', { name: 'Where this can go' })).toBeVisible();
   await expect(page.locator('.rung--current .rung__title')).toHaveText('Administrative Officer');
   await expect(page.getByText('No offers at the moment.', { exact: false })).toBeVisible();
-  await expect(page.locator('.requirement')).toHaveCount(3);
+
+  // Two posts are reachable from Alderford — the council and the audit authority — and each gets
+  // its own requirements panel, because they are entered on different terms.
+  await expect(page.locator('.rung--open')).toHaveCount(2);
+  await expect(page.locator('.panel', { hasText: 'To be offered' })).toHaveCount(2);
 
   await page.getByRole('button', { name: 'Desk' }).click();
   await expect(page.locator('.board')).toBeVisible();

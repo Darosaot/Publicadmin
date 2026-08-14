@@ -178,7 +178,7 @@ export function statDeltas(before: PlayerStats, after: PlayerStats): Partial<Pla
 
 /** Why a condition failed, so the UI can tell the player what they're missing. */
 export interface ConditionFailure {
-  reason: 'level' | 'department' | 'turn' | 'stat' | 'salary' | 'flag' | 'team';
+  reason: 'level' | 'department' | 'track' | 'turn' | 'stat' | 'salary' | 'flag' | 'team';
   stat?: StatId;
   required?: number;
   comparison?: 'min' | 'max';
@@ -200,6 +200,9 @@ export function checkCondition(
   }
   if (condition.departments && !condition.departments.includes(player.department)) {
     return { reason: 'department' };
+  }
+  if (condition.tracks && !condition.tracks.includes(player.track)) {
+    return { reason: 'track' };
   }
   if (condition.minTurn !== undefined && turn < condition.minTurn) {
     return { reason: 'turn', required: condition.minTurn, comparison: 'min' };

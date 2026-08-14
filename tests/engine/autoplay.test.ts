@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { MAX_TURNS } from '../../src/engine/constants';
-import { ENDING_IDS, DEPARTMENT_IDS, STAT_IDS, type DepartmentId } from '../../src/engine/types';
+import {
+  ENDING_IDS,
+  DEPARTMENT_IDS,
+  STAT_IDS,
+  TRACK_IDS,
+  type DepartmentId,
+  type TrackId,
+} from '../../src/engine/types';
 import { playCareer, playMany, summarise } from './autoplay';
 
 /**
@@ -107,6 +114,45 @@ describe('simulated careers', () => {
       best.level - worst.level,
       `${best.department} outruns ${worst.department} by too much`,
     ).toBeLessThan(1.2);
+  });
+});
+
+describe('every track is a real career', () => {
+  // Played deliberately, one branch at a time. A branch nobody can climb is dead content, and a
+  // branch that is strictly better than the others makes the choice meaningless.
+  const byTrack = new Map<TrackId, ReturnType<typeof summarise>>(
+    TRACK_IDS.map((track) => [
+      track,
+      summarise(playMany(seeds.slice(0, 8), DEPARTMENT_IDS, 'balanced', track)),
+    ]),
+  );
+
+  it.each(TRACK_IDS)('%s is survivable and not a walkover', (track: TrackId) => {
+    const summary = byTrack.get(track)!;
+    expect(summary.meanLevel, `${track} goes nowhere`).toBeGreaterThan(2.5);
+    expect(summary.meanLevel, `${track} is a walkover`).toBeLessThan(5);
+    expect(summary.meanTurns).toBeGreaterThan(30);
+  });
+
+  it('does not make one branch obviously the right one', () => {
+    const levels = [...byTrack.entries()].map(([track, s]) => ({ track, level: s.meanLevel }));
+    const best = levels.reduce((a, b) => (a.level >= b.level ? a : b));
+    const worst = levels.reduce((a, b) => (a.level <= b.level ? a : b));
+
+    expect(
+      best.level - worst.level,
+      `${best.track} outruns ${worst.track} by too much`,
+    ).toBeLessThan(1.2);
+  });
+
+  it('actually reaches the branches, rather than reporting the line track four times', () => {
+    // The first per-track run looked healthy and was measuring nothing: only one offer exists per
+    // cycle, so preferring a track among simultaneous offers never changed a decision.
+    for (const track of TRACK_IDS) {
+      const runs = playMany(seeds.slice(0, 8), DEPARTMENT_IDS, 'balanced', track);
+      const ended = runs.filter((r) => r.track === track).length;
+      expect(ended / runs.length, `nobody ends up on ${track}`).toBeGreaterThan(0.5);
+    }
   });
 });
 

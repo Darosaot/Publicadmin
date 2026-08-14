@@ -104,7 +104,7 @@ The same shape gates events and individual choices:
 {
   minLevel?: number;              maxLevel?: number;
   departments?: DepartmentId[];   minTurn?: number;
-  minYearsElapsed?: number;
+  minYearsElapsed?: number;        tracks?: TrackId[];
   minStat?: { reputation?: 40, politicalCapital?: 25, … };
   maxStat?: { integrity?: 30, … };
   requiredFlags?: string[];       forbiddenFlags?: string[];
@@ -202,6 +202,29 @@ departments drift more than 1.2 levels apart; `npm run balance` prints the real 
 
 Only names and numbers are interpolated (`{name}`, `{amount}`), so no sentence depends on English
 grammar for its structure.
+
+## Writing for a track
+
+The career is a graph of **posts** grouped into **tiers**, and a tier is what `minLevel` and
+`maxLevel` have always meant — so every existing gate still works untouched. What is new is
+`tracks`, for content that only makes sense on one branch:
+
+```ts
+conditions: { tracks: ['oversight'], minLevel: 3 }
+```
+
+Use it when the *scene* would not happen elsewhere: an inspection, a reshuffle rumour, a question
+put to you because nobody reports to you. Do not use it to make a track easier or harder — that is
+a job for the post's numbers in `careers.ts`, where it can be measured.
+
+Two things to keep in mind:
+
+- **A post with no unit is not a lesser post.** The expert track has no staff and no budget, so
+  management events (`requiresTeam: true`) simply never fire there. It needs its own material or
+  it is the same game with fewer options.
+- **`npm run balance` reports per track**, and `tests/engine/autoplay.test.ts` fails if the best
+  and worst drift more than 1.2 mean levels apart. Adding a pile of content to one branch is
+  exactly how that gap opens.
 
 ## Flags, and keeping the promise
 
