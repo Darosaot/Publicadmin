@@ -156,6 +156,36 @@ test('the career screen shows the branch not taken', async ({ page }) => {
   await expect(page.locator('.rung--open')).toHaveCount(4);
 });
 
+test('the people you know are on their own screen, and it remembers', async ({ page }) => {
+  await resume(page, managing);
+
+  await page.getByRole('button', { name: 'People' }).click();
+  await expect(page.getByRole('heading', { name: 'People you know' })).toBeVisible();
+
+  // Anyone met has a card; nobody unmet does.
+  const cards = page.locator('.person');
+  const shown = await cards.count();
+  expect(shown).toBeGreaterThan(2);
+  expect(shown).toBeLessThanOrEqual(8);
+
+  // Each card says how they regard you rather than showing the raw number.
+  await expect(cards.first().locator('.person__tone')).not.toBeEmpty();
+  await expect(cards.first().locator('.person__track')).toBeVisible();
+});
+
+test('the People tab stays hidden until somebody has been met', async ({ page }) => {
+  await page.goto('/?seed=42');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+
+  await page.getByRole('button', { name: 'New game' }).click();
+  await page.getByLabel('Your name').fill('Renata Vos');
+  await page.getByRole('button', { name: /^Legal/ }).click();
+  await page.getByRole('button', { name: 'Take the job' }).click();
+
+  await expect(page.getByRole('button', { name: 'People' })).toHaveCount(0);
+});
+
 test('the Team tab only exists once there is a team', async ({ page }) => {
   await page.goto('/?seed=42');
   await page.evaluate(() => localStorage.clear());

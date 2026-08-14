@@ -3,7 +3,7 @@
 > **Generated file.** Produced from the shipped content by `npm run docs:script`. Edit the
 > content in `src/content/` and regenerate — changes made directly to this file are lost.
 
-The complete corpus: 189 events, 62 task templates, 5 departments, 15 posts across 4 tracks and 6 endings. Stat effects are shown after each outcome.
+The complete corpus: 213 events, 62 task templates, 5 departments, 15 posts across 4 tracks and 6 endings. Stat effects are shown after each outcome.
 
 ## Departments
 

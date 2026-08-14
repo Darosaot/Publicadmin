@@ -1565,3 +1565,83 @@ input {
   gap: var(--s-2);
   align-items: center;
 }
+
+
+/* ------------------------------------------------------------------ people */
+
+.people {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: var(--s-3);
+}
+
+.person {
+  padding: var(--s-4);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  background: var(--c-surface);
+}
+
+.person__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-2);
+  margin-bottom: var(--s-1);
+}
+
+.person__name {
+  font-size: var(--fs-base);
+  font-weight: 700;
+}
+
+.person__tone {
+  white-space: nowrap;
+  font-size: var(--fs-xs);
+  color: var(--c-text-muted);
+}
+
+.person--warm .person__tone { color: var(--c-good); }
+.person--cold .person__tone { color: var(--c-bad); }
+
+.person__role {
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+  margin-bottom: var(--s-3);
+}
+
+/* A bar with a centre mark rather than a number: standing runs both ways from neutral, and
+   showing the figure would invite optimising a relationship instead of having one. */
+.person__track {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--c-border);
+  overflow: hidden;
+  margin-bottom: var(--s-3);
+}
+
+.person__fill {
+  height: 100%;
+  background: var(--c-text-faint);
+  transition: width 200ms ease;
+}
+
+.person--warm .person__fill,
+.person--good .person__fill { background: var(--c-good); }
+.person--wary .person__fill,
+.person--cold .person__fill { background: var(--c-bad); }
+
+.person__mid {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--c-surface);
+}
+
+.person__blurb {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}

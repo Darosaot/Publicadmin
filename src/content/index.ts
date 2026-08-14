@@ -1,6 +1,9 @@
 import type { ContentRegistry } from '../engine/registry';
 import { posts } from './careers';
 import { departments } from './departments';
+
+// Imported for the side effect of registering the cast's strings, and for re-export.
+import './cast';
 import { eventRegistry } from './events';
 import { staffNames } from './staff';
 import { taskRegistry } from './tasks';
@@ -10,6 +13,7 @@ import './endings';
 
 export { departments, departmentList } from './departments';
 export { posts } from './careers';
+export { cast } from './cast';
 export { endingCopy, endingBodyKey } from './endings';
 export { allEvents, eventRegistry } from './events';
 export { allTasks, taskRegistry } from './tasks';

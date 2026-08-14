@@ -117,6 +117,45 @@ validation now fails on any flag that is set but never gated on, and the *Reckon
 events, every one of them unreachable unless you earned it, most waiting several years before they
 arrive.
 
+## 3a. The cast
+
+Eight people recur across a whole career, and what they think of you decides what they do when
+they next appear.
+
+| Person | Who they are |
+| --- | --- |
+| **Elena Vásquez** | Joined the same week you did. The control group for your career. |
+| **Rufus Halloran** | Your first director. Everything you believe about how this is done came from him, including the parts he got wrong. |
+| **Marta Oyelaran** | The union representative — the only person who will tell you the truth about your own unit. |
+| **Tomas Berg** | A journalist. Local paper, then the nationals. |
+| **Inés Reyes** | A councillor who becomes rather more. |
+| **Sofia Lindqvist** | The external auditor, who remembers every file of yours she has ever read. |
+| **Jozef Nowak** | A supplier's account manager, and genuinely good company. |
+| **Aurelia Kess** | The trainee who found something, and what you did about it. |
+
+Each has an introduction, a reappearance in the middle of a career, and a late scene where the
+relationship decides the outcome. In simulation, better than 84% of careers meet each of them, and
+a career contains about **15 scenes involving somebody it already knows**.
+
+### How they are stored, and why that matters
+
+A person is **content, not state**. Names, roles and every line they speak are fixed prose written
+at authoring time — which they have to be, because event text cannot interpolate anything. The
+only thing a save carries is a number, kept in `flags` under `rel.<id>`.
+
+Building the cast on flags rather than on a new `GameState` array was a deliberate choice and not
+just an economy. `cloneState` hand-enumerates every mutable field and `applyEffects` mutates in
+place, so a new object or array on the state would fall through the spread as a shared reference
+and silently corrupt the pre-effect snapshot, with nothing to catch it at compile time. `flags` was
+already cloned. This is why the flag type was widened to `boolean | number` first.
+
+**Standing does not decay.** Reputation and political capital fade because they measure how you are
+doing lately; what a particular person thinks of you is not that. Elena remembers whose name went
+on the correction whether or not you have spoken since — and a cast that forgets is not a cast.
+
+The **People screen** shows who you know and how you stand, described rather than scored: putting a
+figure on the page would invite optimising a relationship instead of having one.
+
 ## 4. Departments
 
 You choose one at the start and keep it for the whole career. It determines which tasks land on
@@ -250,14 +289,16 @@ A random event that fires goes on a **12-turn cooldown**, and events marked `onc
 
 ### The corpus
 
-182 events and 62 task templates. The events break down as 151 random, 21 follow-ups and 10
+213 events and 62 task templates. The events break down as 177 random, 21 follow-ups and 15
 milestones, and the random pool splits roughly evenly between work that could happen in any
 department and work that is specific to one of the five:
 
 | Pool | Events | What it covers |
 | --- | --- | --- |
 | Common | 38 | The building, the institution, your own life in it |
+| Cast | 24 | Eight people who recur, and remember |
 | Reckonings | 17 | Gated entirely on flags: the things that come back |
+| Tracks | 8 | Leaving the ladder, and the top of each branch |
 | Department | 70 | 14 each for legal, projects, finance, procurement and policy |
 | Management | 12 | Only reachable once you have a unit |
 | Leadership | 14 | Only from level 4, where the decisions are institutional |

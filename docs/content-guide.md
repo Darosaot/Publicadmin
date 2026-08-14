@@ -226,6 +226,42 @@ Two things to keep in mind:
   and worst drift more than 1.2 mean levels apart. Adding a pile of content to one branch is
   exactly how that gap opens.
 
+## Writing for the cast
+
+Eight people in `src/content/cast.ts` recur across a career. Each exports helpers that turn into
+ordinary effects and conditions, so an event names them in the prose and gates on the relationship:
+
+```ts
+import { vasquez } from '../cast';
+
+defineEvent('evt.cast.vasquez_panel', {
+  conditions: { ...vasquez.known, minLevel: 4, minYearsElapsed: 12 },
+  choices: [
+    {
+      id: 'lean',
+      label: 'Remind her, gently, of the early years',
+      conditions: vasquez.warm(20),        // → { requiredFlags, minFlag }
+      text: 'You mention Alderford, and the supervisor you both had…',
+      effects: [vasquez.standing(-14)],    // → { kind: 'flagDelta' }
+    },
+  ],
+});
+```
+
+The helpers are `standing(n)`, `meet(n)`, `known`, `unknown`, `warm(n)` and `cold(n)`.
+
+Four rules:
+
+- **Names go in the prose, literally.** `EventModal` renders the body with no params, so there is
+  no interpolation — and there does not need to be, since a cast member's name is fixed at
+  authoring time. Write "Elena Vásquez" into the sentence.
+- **Gate introductions `unknown` and everything else `known`**, or a career will be introduced to a
+  twenty-year colleague in its final year.
+- **Give the reappearances `minYearsElapsed`.** The point of a cast is time passing.
+- **Use conditional outcomes, not separate events, for how they take it.** The same scene resolving
+  differently against `warm` and `cold` is the whole mechanism; a `warm`-gated *event* would just
+  hide content from most players.
+
 ## Flags, and keeping the promise
 
 Setting a flag is a promise that the decision will matter later. It is very easy to make that

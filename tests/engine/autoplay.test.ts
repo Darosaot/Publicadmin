@@ -156,6 +156,41 @@ describe('every track is a real career', () => {
   });
 });
 
+describe('the cast', () => {
+  it('gets met in ordinary play rather than only in theory', () => {
+    // Introductions are gated on not having met, so a career that never runs into anybody means
+    // the gates are wrong, not that the writing is unlucky.
+    const met = new Set<string>();
+    for (const run of results) {
+      for (const flag of Object.keys(run.finalState.flags)) {
+        if (flag.startsWith('met.')) met.add(flag);
+      }
+    }
+    expect(met.size, 'nobody in the cast is ever met').toBeGreaterThan(4);
+  });
+
+  it('remembers: standing moves in both directions across a career', () => {
+    const standings = results.flatMap((r) =>
+      Object.entries(r.finalState.flags)
+        .filter(([flag]) => flag.startsWith('rel.'))
+        .map(([, value]) => (typeof value === 'number' ? value : 0)),
+    );
+
+    expect(standings.length, 'no relationship was ever scored').toBeGreaterThan(10);
+    expect(standings.some((v) => v > 10), 'nobody ever warms to you').toBe(true);
+    expect(standings.some((v) => v < -5), 'nobody is ever put off').toBe(true);
+  });
+
+  it('never meets the same person twice for the first time', () => {
+    // The introductions are `unknown`-gated, so firing one twice would mean the gate is not
+    // holding — and the player would be introduced to a twenty-year colleague in their last year.
+    for (const run of results) {
+      const intros = run.finalState.firedEvents.filter((id) => id.endsWith('_meet'));
+      expect(new Set(intros).size).toBe(intros.length);
+    }
+  });
+});
+
 describe('decisions come back', () => {
   it('fires consequence events that only a past choice can unlock', () => {
     // The reckonings pool is gated entirely on flags set years earlier, so an event from it
