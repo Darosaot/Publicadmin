@@ -50,8 +50,8 @@ export const BASELINE_STRESS_PER_TURN = 2;
  *
  * Integrity is deliberately exempt. A record does not fade.
  */
-export const REPUTATION_DECAY_RATE = 0.05;
-export const POLITICAL_CAPITAL_DECAY_RATE = 0.04;
+export const REPUTATION_DECAY_RATE = 0.046;
+export const POLITICAL_CAPITAL_DECAY_RATE = 0.044;
 export const PERFORMANCE_REVERSION_RATE = 0.05;
 export const PERFORMANCE_BASELINE = 50;
 

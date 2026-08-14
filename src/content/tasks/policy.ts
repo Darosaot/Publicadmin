@@ -6,10 +6,10 @@ export const policyTasks = [
     desc: 'Two pages for someone who will read one of them, ten minutes before speaking about it in public.',
     departments: ['policy'],
     maxLevel: 3,
-    baseEffort: 4,
+    baseEffort: 5,
     deadlineRange: [2, 2],
     difficulty: 1,
-    weight: 14,
+    weight: 12,
     onComplete: {
       excellent: [{ kind: 'stat', stat: 'politicalCapital', delta: 2 }],
     },

@@ -393,7 +393,8 @@ export const departmentExtraEvents = [
         label: 'Find the money somewhere else',
         text: 'Three departments contribute a share in exchange for a mention in the outputs. It is held together with goodwill and it works.',
         effects: [
-          { kind: 'stat', stat: 'politicalCapital', delta: -5 },
+          { kind: 'stat', stat: 'politicalCapital', delta: -4 },
+          { kind: 'stat', stat: 'reputation', delta: 1 },
           { kind: 'stat', stat: 'performance', delta: 3 },
           { kind: 'stat', stat: 'stress', delta: 6 },
         ],
@@ -486,6 +487,7 @@ export const departmentExtraEvents = [
           { kind: 'stat', stat: 'integrity', delta: 5 },
           { kind: 'stat', stat: 'politicalCapital', delta: -4 },
           { kind: 'stat', stat: 'performance', delta: 2 },
+          { kind: 'stat', stat: 'reputation', delta: 2 },
         ],
       },
     ],

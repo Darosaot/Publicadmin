@@ -6,7 +6,7 @@ export const projectsTasks = [
     desc: 'The funding programme wants evidence that month six happened. Month six did happen, but not quite in the order the application promised.',
     departments: ['projects'],
     baseEffort: 6,
-    deadlineRange: [2, 3],
+    deadlineRange: [2, 4],
     difficulty: 2,
     weight: 13,
     onFail: [{ kind: 'queueEvent', eventId: 'evt.followup.audit_letter', delayTurns: 2 }],
@@ -57,7 +57,7 @@ export const projectsTasks = [
     departments: ['projects'],
     baseEffort: 8,
     deadlineRange: [3, 4],
-    difficulty: 3,
+    difficulty: 2,
     weight: 10,
     onComplete: {
       poor: [{ kind: 'queueEvent', eventId: 'evt.followup.audit_letter', delayTurns: 3 }],
@@ -85,10 +85,10 @@ export const projectsTasks = [
     desc: 'A day on site, a checklist, and the growing suspicion that the works you are inspecting are three months behind what the reports say.',
     departments: ['projects'],
     maxLevel: 3,
-    baseEffort: 5,
+    baseEffort: 4,
     deadlineRange: [3, 4],
     difficulty: 1,
-    weight: 9,
+    weight: 13,
   }),
 
   defineTask('task.projects.closure_dossier', {
