@@ -1,5 +1,5 @@
 import { registry } from '../../content';
-import type { ActiveTask } from '../../engine/types';
+import type { ActiveTask, StaffMember } from '../../engine/types';
 import { useT } from '../../i18n';
 import { EffortStepper } from './EffortStepper';
 
@@ -9,17 +9,35 @@ interface TaskCardProps {
   allocated: number;
   headroom: number;
   onChange: (points: number) => void;
+  /** Empty when the player has no unit; the control hides itself. */
+  staff?: StaffMember[];
+  assignedTo?: string;
+  onDelegate?: (staffId: string | null) => void;
+  /** Progress the assignee is expected to add this month, for the projection. */
+  delegatedProgress?: number;
 }
 
-export function TaskCard({ task, turn, allocated, headroom, onChange }: TaskCardProps) {
+export function TaskCard({
+  task,
+  turn,
+  allocated,
+  headroom,
+  onChange,
+  staff = [],
+  assignedTo,
+  onDelegate,
+  delegatedProgress = 0,
+}: TaskCardProps) {
   const t = useT();
   const template = registry.tasks[task.templateId];
   const title = template ? t(template.titleKey) : task.templateId;
 
   const remaining = Math.max(0, task.required - task.progress);
   const monthsLeft = task.deadlineTurn - turn;
-  const projected = Math.min(task.required, task.progress + allocated);
-  const willFinish = task.progress + allocated >= task.required;
+  // What the file will be at month end counts the unit's contribution as well as your own.
+  const incoming = allocated + delegatedProgress;
+  const projected = Math.min(task.required, task.progress + incoming);
+  const willFinish = task.progress + incoming >= task.required;
 
   const deadlineLabel =
     monthsLeft <= 0
@@ -58,18 +76,35 @@ export function TaskCard({ task, turn, allocated, headroom, onChange }: TaskCard
           className="task__fill"
           style={{ width: `${(task.progress / task.required) * 100}%` }}
         />
-        {allocated > 0 && (
+        {incoming > 0 && (
           <div
             className="task__fill task__fill--planned"
             style={{
               left: `${(task.progress / task.required) * 100}%`,
-              width: `${(Math.min(allocated, remaining) / task.required) * 100}%`,
+              width: `${(Math.min(incoming, remaining) / task.required) * 100}%`,
             }}
           />
         )}
       </div>
 
       <div className="task__foot">
+        {onDelegate && staff.length > 0 && (
+          <label className="delegate">
+            <span className="visually-hidden">{t('dash.delegate_to', { task: title })}</span>
+            <select
+              className="delegate__select"
+              value={assignedTo ?? ''}
+              onChange={(event) => onDelegate(event.target.value || null)}
+            >
+              <option value="">{t('dash.delegate_none')}</option>
+              {staff.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <EffortStepper
           value={allocated}
           onChange={onChange}

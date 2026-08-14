@@ -1,0 +1,403 @@
+/**
+ * The unit: the people who work for you, and the money you answer for.
+ *
+ * From the first management post onward the game changes shape. Below it you are the person doing
+ * the work, and effort points are hours at your own desk. Above it most of the output in your name
+ * is produced by other people, and your effort goes on deciding who carries what, keeping them in
+ * a state to carry it, and defending the budget that pays for them.
+ *
+ * Everything here is pure: state in, state out, all randomness through the cursor in the state.
+ */
+
+import {
+  BUDGET_OVERSPEND_REPUTATION,
+  BUDGET_OVERSPEND_TOLERANCE,
+  BUDGET_UNDERSPEND_CUT,
+  BUDGET_UNDERSPEND_REPUTATION,
+  BUDGET_UNDERSPEND_TOLERANCE,
+  BUDGET_YEAR_MONTHS,
+  COACHING_MORALE_GAIN,
+  COACHING_SKILL_GAIN,
+  HIRING_MONTHS,
+  ONE_TO_ONE_MORALE_GAIN,
+  STAFF_ATTRITION_CHANCE,
+  STAFF_ATTRITION_MORALE,
+  STAFF_BASE_OUTPUT,
+  STAFF_MORALE_DRIFT,
+  STAFF_SALARY,
+  STAFF_SKILL_DRIFT_PER_YEAR,
+  STAFF_START_MORALE,
+  STAFF_START_SKILL,
+  TRAINING_SKILL_GAIN,
+} from './constants';
+import { getCareerLevel, type ContentRegistry } from './registry';
+import { nextChance, nextInt, pick } from './rng';
+import type {
+  Allocation,
+  Budget,
+  GameState,
+  Seniority,
+  StaffMember,
+  TeamReport,
+} from './types';
+
+/** Clamps a staff attribute to the same 0–100 range the player's stats use. */
+function clamp(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+export function headcountFor(state: GameState, registry: ContentRegistry): number {
+  return getCareerLevel(registry, state.player.level).headcount ?? 0;
+}
+
+export function hasTeam(state: GameState, registry: ContentRegistry): boolean {
+  return headcountFor(state, registry) > 0;
+}
+
+export function findStaff(state: GameState, id: string): StaffMember | undefined {
+  return state.staff.find((s) => s.id === id);
+}
+
+/* ------------------------------------------------------------ recruitment */
+
+/**
+ * Generates a person. Skill is rolled inside the band for their grade, so a new senior is
+ * reliably better than a new junior but never a known quantity.
+ */
+export function createStaff(
+  state: GameState,
+  registry: ContentRegistry,
+  seniority: Seniority,
+): { state: GameState; staff: StaffMember } {
+  let rng = state.rngState;
+
+  const taken = new Set(state.staff.map((s) => s.name));
+  const available = registry.staffNames.filter((n) => !taken.has(n));
+  const namePick = pick(rng, available.length > 0 ? available : registry.staffNames);
+  rng = namePick.rngState;
+
+  const [skillMin, skillMax] = STAFF_START_SKILL[seniority];
+  const skillRoll = nextInt(rng, skillMin, skillMax);
+  rng = skillRoll.rngState;
+
+  const moraleRoll = nextInt(rng, STAFF_START_MORALE[0], STAFF_START_MORALE[1]);
+  rng = moraleRoll.rngState;
+
+  const staff: StaffMember = {
+    id: `s${state.nextStaffUid}`,
+    name: namePick.value ?? `Officer ${state.nextStaffUid}`,
+    seniority,
+    skill: skillRoll.value,
+    morale: moraleRoll.value,
+    salary: STAFF_SALARY[seniority],
+    monthsInPost: 0,
+  };
+
+  return {
+    state: { ...state, rngState: rng, nextStaffUid: state.nextStaffUid + 1 },
+    staff,
+  };
+}
+
+/**
+ * Builds the unit you inherit on arriving in a management post.
+ *
+ * Deliberately one short of the establishment: every new post comes with a vacancy someone has
+ * been meaning to fill, which puts recruitment in front of the player immediately.
+ */
+export function setupTeamForLevel(state: GameState, registry: ContentRegistry): GameState {
+  const level = getCareerLevel(registry, state.player.level);
+  const headcount = level.headcount ?? 0;
+
+  if (headcount === 0) {
+    return { ...state, staff: [], hiring: undefined, budget: undefined };
+  }
+
+  // A plausible shape: one senior, then officers, with juniors making up the rest.
+  const shape: Seniority[] = [];
+  for (let i = 0; i < headcount - 1; i += 1) {
+    if (i === 0) shape.push('senior');
+    else if (i <= Math.ceil((headcount - 1) / 2)) shape.push('officer');
+    else shape.push('junior');
+  }
+
+  let next = state;
+  const staff: StaffMember[] = [];
+  for (const seniority of shape) {
+    const made = createStaff(next, registry, seniority);
+    next = made.state;
+
+    // You are new; they are not. An inherited unit has history, and showing everyone at nought
+    // months makes it read as a team that was assembled for you this morning.
+    const tenure = nextInt(next.rngState, 4, 60);
+    next = { ...next, rngState: tenure.rngState };
+    staff.push({ ...made.staff, monthsInPost: tenure.value });
+  }
+
+  const budget: Budget = {
+    monthly: level.monthlyBudget ?? 0,
+    balance: 0,
+    yearStartTurn: next.turn,
+    spentThisMonth: 0,
+  };
+
+  return { ...next, staff, hiring: undefined, budget };
+}
+
+export function startHiring(state: GameState, seniority: Seniority): GameState {
+  if (state.hiring) return state;
+  return { ...state, hiring: { seniority, monthsRemaining: HIRING_MONTHS[seniority] } };
+}
+
+export function cancelHiring(state: GameState): GameState {
+  return { ...state, hiring: undefined };
+}
+
+/* ---------------------------------------------------------------- output */
+
+/**
+ * What one person delivers to a file in a month.
+ *
+ * Skill sets the ceiling and morale decides how much of it you actually get, which is why a
+ * neglected expert can be worth less than an ordinary officer who is being looked after.
+ */
+export function staffOutput(staff: StaffMember): number {
+  const base = STAFF_BASE_OUTPUT[staff.seniority];
+  const skillFactor = 0.6 + (0.8 * staff.skill) / 100;
+  const moraleFactor = 0.7 + (0.6 * staff.morale) / 100;
+  return Math.max(1, Math.round(base * skillFactor * moraleFactor));
+}
+
+/** The effective ability behind a delegated file, used in place of your own form. */
+export function delegatedQualityBase(staff: StaffMember): number {
+  return staff.skill * 0.75 + staff.morale * 0.25;
+}
+
+/* --------------------------------------------------------- monthly cycle */
+
+export interface StaffMonthResult {
+  state: GameState;
+  report: TeamReport;
+}
+
+/**
+ * Applies everything the unit does in a month except the task progress itself, which `turn.ts`
+ * folds in alongside the player's own effort.
+ */
+export function resolveStaffMonth(
+  state: GameState,
+  registry: ContentRegistry,
+  allocation: Allocation,
+): StaffMonthResult {
+  const report: TeamReport = { delegatedProgress: [], departures: [], arrivals: [] };
+
+  if (!hasTeam(state, registry)) return { state, report };
+
+  let next = state;
+
+  // Attention: coaching builds capability, one-to-ones build willingness.
+  const coached = new Set(allocation.coaching);
+  const seen = new Set(allocation.oneToOnes);
+  const trained = new Set(allocation.training);
+
+  next = {
+    ...next,
+    staff: next.staff.map((member) => {
+      let { skill, morale } = member;
+
+      morale += STAFF_MORALE_DRIFT;
+      if (coached.has(member.id)) {
+        skill += COACHING_SKILL_GAIN;
+        morale += COACHING_MORALE_GAIN;
+      }
+      if (seen.has(member.id)) morale += ONE_TO_ONE_MORALE_GAIN;
+      if (trained.has(member.id)) skill += TRAINING_SKILL_GAIN;
+
+      // A slow drip of learning by doing.
+      const monthsInPost = member.monthsInPost + 1;
+      if (monthsInPost % 12 === 0) skill += STAFF_SKILL_DRIFT_PER_YEAR;
+
+      return { ...member, skill: clamp(skill), morale: clamp(morale), monthsInPost };
+    }),
+  };
+
+  // Recruitment.
+  if (next.hiring && allocation.recruiting) {
+    const remaining = next.hiring.monthsRemaining - 1;
+    if (remaining <= 0) {
+      const made = createStaff(next, registry, next.hiring.seniority);
+      next = {
+        ...made.state,
+        staff: [...made.state.staff, made.staff],
+        hiring: undefined,
+      };
+      report.arrivals.push({ name: made.staff.name, seniority: made.staff.seniority });
+    } else {
+      next = { ...next, hiring: { ...next.hiring, monthsRemaining: remaining } };
+    }
+  }
+
+  return { state: next, report };
+}
+
+/**
+ * People leave. Low morale makes it likely; a file in their hands makes it expensive, because it
+ * goes back on the board with whatever progress they had made and no one to carry it.
+ */
+export function resolveAttrition(
+  state: GameState,
+  registry: ContentRegistry,
+): StaffMonthResult {
+  const report: TeamReport = { delegatedProgress: [], departures: [], arrivals: [] };
+  if (!hasTeam(state, registry)) return { state, report };
+
+  let next = state;
+  const leaving: string[] = [];
+
+  for (const member of next.staff) {
+    if (member.morale > STAFF_ATTRITION_MORALE) continue;
+
+    // The worse the morale, the likelier the resignation.
+    const severity = (STAFF_ATTRITION_MORALE - member.morale) / STAFF_ATTRITION_MORALE;
+    const roll = nextChance(next.rngState, STAFF_ATTRITION_CHANCE * (0.5 + severity));
+    next = { ...next, rngState: roll.rngState };
+
+    if (roll.value) {
+      leaving.push(member.id);
+      report.departures.push({ name: member.name, reason: 'morale' });
+    }
+  }
+
+  if (leaving.length === 0) return { state: next, report };
+
+  return {
+    state: {
+      ...next,
+      staff: next.staff.filter((s) => !leaving.includes(s.id)),
+      // Whatever they were holding lands back on your desk, unassigned.
+      tasks: next.tasks.map((task) =>
+        task.assignedTo && leaving.includes(task.assignedTo)
+          ? { ...task, assignedTo: undefined }
+          : task,
+      ),
+    },
+    report,
+  };
+}
+
+/* ---------------------------------------------------------------- budget */
+
+export function staffCost(state: GameState): number {
+  return state.staff.reduce((sum, member) => sum + member.salary, 0);
+}
+
+export interface BudgetResult {
+  state: GameState;
+  delta: number;
+  verdict?: 'overspent' | 'underspent';
+}
+
+/**
+ * Charges the month to the budget and, once a year, judges the result.
+ *
+ * Both directions of failure are punished. Overspending is the obvious one. Underspending costs
+ * you too, and costs you next year's allocation, because a budget you did not need is a budget
+ * you will not be given again — which is exactly why public bodies spend their remainder in
+ * December.
+ */
+export function resolveBudget(state: GameState, discretionarySpend: number): BudgetResult {
+  if (!state.budget) return { state, delta: 0 };
+
+  const spend = staffCost(state) + Math.max(0, discretionarySpend);
+  const delta = state.budget.monthly - spend;
+
+  let budget: Budget = {
+    ...state.budget,
+    balance: state.budget.balance + delta,
+    spentThisMonth: 0,
+  };
+  let next: GameState = { ...state, budget };
+  let verdict: 'overspent' | 'underspent' | undefined;
+
+  const monthsElapsed = next.turn - budget.yearStartTurn + 1;
+  if (monthsElapsed >= BUDGET_YEAR_MONTHS) {
+    const annual = budget.monthly * BUDGET_YEAR_MONTHS;
+    const stats = { ...next.stats };
+
+    if (budget.balance < -annual * BUDGET_OVERSPEND_TOLERANCE) {
+      verdict = 'overspent';
+      stats.reputation = clamp(stats.reputation + BUDGET_OVERSPEND_REPUTATION);
+    } else if (budget.balance > annual * BUDGET_UNDERSPEND_TOLERANCE) {
+      verdict = 'underspent';
+      stats.reputation = clamp(stats.reputation + BUDGET_UNDERSPEND_REPUTATION);
+      budget = { ...budget, monthly: Math.round(budget.monthly * (1 - BUDGET_UNDERSPEND_CUT)) };
+    }
+
+    budget = { ...budget, balance: 0, yearStartTurn: next.turn + 1 };
+    next = { ...next, stats, budget };
+  }
+
+  return { state: next, delta, verdict };
+}
+
+/* ------------------------------------------------------------ assignment */
+
+/** Records who is carrying what, dropping assignments to people who are no longer here. */
+export function applyAssignments(state: GameState, allocation: Allocation): GameState {
+  const present = new Set(state.staff.map((s) => s.id));
+
+  return {
+    ...state,
+    tasks: state.tasks.map((task) => {
+      const assignee = allocation.delegations[task.uid];
+      if (assignee && present.has(assignee)) return { ...task, assignedTo: assignee };
+      return task.assignedTo ? { ...task, assignedTo: undefined } : task;
+    }),
+  };
+}
+
+/** Moves a staff member up a grade — the reward for coaching someone well. */
+export function promoteStaff(state: GameState, staffId: string): GameState {
+  return {
+    ...state,
+    staff: state.staff.map((member) => {
+      if (member.id !== staffId) return member;
+      const nextGrade: Seniority =
+        member.seniority === 'junior' ? 'officer' : member.seniority === 'officer' ? 'senior' : 'senior';
+      return {
+        ...member,
+        seniority: nextGrade,
+        salary: STAFF_SALARY[nextGrade],
+        morale: clamp(member.morale + 12),
+      };
+    }),
+  };
+}
+
+/** Adjusts one person's morale, for events that land on an individual. */
+export function adjustStaffMorale(state: GameState, staffId: string, delta: number): GameState {
+  return {
+    ...state,
+    staff: state.staff.map((member) =>
+      member.id === staffId ? { ...member, morale: clamp(member.morale + delta) } : member,
+    ),
+  };
+}
+
+/** Adjusts the whole unit's morale, for events that land on everyone. */
+export function adjustTeamMorale(state: GameState, delta: number): GameState {
+  return {
+    ...state,
+    staff: state.staff.map((member) => ({ ...member, morale: clamp(member.morale + delta) })),
+  };
+}
+
+export function averageMorale(state: GameState): number {
+  if (state.staff.length === 0) return 0;
+  return Math.round(state.staff.reduce((sum, s) => sum + s.morale, 0) / state.staff.length);
+}
+
+export function averageSkill(state: GameState): number {
+  if (state.staff.length === 0) return 0;
+  return Math.round(state.staff.reduce((sum, s) => sum + s.skill, 0) / state.staff.length);
+}

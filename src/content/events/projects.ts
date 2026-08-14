@@ -70,6 +70,7 @@ export const projectsEvents = [
         effects: [
           { kind: 'stat', stat: 'integrity', delta: 3 },
           { kind: 'stat', stat: 'performance', delta: 2 },
+          { kind: 'stat', stat: 'reputation', delta: 2 },
           { kind: 'stat', stat: 'politicalCapital', delta: -2 },
         ],
       },
@@ -280,6 +281,7 @@ export const projectsEvents = [
         text: 'You report the related-party transaction as the rules require. The partner is furious, the programme investigates for eight months, and the finding is that it was permissible but should have been declared properly.',
         effects: [
           { kind: 'stat', stat: 'integrity', delta: 5 },
+          { kind: 'stat', stat: 'reputation', delta: 2 },
           { kind: 'stat', stat: 'politicalCapital', delta: -4 },
           { kind: 'stat', stat: 'stress', delta: 5 },
         ],
@@ -291,6 +293,7 @@ export const projectsEvents = [
         effects: [
           { kind: 'stat', stat: 'integrity', delta: 4 },
           { kind: 'stat', stat: 'performance', delta: 2 },
+          { kind: 'stat', stat: 'reputation', delta: 3 },
           { kind: 'stat', stat: 'politicalCapital', delta: -2 },
         ],
       },

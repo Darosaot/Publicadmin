@@ -1,8 +1,10 @@
 import { NETWORK_PC_GAIN, OVERTIME_POINTS, OVERTIME_STRESS, REST_STRESS_RELIEF } from '../../engine/constants';
+import { staffOutput } from '../../engine/team';
 import type { GameState } from '../../engine/types';
 import { useT } from '../../i18n';
 import { useGame } from '../../state/GameProvider';
 import { EffortStepper } from '../components/EffortStepper';
+import { GameTabs } from '../components/GameTabs';
 import { LogPanel } from '../components/LogPanel';
 import { StatsBar } from '../components/StatsBar';
 import { TaskCard } from '../components/TaskCard';
@@ -15,23 +17,19 @@ export function DashboardScreen({ game }: { game: GameState }) {
 
   const hasOffers = game.offers.length > 0;
 
+  /** What the assignee is expected to add to a file this month, for the card's projection. */
+  const delegatedProgressFor = (taskUid: string): number => {
+    const staffId = allocation.delegations[taskUid];
+    if (!staffId) return 0;
+    const member = game.staff.find((s) => s.id === staffId);
+    return member ? staffOutput(member) : 0;
+  };
+
   return (
     <>
       <StatsBar game={game} />
 
-      <nav className="tabs">
-        <button type="button" className="tab tab--active" aria-current="page">
-          {t('action.dashboard')}
-        </button>
-        <button
-          type="button"
-          className="tab"
-          onClick={() => dispatch({ type: 'SET_VIEW', view: 'career' })}
-        >
-          {t('action.career')}
-          {hasOffers && <span className="tab__dot" aria-hidden="true" />}
-        </button>
-      </nav>
+      <GameTabs current="desk" />
 
       {hasOffers && (
         <p className="banner" role="status">
@@ -63,6 +61,14 @@ export function DashboardScreen({ game }: { game: GameState }) {
                   headroom={effortRemaining}
                   onChange={(points) =>
                     dispatch({ type: 'SET_TASK_EFFORT', uid: task.uid, points })
+                  }
+                  staff={game.staff}
+                  assignedTo={allocation.delegations[task.uid]}
+                  delegatedProgress={delegatedProgressFor(task.uid)}
+                  onDelegate={
+                    game.staff.length > 0
+                      ? (staffId) => dispatch({ type: 'SET_DELEGATION', taskUid: task.uid, staffId })
+                      : undefined
                   }
                 />
               ))}

@@ -47,7 +47,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<GameContextValue>(() => {
     const game = state.game;
-    const effortTotal = game ? effortAvailable(game, registry, state.allocation.overtime) : 0;
+    // Agency cover is bought with the unit's budget and paid for whether or not it is counted, so
+    // it has to be in the total the screens work from — not only in the one `resolveTurn` uses.
+    const effortTotal = game
+      ? effortAvailable(game, registry, state.allocation.overtime, state.allocation.agencyTemps)
+      : 0;
     const effortSpent = game
       ? allocationTotal(normalizeAllocation(game, registry, state.allocation))
       : 0;

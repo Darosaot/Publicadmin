@@ -41,9 +41,9 @@ Five stats run 0–100 and are always clamped to that range. Salary is money and
 
 | Stat | Starts at | What it means | What moves it |
 | --- | --- | --- | --- |
-| **Reputation** | 20 | Your professional standing outside your own office. This is the stat that gates promotions and job offers. | Task quality, reviews, events; **decays 3% a month** |
+| **Reputation** | 20 | Your professional standing outside your own office. This is the stat that gates promotions and job offers. | Task quality, reviews, events; **decays 4.6% a month** |
 | **Performance** | 50 | The rolling quality of your department's actual output. It feeds your reviews, which feed Reputation. | Completed and failed tasks; **reverts 5% a month toward 50** |
-| **Political Capital** | 10 | Favours owed to you, and people who take your call. Spent to force decisions through and to survive scandals. | Networking, events; **decays 4% a month** |
+| **Political Capital** | 10 | Favours owed to you, and people who take your call. Spent to force decisions through and to survive scandals. | Networking, events; **decays 4.4% a month** |
 | **Integrity** | 70 | Your ethical track record. High integrity closes off shortcuts but protects you when investigators arrive. Low integrity opens shortcuts and quietly accumulates risk. | Events, almost exclusively. Does not decay — a record does not fade |
 | **Stress** | 20 | Accumulated load. At 100 you burn out and the game ends. | Every turn (+2), overtime, crises; reduced by Rest |
 | **Salary** | €2,100/mo | Your pay. A progress marker, and a reason to take an offer you might otherwise refuse. | Promotions, reviews |
@@ -83,7 +83,7 @@ your desk, which events can fire, and which signature crisis is waiting for you.
 
 ### The board
 
-Your board holds a fixed number of slots (4 at the start, 6 at the top). At the end of each turn it
+Your board holds a fixed number of slots (4 at the start, 8 at the top). At the end of each turn it
 refills from the task templates available for your department and level. Each active task carries:
 
 - **Required effort** — total points needed to finish it
@@ -100,7 +100,8 @@ required = round(baseEffort × 1.35 × (1 + 0.08 × (level − 1)))
 
 The multiplier is deliberately above 1: across a career it puts roughly 15–25% more work on the
 board than there are points to do it with. **A player who can finish everything is never choosing
-anything**, and choosing is the game. Simulated careers finish about 89% of their files on time.
+anything**, and choosing is the game. Simulated careers finish about 95% of their files on time — but the near-misses are where the
+decisions are, and a senior desk is only survivable because a unit is carrying most of it.
 
 ### Effort
 
@@ -143,6 +144,12 @@ early, so everything scored poor, which lowered Performance, which lowered quali
 Some task templates attach extra effects to a given tier — an excellent tender evaluation might
 earn political capital; a poor legal opinion might schedule a complaint two months out.
 
+**Credit is scaled by the size of the board.** A Director-General with eight slots and a unit of
+eight finishes far more files a month than a level-1 officer, and if each paid the same Reputation
+the top of the ladder would saturate at 100 no matter how it was played. So the per-file credit is
+multiplied by `4 / taskSlots`: a director's standing is the record of the unit, not the sum of
+forty signatures.
+
 ### Failure
 
 A task still unfinished when its deadline passes is removed from the board:
@@ -166,8 +173,8 @@ stressDelta = +2                        // the baseline weight of the job
 Alongside it, the monthly drift described in §3:
 
 ```
-reputation       −= round(reputation × 0.03)
-politicalCapital −= round(politicalCapital × 0.04)
+reputation       −= round(reputation × 0.046)
+politicalCapital −= round(politicalCapital × 0.044)
 performance      −= round((performance − 50) × 0.05)
 ```
 
@@ -190,6 +197,25 @@ Each turn the engine assembles up to **3** events in this priority order:
 
 A random event that fires goes on a **12-turn cooldown**, and events marked `once` never repeat.
 
+### The corpus
+
+165 events and 62 task templates. The events break down as 134 random, 21 follow-ups and 10
+milestones, and the random pool splits roughly evenly between work that could happen in any
+department and work that is specific to one of the five:
+
+| Pool | Events | What it covers |
+| --- | --- | --- |
+| Common | 38 | The building, the institution, your own life in it |
+| Department | 70 | 14 each for legal, projects, finance, procurement and policy |
+| Management | 12 | Only reachable once you have a unit |
+| Leadership | 14 | Only from level 4, where the decisions are institutional |
+| Milestones | 10 | The guaranteed beats, including the confirmation arc |
+| Follow-ups | 21 | Consequences, none of them ever drawn at random |
+
+Because a follow-up can only arrive if something scheduled it, an unscheduled one is content no
+player can ever reach. A test walks every choice, outcome and task result in the corpus and fails
+if any follow-up has nothing that leads to it.
+
 ### Conditions
 
 The same condition structure gates both whether an event can appear and whether an individual
@@ -206,18 +232,28 @@ capital is too thin tells you what you're missing.
 A choice can have several weighted outcomes, so the same decision doesn't always land the same way.
 Taking the risk usually works. Usually.
 
+An individual outcome can also carry its own conditions, which is how a decision made years earlier
+changes what a later scene can do. When the contract you quietly noticed a flaw in is annulled, the
+outcome where you produce the note you wrote at the time is only available if you actually wrote
+one — otherwise the same choice resolves into the version where there is no note, and the only
+other person in that conversation remembers it differently. Every choice keeps at least one
+unconditional outcome, so a decision can never dead-end.
+
 ## 7. Career
 
 ### The ladder
 
-| Level | Post | Administration | Salary | Effort | Slots |
-| --- | --- | --- | --- | --- | --- |
-| 1 | Administrative Officer | Alderford City Council (pop. 18,000) | €2,100 | 10 | 4 |
-| 2 | Senior Officer | Northbridge City Council (pop. 140,000) | €2,900 | 12 | 4 |
-| 3 | Head of Unit | Regional Government of Valmara | €3,900 | 14 | 5 |
-| 4 | Head of Department | National Agency for Public Investment | €5,200 | 16 | 5 |
-| 5 | Director-General | Ministry of Territorial Administration | €6,800 | 18 | 6 |
-| — | **Minister** | Government of Valmara | — | — | — |
+| Level | Post | Administration | Salary | Effort | Slots | Unit | Budget |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Administrative Officer | Alderford City Council (pop. 18,000) | €2,100 | 10 | 4 | — | — |
+| 2 | Senior Officer | Northbridge City Council (pop. 140,000) | €2,900 | 12 | 4 | — | — |
+| 3 | Head of Unit | Regional Government of Valmara | €3,900 | 14 | 6 | 4 | €11,500/mo |
+| 4 | Head of Department | National Agency for Public Investment | €5,200 | 16 | 7 | 6 | €18,500/mo |
+| 5 | Director-General | Ministry of Territorial Administration | €6,800 | 18 | 8 | 8 | €26,000/mo |
+| — | **Minister** | Government of Valmara | — | — | — | — | — |
+
+Levels 3 to 5 come with an establishment and a budget line. **You arrive one post short**, because
+you always do.
 
 Minister is not a sixth playable level; it is the ending. Reaching it requires being a
 Director-General with Reputation ≥ 88 and Political Capital ≥ 70, which triggers a three-event
@@ -255,7 +291,71 @@ if you failed 3 or more tasks since the last review.
 | 40–54 | Adequate | — |
 | < 40 | Concerning | Reputation −5 |
 
-## 8. Endings
+## 8. The office
+
+From Head of Unit upward you stop being the person who does the work and become the person who
+decides who does it. The Team screen appears at level 3 and does not go away.
+
+### Your people
+
+Each member of your unit is a **junior**, **officer** or **senior**, with a **skill** and a
+**morale** score, a salary, and a length of service. What they produce in a month is:
+
+```
+output = base(grade) × (0.6 + 0.8 × skill/100) × (0.7 + 0.6 × morale/100)
+```
+
+Base output is 3 / 5 / 7. A capable, well-treated senior therefore produces about ten points of
+work a month; a demoralised junior produces two. **The spread is the point** — a manager whose
+people are unhappy is doing the whole board personally.
+
+### Delegation
+
+Handing a file to someone costs you **1 effort point** to brief them, and they carry it from then
+on. The quality roll on a delegated file is judged on *their* ability rather than yours:
+
+```
+qualityBase = skill × 0.75 + morale × 0.25
+```
+
+So delegation is not free output. Give a hard file to someone who cannot do it and it comes back
+poor, with your name on it — and a failed file costs the person carrying it 6 morale, which is how
+a unit starts to unravel.
+
+### Attention
+
+Three things you can spend a month's effort on instead of files:
+
+| Action | Cost | Effect |
+| --- | --- | --- |
+| **One-to-one** | 1 point | +9 morale for that person |
+| **Coaching** | 2 points | +4 skill, +3 morale |
+| **Recruiting** | 2 points | Advances an open vacancy toward filling |
+
+Morale drifts down 1 a month on its own, and below **30** people start looking for other jobs and
+leave. Skill creeps up about 2 a year from experience alone.
+
+### Money
+
+Your unit has a **monthly budget**. Salaries come out of it automatically; what is left is
+discretionary, and you can spend it on **training** (€1,500 for +6 skill) or **agency cover**
+(€3,200 for +2 effort points this month, up to three at once — money for time, at a poor rate).
+
+The budget year is judged as a whole, and **both directions cost you**:
+
+- Overspending by more than 4%: **Reputation −6**
+- Underspending by more than 12%: **Reputation −3**, and next year's allocation is cut 10%
+
+Returning money you were given is not thrift; it is evidence you did not need it. Anyone who has
+worked in a public body in December knows exactly why this is in the game.
+
+### Hiring
+
+You arrive one post below your establishment. Filling it takes 2 / 3 / 4 months for a junior /
+officer / senior, plus 2 effort points a month spent pushing it along, and then you get a person
+with rolled skill and no knowledge of your files.
+
+## 9. Endings
 
 Checked at the end of every month, in this order — the first one that matches wins.
 
@@ -268,7 +368,7 @@ Checked at the end of every month, in this order — the first one that matches 
 | **Honoured retirement** | Month 120 with Reputation ≥ 60 | Thirty years of files. A room full of people who mean it. |
 | **Quiet retirement** | Month 120 with Reputation < 60 | Thirty years of files. A card, signed by the department. |
 
-## 9. Balance reference
+## 10. Balance reference
 
 All of these live in `src/engine/constants.ts`.
 
@@ -278,59 +378,91 @@ All of these live in `src/engine/constants.ts`.
 | Maximum campaign length | 120 turns |
 | Starting stats | Rep 20, Perf 50, PC 10, Integrity 70, Stress 20 |
 | Effort points by level | 10 / 12 / 14 / 16 / 18 |
-| Task slots by level | 4 / 4 / 5 / 5 / 6 |
+| Task slots by level | 4 / 4 / 6 / 7 / 8 |
+| Establishment by level | — / — / 4 / 6 / 8 |
+| Unit budget by level | — / — / €11,500 / €18,500 / €26,000 a month |
 | Overtime | +3 points, +5 stress |
 | Rest | −3 stress per point |
 | Networking | +2 political capital per point |
 | Baseline stress per turn | +2 |
 | Task workload multiplier | ×1.35 |
 | Task effort level scaling | ×(1 + 0.08 × (level − 1)) |
-| Reputation decay | 3% a month |
-| Political capital decay | 4% a month |
+| Reputation decay | 4.6% a month |
+| Political capital decay | 4.4% a month |
 | Performance reversion | 5% a month toward 50 |
 | Quality baseline | 58 |
 | Quality thresholds | Excellent ≥ 75, Good ≥ 45 |
 | Task failure | Performance −3, Reputation −2 |
+| Per-file credit scaling | × (4 ÷ task slots) |
+| Staff base output | 3 / 5 / 7 by grade |
+| Staff salaries | €1,800 / €2,600 / €3,600 a month |
+| Delegation / one-to-one / coaching / recruiting | 1 / 1 / 2 / 2 effort points |
+| One-to-one, coaching, training | +9 morale / +4 skill +3 morale / +6 skill for €1,500 |
+| Morale drift | −1 a month; people leave below 30 |
+| Agency cover | €3,200 for +2 effort, max 3 a month |
+| Budget verdict | over 4% → Rep −6; under 12% → Rep −3 and a 10% cut |
 | Events per turn | 1 guaranteed, 35% chance of a 2nd, hard cap 3 |
 | Random event cooldown | 12 turns |
 | Review interval | 6 turns |
 | Offer base chance | 35%, +1% per point of reputation above the requirement, cap 80% |
 | Offer expiry | 3 turns |
 
-## 10. Measured balance
+## 11. Measured balance
 
 The numbers above were not guessed. `npm run balance` plays 200 careers — 40 seeds across all five
 departments — with a bot that plays about as well as an engaged player on a first run, and prints
 the distribution. `tests/engine/autoplay.test.ts` asserts the shape of it so a future change to
-`constants.ts` cannot quietly break the game.
+`constants.ts` or to the content cannot quietly break the game.
 
 Where it currently sits:
 
 | Measure | Value |
 | --- | --- |
-| Careers reaching Director-General | 42% |
-| Careers reaching Head of Unit or above | 96% |
-| Careers stuck at the starting post | 1% |
-| Files finished on time | 89% |
-| Mean Reputation at the end | 45 |
-| Mean months survived | 118 of 120 |
+| Careers reaching Director-General | 58% |
+| Careers reaching Head of Unit or above | 82% |
+| Careers stuck at the starting post | 3% |
+| Files finished on time | 95% |
+| Mean level reached | 4.1 |
+| Mean Reputation at the end | 78 |
+| Mean months survived | 119 of 120 |
 
-Endings, over those 200 careers: quiet retirement 61%, honoured retirement 31%, dismissed 7%,
-Minister 2.5%. Burnout and disgrace do not appear, because the balanced bot rests when tired and
-does not take bribes — both are reached reliably by the `reckless` and `ruthless` bot strategies,
-which exist precisely to prove that an ending is not unreachable. Burnout takes a reckless player
-about 9 months; disgrace takes a ruthless one about 20.
+Endings, over those 200 careers: honoured retirement 72%, quiet retirement 21%, Minister 7.5%.
+Burnout, disgrace and dismissal do not appear, because the balanced bot rests when tired and does
+not take bribes — the first two are reached reliably by the `reckless` and `ruthless` bot
+strategies, which exist precisely to prove that an ending is not unreachable. Burnout takes a
+reckless player about 9 months; disgrace takes a ruthless one about 21.
 
-Departments are not equally difficult, and that is intentional replay value rather than an
-oversight: Policy averages level 4.8 and Procurement 3.0, because Procurement is the department
-everyone watches. What matters is that every department is survivable and none is a walkover,
-which the test suite checks per department.
+### Two things the simulation caught
 
-## 11. Deliberately out of scope for v1
+**Growing the corpus moves the balance.** The bot picks uniformly among the options open to it, so
+the whole game is tuned against the *average* option in the pool. Adding 71 events without checking
+that average dropped careers reaching the top from 57% to 26% — not because any new event was
+harsh, but because the new ones were slightly less generous than the ones they diluted. The decay
+rates were re-derived afterwards: both stats settle at `monthly gain ÷ decay rate`, so a corpus
+whose average gain falls needs a lower rate to sit in the same place.
+
+**The five departments had drifted a long way apart.** Once each had its own task board and its own
+event pool, a Policy career averaged level 4.8 and a Procurement one 3.0 — a gap the player could
+neither see nor do anything about. The cause was almost entirely the task boards: Procurement's
+files had the tightest deadlines in the game, which cost completions, which cost Performance, which
+cost quality, which compounded over thirty years. The boards were levelled (comparable mean effort,
+difficulty and deadline at every level) and the departments now sit between 4.0 and 4.3. A test
+pins the spread so the next department to get new content cannot quietly run away from the others.
+
+## 12. Deliberately out of scope for v1
 
 Sound and music; multiple save slots and save export; Spanish content (the architecture supports it,
 the dictionary isn't written yet); difficulty settings; changing department mid-career; named NPCs
-with persistent relationship tracking; a budget-management sub-game; achievements.
+with persistent relationship tracking beyond your own unit; achievements.
 
-The two that are worth revisiting first, if this gets a v2, are **named NPCs** (a recurring boss,
-rival and mentor whose opinion of you is tracked) and **Spanish**.
+The two that are worth revisiting first, if this gets a v2, are **named NPCs outside your unit** (a
+recurring boss, rival and mentor whose opinion of you is tracked the way your staff's morale
+already is) and **Spanish**.
+
+### Saving
+
+Not out of scope, and not a feature you have to think about: the game writes to `localStorage`
+after every action, so closing the tab and coming back resumes exactly where you were — including
+the random stream, because the RNG cursor is part of the saved state rather than a global. A save
+carries a version number, unknown content ids are pruned on load rather than crashing, and there is
+one slot.

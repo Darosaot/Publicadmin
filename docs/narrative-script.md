@@ -3,7 +3,7 @@
 > **Generated file.** Produced from the shipped content by `npm run docs:script`. Edit the
 > content in `src/content/` and regenerate — changes made directly to this file are lost.
 
-The complete corpus: 82 events, 46 task templates, 5 departments, 5 career levels and 6 endings. Stat effects are shown after each outcome.
+The complete corpus: 165 events, 62 task templates, 5 departments, 5 career levels and 6 endings. Stat effects are shown after each outcome.
 
 ## Departments
 
@@ -53,9 +53,9 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Administrative Officer | Alderford City Council | €2100 | 10 | 4 | starting post |
 | 2 | Senior Officer | Northbridge City Council | €2900 | 12 | 4 | Rep 35, Perf 50, 8 months in post |
-| 3 | Head of Unit | Regional Government of Valmara | €3900 | 14 | 5 | Rep 50, Perf 55, PC 25, 10 months in post |
-| 4 | Head of Department | National Agency for Public Investment | €5200 | 16 | 5 | Rep 65, Perf 60, PC 40, 12 months in post |
-| 5 | Director-General | Ministry of Territorial Administration | €6800 | 18 | 6 | Rep 78, Perf 65, PC 55, 12 months in post |
+| 3 | Head of Unit | Regional Government of Valmara | €3900 | 14 | 6 | Rep 50, Perf 55, PC 25, 10 months in post |
+| 4 | Head of Department | National Agency for Public Investment | €5200 | 16 | 7 | Rep 65, Perf 60, PC 40, 12 months in post |
+| 5 | Director-General | Ministry of Territorial Administration | €6800 | 18 | 8 | Rep 78, Perf 65, PC 55, 12 months in post |
 
 ## Tasks
 
@@ -63,12 +63,18 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
-| Clear the inbox backlog | any desk | 4 | 2–4 | 1 | — |
+| Clear the inbox backlog | any desk, level 1–2 | 4 | 2–4 | 1 | — |
 | Transparency request | any desk | 6 | 2–3 | 2 | missed: schedules "A list of eleven questions" in 1 months |
-| Committee papers | any desk | 5 | 2–3 | 1 | — |
+| Committee papers | any desk, level 1–3 | 5 | 2–3 | 1 | — |
 | Staff appraisal round | any desk, level 2+ | 7 | 3–5 | 2 | excellent: Political capital +2; poor: schedules "A grievance" in 2 months |
 | Reorganisation consultation | any desk | 6 | 3–4 | 2 | — |
 | Annual activity report | any desk | 8 | 3–5 | 2 | excellent: Reputation +2; missed: schedules "A conversation with the door closed" in 1 months |
+| Unit business plan | any desk, level 3+ | 16 | 3–4 | 2 | excellent: Reputation +2 · team morale +4; poor: team morale -4 |
+| Budget bid | any desk, level 3+ | 18 | 2–3 | 3 | excellent: monthly budget +1200 · Reputation +2; poor: monthly budget -800; missed: monthly budget -1200 · Reputation -2 |
+| Paper for the management board | any desk, level 3+ | 12 | 2–2 | 2 | excellent: Political capital +3 |
+| Workforce plan | any desk, level 3+ | 14 | 3–5 | 2 | excellent: team morale +5; poor: team morale -6 |
+| Quarterly performance return | any desk, level 3+ | 10 | 2–2 | 1 | — |
+| Briefing for the executive | any desk, level 4+ | 12 | 2–2 | 3 | excellent: Political capital +4; poor: Political capital -3; missed: schedules "A question on the council agenda" in 1 months |
 
 **Clear the inbox backlog** — Two hundred and forty unread messages, of which perhaps nine matter. Finding out which nine is the work.
 **Transparency request** — A citizen has asked for every document relating to a decision taken four years ago. The clock started the moment it arrived.
@@ -76,19 +82,27 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Staff appraisal round** — Everyone in the unit needs a written assessment, a development objective, and half an hour of your undivided attention.
 **Reorganisation consultation** — The structure is being redrawn again. Your department is asked to comment, which is not the same as being asked.
 **Annual activity report** — Twelve months of work, compressed into a document that will be read by four people and cited by none.
+**Unit business plan** — What the unit will achieve next year, in a document that will be used to judge you and to justify your headcount.
+**Budget bid** — Next year’s allocation is decided in a room you will be in for eleven minutes. This is the paper that speaks for you the rest of the time.
+**Paper for the management board** — Six pages for people who will read two of them, on a decision that cannot be unmade.
+**Workforce plan** — Which posts you will need in three years, which you will lose, and how you intend to explain the second part to the people in them.
+**Quarterly performance return** — Your unit’s numbers, assembled for people who will compare them with units doing something entirely different.
+**Briefing for the executive** — Two pages, tonight, on a subject that has been developing for three years and became urgent this afternoon.
 
 ### Legal
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
 | Contract review | legal | 6 | 2–4 | 2 | poor: schedules "Internal review" in 3 months; missed: schedules "A formal challenge" in 1 months |
-| Licensing appeal | legal | 7 | 2–3 | 2 | missed: schedules "A formal complaint" in 1 months |
-| Legal opinion | legal | 5 | 2–3 | 2 | excellent: Political capital +2 |
+| Licensing appeal | legal, level 1–3 | 7 | 2–4 | 2 | missed: schedules "A formal complaint" in 1 months |
+| Legal opinion | legal | 4 | 2–3 | 2 | excellent: Political capital +2 |
 | Byelaw revision | legal | 8 | 3–5 | 2 | — |
 | Litigation bundle | legal | 10 | 2–4 | 3 | excellent: Reputation +3; missed: Reputation -3 · schedules "A conversation with the door closed" in 1 months |
 | Data protection assessment | legal | 7 | 3–4 | 2 | missed: schedules "A letter from the audit authority" in 2 months |
-| Land registry dispute | legal | 9 | 3–5 | 3 | — |
+| Land registry dispute | legal, level 1–3 | 9 | 3–5 | 3 | — |
 | Framework terms and conditions | legal, level 2+ | 9 | 3–5 | 3 | excellent: Reputation +3; poor: schedules "Internal review" in 4 months |
+| Drafting instructions | legal, level 4+ | 22 | 3–5 | 3 | excellent: Reputation +4 |
+| Legal risk register | legal, level 4+ | 16 | 3–4 | 2 | — |
 
 **Contract review** — Forty pages of clauses drafted by the supplier’s lawyers, who were paid rather more than you are.
 **Licensing appeal** — A refused permit, an angry applicant, and a deadline set by statute rather than by anyone you can negotiate with.
@@ -98,19 +112,23 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Data protection assessment** — A new system will process personal data on eleven thousand residents. Someone has to write down exactly why that is lawful.
 **Land registry dispute** — Two neighbours, one boundary, and a municipal map last surveyed in 1974.
 **Framework terms and conditions** — Standard clauses for every contract the administration will sign for the next four years. Get one wrong and you get it wrong four hundred times.
+**Drafting instructions** — What the legislation should do, written precisely enough that parliamentary counsel can turn it into words that will bind people for a generation.
+**Legal risk register** — Every case the administration could lose, what it would cost, and how likely it is. Read once a year by everyone, in a bad week.
 
 ### Projects
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
-| Milestone report | projects | 6 | 2–3 | 2 | missed: schedules "A letter from the audit authority" in 2 months |
+| Milestone report | projects | 6 | 2–4 | 2 | missed: schedules "A letter from the audit authority" in 2 months |
 | Grant application | projects | 9 | 2–4 | 3 | excellent: Reputation +3 · Political capital +2 |
 | Partner coordination | projects | 5 | 2–3 | 2 | excellent: Political capital +3 |
 | Project budget revision | projects | 7 | 2–3 | 2 | — |
-| Eligibility check | projects | 8 | 3–4 | 3 | poor: schedules "A letter from the audit authority" in 3 months; missed: schedules "A letter from the audit authority" in 1 months |
-| Interim payment claim | projects | 7 | 2–3 | 2 | missed: Political capital -3 · schedules "A question on the council agenda" in 1 months |
-| Monitoring visit | projects | 5 | 3–4 | 1 | — |
+| Eligibility check | projects | 8 | 3–4 | 2 | poor: schedules "A letter from the audit authority" in 3 months; missed: schedules "A letter from the audit authority" in 1 months |
+| Interim payment claim | projects, level 1–4 | 7 | 2–3 | 2 | missed: Political capital -3 · schedules "A question on the council agenda" in 1 months |
+| Monitoring visit | projects, level 1–3 | 4 | 3–4 | 1 | — |
 | Project closure dossier | projects, level 2+ | 10 | 3–5 | 3 | excellent: Reputation +3; missed: schedules "A letter from the audit authority" in 2 months |
+| National programme design | projects, level 4+ | 24 | 3–5 | 3 | excellent: Reputation +4 · Political capital +2 |
+| Portfolio prioritisation | projects, level 4+ | 18 | 2–4 | 3 | poor: Political capital -3 |
 
 **Milestone report** — The funding programme wants evidence that month six happened. Month six did happen, but not quite in the order the application promised.
 **Grant application** — Sixty pages, four annexes, and a budget table that must add up in three different currencies of optimism.
@@ -120,19 +138,23 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Interim payment claim** — The administration has spent the money. Getting it back requires proving that in the format the programme prescribes.
 **Monitoring visit** — A day on site, a checklist, and the growing suspicion that the works you are inspecting are three months behind what the reports say.
 **Project closure dossier** — Everything the project ever produced, assembled in one file that will be kept for ten years and opened by an auditor in year eight.
+**National programme design** — Four hundred million euros, seven years, and the structure that decides whether any of it reaches anybody.
+**Portfolio prioritisation** — Nineteen projects, funding for eleven. The other eight belong to people who will be in the room.
 
 ### Finance
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
-| Monthly closing | finance | 5 | 2–2 | 2 | missed: schedules "A conversation with the door closed" in 1 months |
-| Invoice backlog | finance | 6 | 2–3 | 1 | missed: schedules "A formal challenge" in 1 months |
+| Monthly closing | finance, level 1–4 | 5 | 2–3 | 2 | missed: schedules "A conversation with the door closed" in 1 months |
+| Invoice backlog | finance, level 1–2 | 5 | 2–3 | 1 | missed: schedules "A formal challenge" in 1 months |
 | Budget amendment | finance | 7 | 2–4 | 2 | excellent: Political capital +2 |
 | Treasury forecast | finance | 6 | 2–3 | 2 | — |
 | Subsidy justification review | finance | 8 | 3–4 | 2 | poor: schedules "A question on the council agenda" in 2 months |
 | Draft annual budget | finance | 11 | 3–5 | 3 | excellent: Reputation +3 · Political capital +2; missed: schedules "A question on the council agenda" in 1 months |
 | Cost centre reconciliation | finance | 7 | 3–4 | 3 | — |
 | Audit response file | finance, level 2+ | 9 | 2–4 | 3 | excellent: Reputation +3; missed: schedules "A letter from the audit authority" in 1 months |
+| Spending review submission | finance, level 4+ | 24 | 3–4 | 3 | excellent: monthly budget +2000 · Reputation +3; missed: monthly budget -2500 |
+| Multi-year financial framework | finance, level 4+ | 20 | 3–5 | 3 | — |
 
 **Monthly closing** — The ledger must balance by the eighth. It currently does not, by an amount small enough to be maddening.
 **Invoice backlog** — Suppliers are waiting. Some have been waiting long enough to start writing letters that mention interest.
@@ -142,19 +164,23 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Draft annual budget** — Every department has asked for more than exists. Your job is to produce a document in which that is not visible.
 **Cost centre reconciliation** — Two systems that were supposed to talk to each other have been quietly disagreeing since March.
 **Audit response file** — The external auditors have eleven observations. Each needs an answer that is accurate, complete, and does not concede more than it must.
+**Spending review submission** — Justify every euro the directorate spends, to a treasury that has already decided the answer is less.
+**Multi-year financial framework** — Three years of numbers for an administration that has never successfully predicted one.
 
 ### Procurement
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
 | Tender specification | procurement | 7 | 2–4 | 2 | poor: schedules "A formal challenge" in 2 months |
-| Evaluation committee | procurement | 8 | 2–3 | 3 | excellent: Reputation +3; poor: schedules "A formal challenge" in 1 months; missed: schedules "A formal challenge" in 1 months |
-| Framework renewal | procurement | 6 | 2–3 | 2 | missed: Reputation -2 · schedules "A question on the council agenda" in 1 months |
-| Bidder clarifications | procurement | 5 | 2–2 | 2 | — |
-| Award publication | procurement | 4 | 2–2 | 2 | missed: schedules "A formal challenge" in 1 months |
+| Evaluation committee | procurement | 8 | 3–4 | 3 | excellent: Reputation +3; poor: schedules "A formal challenge" in 1 months; missed: schedules "A formal challenge" in 1 months |
+| Framework renewal | procurement | 6 | 3–4 | 2 | missed: Reputation -2 · schedules "A question on the council agenda" in 1 months |
+| Bidder clarifications | procurement, level 1–3 | 5 | 2–3 | 2 | — |
+| Award publication | procurement, level 1–3 | 4 | 2–3 | 2 | missed: schedules "A formal challenge" in 1 months |
 | Supplier performance review | procurement | 6 | 3–4 | 2 | excellent: Integrity +2 |
-| Direct award justification | procurement | 6 | 2–3 | 3 | poor: schedules "A letter from the audit authority" in 3 months |
+| Direct award justification | procurement | 6 | 2–3 | 2 | poor: schedules "A letter from the audit authority" in 3 months |
 | Response to a challenge | procurement, level 2+ | 9 | 2–3 | 3 | excellent: Reputation +4; missed: Reputation -3 · schedules "A list of eleven questions" in 1 months |
+| Procurement policy reform | procurement, level 4+ | 22 | 3–5 | 3 | excellent: Reputation +4 · Integrity +2 |
+| Category strategy | procurement, level 4+ | 18 | 3–4 | 3 | poor: schedules "A formal challenge" in 3 months |
 
 **Tender specification** — Describe what the administration needs precisely enough to get it, and generally enough that only one company cannot possibly qualify.
 **Evaluation committee** — Six bids, four evaluators, and a scoring grid that will be read very carefully by whoever comes second.
@@ -164,12 +190,14 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Supplier performance review** — The contractor has been late on every milestone and charming about all of them. The file should say so.
 **Direct award justification** — The department wants to skip the tender. The law allows it in narrow circumstances, and someone must write down which one applies.
 **Response to a challenge** — A losing bidder has formally contested the award. Every note you took during the evaluation now belongs to the file.
+**Procurement policy reform** — Rewrite the rules everyone complains about, knowing that whatever you replace them with is what they will complain about next.
+**Category strategy** — How the administration will buy an entire class of things for the next five years, and which suppliers that quietly favours.
 
 ### Policy
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
-| Council brief | policy | 4 | 2–2 | 1 | excellent: Political capital +2 |
+| Council brief | policy, level 1–3 | 5 | 2–2 | 1 | excellent: Political capital +2 |
 | Public consultation | policy | 7 | 3–4 | 2 | missed: schedules "A formal complaint" in 1 months |
 | Strategy paper | policy | 9 | 3–5 | 3 | excellent: Reputation +3 |
 | Impact assessment | policy | 8 | 3–4 | 3 | — |
@@ -177,6 +205,8 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 | Stakeholder roundtable | policy | 6 | 2–4 | 2 | excellent: Political capital +3 |
 | Position paper | policy, level 2+ | 8 | 3–4 | 3 | excellent: Political capital +3 |
 | Annual policy review | policy | 9 | 3–5 | 2 | poor: schedules "A list of eleven questions" in 2 months; missed: schedules "A conversation with the door closed" in 1 months |
+| Green paper | policy, level 4+ | 22 | 3–5 | 3 | excellent: Reputation +4 |
+| Appearance before the committee | policy, level 4+ | 16 | 2–3 | 3 | excellent: Reputation +4; poor: schedules "A list of eleven questions" in 1 months; missed: Reputation -4 |
 
 **Council brief** — Two pages for someone who will read one of them, ten minutes before speaking about it in public.
 **Public consultation** — Six weeks of submissions from residents, associations and one man who writes every week about the same roundabout.
@@ -186,6 +216,8 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Stakeholder roundtable** — Eleven organisations around a table, each of which has been told this is the meeting where their concern will be addressed.
 **Position paper** — The administration’s formal view, to be defended in a forum where every other administration has brought one too.
 **Annual policy review** — Which of last year’s commitments were met, in a document that must be honest enough to be useful and diplomatic enough to be published.
+**Green paper** — The administration’s thinking, published for argument. Everything you leave out is a decision, and everyone will notice which.
+**Appearance before the committee** — Three hours of questions, on the record, about decisions taken by people who no longer work here.
 
 ## Events
 
@@ -619,6 +651,368 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - You brief a colleague properly, hand it over, and leave. It is finished on time and not quite as you would have done it, which turns out to be an acceptable price.
   <br>↳ Stress -4 · Performance +1 · Political capital -1
 
+#### Forty-one requests from one address
+
+*`evt.common.freedom_request_bulk` · weight 10*
+
+> A campaigner has submitted forty-one transparency requests in a fortnight, each individually reasonable and collectively equal to a full-time post. The law does not care that they arrived together.
+
+**Answer every one on time**
+
+- It consumes the department for five weeks. Every deadline is met, nothing else is, and the campaigner publishes a piece praising the administration’s transparency.
+  <br>↳ Reputation +3 · Performance -3 · Stress +8
+
+**Refuse them as a vexatious pattern**
+
+- *(weight 2)* The refusal holds on review. It is the correct use of a provision that exists precisely for this, and it saves five weeks.
+  <br>↳ Performance +2
+- *(weight 3)* The refusal is overturned, the deadlines restart, and the administration is now the body that tried to call transparency vexatious.
+  <br>↳ Reputation -5 · Stress +6
+
+**Publish the underlying data instead**
+
+- You put the whole dataset online and answer all forty-one with a link. It takes three weeks, it answers every future request as well, and nobody had thought of it in eleven years.
+  <br>↳ Reputation +5 · Integrity +3 · Stress +5
+
+#### The system nobody understands
+
+*`evt.common.legacy_system` · weight 10*
+
+> The application that runs the core of your department was written in 1997 by a contractor who has since died. It works. Nobody knows how. The supplier who maintains it has just quoted a renewal figure with an extra digit.
+
+**Pay it**
+
+- You pay, because the alternative is the department stopping. The supplier learns exactly what you will pay, which is the number they will start from next time.
+  <br>↳ Performance +1 · Political capital -2
+
+**Start the replacement programme**
+
+- *(weight 2)* Three years, over budget, and at the end of it the department has a system it understands. You are not there to see it finished, and your name is on the business case that made it possible.
+  <br>↳ Reputation +5 · Stress +8
+- *(weight 3)* Eighteen months in, the programme is cancelled after a change of leadership. The old system is still running. So is the maintenance contract, at the higher price.
+  <br>↳ Reputation -4 · Stress +9
+
+**Have someone document it first**
+
+- Four months of a junior officer sitting with the system and writing down what it does. Deeply unglamorous, and it halves the quoted figure at the next renewal because you can finally describe what you are buying.
+  <br>↳ Performance +3 · Reputation +2
+
+#### The building is being consolidated
+
+*`evt.common.office_move` · weight 10*
+
+> Your department is moving to an open-plan floor with fewer desks than people, on the reasoning that not everyone is in on the same day. The reasoning is correct and everyone hates it.
+
+**Accept the plan and make it work**
+
+- You spend a fortnight on seating, storage and the small things that make a floor bearable. It is fine. Nobody thanks you for the fortnight, and it would have been much worse without it.
+  <br>↳ Stress +4 · Political capital +2
+
+**Fight for the space**
+
+- *(weight 2)* You win four extra desks and a quiet room by being tediously persistent with an estates team that had assumed nobody would be.
+  <br>↳ team morale +6 · Political capital -3
+- *(weight 3)* You lose, having spent six weeks and a measurable amount of goodwill on furniture.
+  <br>↳ Political capital -4 · Stress +4
+
+#### Internal audit would like a word about process
+
+*`evt.common.audit_of_you` · weight 10*
+
+> Not about a decision — about how you work. They have noticed that your department closes files faster than any comparable one and would like to understand why, in a tone that could mean either of the two possible things.
+
+**Show them everything, including the shortcuts**
+
+- *(weight 3)* The shortcuts turn out to be good practice nobody had written down. The audit report recommends them to every other department, with your name in it.
+  <br>↳ Reputation +5 · Integrity +3
+- *(weight 2)* Two of the shortcuts turn out to be shortcuts. The report is measured, the recommendations are fair, and the department is slower by a third for the following year.
+  <br>↳ Performance -3 · Integrity +3
+
+**Answer strictly what is asked**
+
+- A correct, narrow, unhelpful engagement. The audit closes with a recommendation about "documentation of working practices" and a note about the department’s cooperation.
+  <br>↳ Reputation -2 · Stress +3
+
+#### It was you
+
+*`evt.common.mistake_yours` · weight 12*
+
+> A decision going out under the department’s name is wrong, and tracing it back, the error is yours. Nobody has noticed. It will affect about two hundred people, none of whom will know why.
+
+**Report it immediately**
+
+- You write it up before anyone asks, with the correction attached. It is a bad morning and a short one, and it is the single most useful thing you do for your reputation that year.
+  <br>↳ Integrity +6 · Reputation +2 · Stress +5
+
+**Correct it without telling anyone**
+
+- *(weight 3)* Fixed in a fortnight, quietly, at some personal cost. Two hundred people get the right outcome. The record shows nothing ever went wrong.
+  <br>↳ Integrity -3 · Stress +6
+- *(weight 2)* The correction is spotted by someone reconciling the numbers, and the question is no longer about the error but about the fortnight.
+  <br>↳ Integrity -4 · Reputation -5 · schedules "Internal review" in 1 months
+
+**Leave it**
+
+- It is small, it is untraceable, and nobody will ever connect it to you. You are right about all three, which is not the same as it being nothing.
+  <br>↳ Integrity -6 · flag `buried_own_error`
+
+#### A seat on the professional body
+
+*`evt.common.professional_body` · weight 9 · level 2+*
+
+> The national association for your discipline is looking for a council member. Unpaid, six meetings a year, and every person who has ever held it seems to be well connected.
+
+**Stand for it**
+
+- *(weight 3)* Elected. Six evenings a year among people who do your job elsewhere, and a slow accumulation of the kind of contact that turns into a job offer four years later.
+  <br>↳ Political capital +6 · Reputation +3 · Stress +4
+- *(weight 2)* You lose to a better-known candidate from a bigger administration. It costs an evening and a small amount of pride.
+  <br>↳ Political capital +1
+
+**Leave it to someone else**
+
+- Six evenings a year is six evenings a year. You keep them.
+  <br>↳ Stress -3
+
+#### The spreadsheet had a hidden tab
+
+*`evt.common.data_breach` · weight 10*
+
+> A file published on the website last week contained, in a tab nobody checked, the personal details of three hundred applicants. It has been downloaded eleven times.
+
+**Notify everyone affected and the regulator**
+
+- Three hundred letters, a regulator notification within seventy-two hours, and a genuinely unpleasant fortnight. The regulator’s finding notes the speed of the response as mitigation.
+  <br>↳ Integrity +5 · Reputation -3 · Stress +9
+
+**Pull the file and assess whether notification is required**
+
+- *(weight 2)* The assessment concludes the risk is low and documents why. It is a defensible judgement, properly recorded, and it holds.
+  <br>↳ Stress +5 · Performance +1
+- *(weight 3)* One of the eleven downloads was a journalist. The story is not the breach; the story is the eleven days.
+  <br>↳ Reputation -7 · Integrity -3 · schedules "A list of eleven questions" in 1 months
+
+#### Six months somewhere else
+
+*`evt.common.secondment_offer` · weight 9 · level 2+*
+
+> A secondment has come up: six months in a different administration, doing adjacent work, returning to your post afterwards. Your director is neutral in a way that means it is entirely your decision.
+
+**Take it**
+
+- *(weight 3)* Six months of seeing how a competent organisation does the same job differently. You come back with three things worth stealing and a network in a building you had never entered.
+  <br>↳ Performance +4 · Political capital +5 · Reputation +2
+- *(weight 2)* Six months of being the outsider in a place with its own way of doing things. You learn what you do not want to be, which is worth something, and your own department has reorganised without you.
+  <br>↳ Political capital -3 · Performance +1
+
+**Stay where the work is**
+
+- You have three things in flight that would not survive your absence. It is a good reason, and it is also the reason you will give the next time.
+  <br>↳ Performance +2
+
+#### Everything is a priority again
+
+*`evt.common.new_minister` · weight 11 · level 2+*
+
+> A change at the political level has produced a new set of priorities, delivered as a list of eleven items, of which four contradict each other and two are already department policy under different names.
+
+**Map them honestly against what exists**
+
+- A one-page table showing which are new, which are already happening, and which cannot both be done. It is exactly what was needed and nobody enjoys receiving it.
+  <br>↳ Reputation +4 · Political capital -2
+
+**Rename existing work to match the new list**
+
+- By Friday the department is delivering nine of the eleven priorities, having changed nothing but the headings. Everyone is pleased. Two of the genuinely new things quietly never start.
+  <br>↳ Political capital +4 · Integrity -4
+
+**Pick the two that matter and do them properly**
+
+- *(weight 3)* You choose the two that would still be worth doing in five years and put the department behind them. Both land. Nobody asks about the other nine.
+  <br>↳ Reputation +4 · Performance +3
+- *(weight 2)* You choose two and are asked, in a meeting, about the other nine, by someone holding the list.
+  <br>↳ Political capital -4 · Stress +5
+
+#### Someone is retiring after thirty-eight years
+
+*`evt.common.long_service` · weight 10 · month 24+*
+
+> She has been in the building since before the department existed in its current form. There is a cake at three. Nobody has written anything down about what she knows.
+
+**Spend her last month recording what she knows**
+
+- Four sessions and a document. It reads like nothing and it answers, over the following three years, about sixty questions that would otherwise have had no answer.
+  <br>↳ Performance +4 · Reputation +2 · Stress +3
+
+**Give her a proper send-off instead**
+
+- A real speech, people invited who left years ago, and an afternoon that means something to her. The knowledge goes with her. You do not regret the choice.
+  <br>↳ Political capital +3 · Integrity +2 · Performance -2
+
+**Cake at three**
+
+- Cake at three. She leaves at five. Six weeks later somebody asks why the process works the way it does, and the honest answer is that nobody left knows.
+  <br>↳ Performance -3
+
+#### The consultants have reported
+
+*`evt.common.consultant_report` · weight 10*
+
+> Four months and a substantial fee have produced a document whose central recommendation is the thing your department proposed, in writing, two years ago, and which was refused.
+
+**Support it without mentioning the history**
+
+- It gets done, which was the point. Someone senior privately remembers that you did not say the obvious thing, which is worth more than saying it.
+  <br>↳ Political capital +5 · Performance +2
+
+**Point out that this was your proposal**
+
+- *(weight 2)* You attach the original note. The room reads it, is briefly embarrassed, and your department is asked to lead the implementation.
+  <br>↳ Reputation +4 · Political capital -2
+- *(weight 3)* It reads as sour, whatever the merits. The recommendation proceeds under the consultants’ name and you have spent capital being right in public.
+  <br>↳ Political capital -5 · Stress +3
+
+**Use the moment to get more than they recommended** *(requires Political capital ≥ 25)*
+
+- With the door open you push through the recommendation and the two things it would need to actually work, which the consultants had not identified. It is the best use of somebody else’s fee you will ever make.
+  <br>↳ Reputation +4 · Performance +3 · Political capital -3
+
+#### A hall with two hundred angry people in it
+
+*`evt.common.public_meeting` · weight 10*
+
+> The public meeting about the decision is tonight. The decision is correct, it is final, and the two hundred people are correct that nobody explained it to them before it was made.
+
+**Go and answer questions for two hours**
+
+- *(weight 3)* It is bruising for forty minutes and then, gradually, it becomes a conversation. Nothing changes about the decision. About thirty people leave understanding it, which is thirty more than this morning.
+  <br>↳ Reputation +4 · Integrity +4 · Stress +8
+- *(weight 2)* It does not become a conversation. Two hours of being shouted at by people who have every right to be angry and no way to change anything.
+  <br>↳ Integrity +3 · Stress +11
+
+**Send the communications team**
+
+- They handle it professionally and cannot answer a single substantive question, because they do not know the answers. The room concludes, reasonably, that nobody who mattered came.
+  <br>↳ Reputation -4 · Integrity -2
+
+**Publish a full written explanation instead**
+
+- Eleven pages, plainly written, published the morning of the meeting. Forty people read it properly. The meeting is still difficult and is at least about the actual decision.
+  <br>↳ Integrity +3 · Stress +4
+
+#### Someone you trained now sells to you
+
+*`evt.common.former_colleague_supplier` · weight 10*
+
+> He left four years ago for a firm that supplies the administration. He is good, the product is genuinely appropriate, and he is on the other side of a table you used to sit at together.
+
+**Declare the relationship and step back**
+
+- You register it and hand the decision to a colleague. The firm may or may not win. Nobody will ever be able to ask the question.
+  <br>↳ Integrity +5 · Political capital -2
+
+**Declare it and stay in the room**
+
+- Registered, disclosed to the panel, and you take part anyway because there is nobody else who understands the technical requirement. It is defensible and it will be questioned if the firm wins.
+  <br>↳ Integrity +1 · Performance +2
+
+**It was four years ago**
+
+- You say nothing, because it genuinely does not affect your judgement. That is probably true. It is not the test, and you know what the test is.
+  <br>↳ Integrity -5 · flag `undeclared_interest` · schedules "A letter from the audit authority" in 5 months
+
+#### The ombudsman has an opinion
+
+*`evt.common.ombudsman` · weight 9 · month 18+*
+
+> A case you handled two years ago has reached the ombudsman, who has found maladministration — not in the decision, which was right, but in taking eleven months to communicate it.
+
+**Accept it and fix the process**
+
+- You accept the finding without qualification and change the process so it cannot take eleven months again. The ombudsman’s annual report cites it as an example of good response.
+  <br>↳ Integrity +4 · Reputation +3 · Performance +2
+
+**Accept it, with context about the resourcing**
+
+- You accept and explain the two vacancies that caused it. The explanation is true and reads, in print, as an excuse.
+  <br>↳ Reputation -2 · Political capital +2
+
+**Contest the finding**
+
+- The finding stands, as ombudsman findings generally do, and the file now contains both the maladministration and the argument about it.
+  <br>↳ Reputation -4 · Stress +5
+
+#### The pay settlement
+
+*`evt.common.pay_freeze` · weight 10*
+
+> This year’s settlement is below inflation for the fourth consecutive year. You are asked to communicate it to your colleagues as though it were news about something else.
+
+**Tell them exactly what it is**
+
+- You say the number, say what it means in real terms, and do not dress it. People are angry about the settlement rather than about you, which is the most that was available.
+  <br>↳ Integrity +4 · team morale +3 · Political capital -2
+
+**Use the framing you were given**
+
+- "A settlement that reflects the fiscal position while recognising the contribution of colleagues." Nobody in the room is fooled, and something small is spent that you cannot get back.
+  <br>↳ Integrity -3 · team morale -5 · Political capital +2
+
+#### The union rep wants a standing meeting
+
+*`evt.common.union_rep_request` · weight 9*
+
+> She proposes half an hour a month, before problems become grievances. It is an entirely reasonable request from someone whose job is to make your job harder in specific and legitimate ways.
+
+**Agree to it**
+
+- Half an hour a month, and over two years perhaps four things that would have become formal never do. It is impossible to prove and obviously true.
+  <br>↳ team morale +5 · Integrity +2 · Stress -2
+
+**Offer to meet whenever there is an issue**
+
+- Which sounds identical and is not: by the time there is an issue there is an issue. The first grievance of the year arrives in March.
+  <br>↳ schedules "A grievance" in 3 months
+
+#### A letter from someone you helped
+
+*`evt.common.small_kindness` · weight 9 · month 18+*
+
+> A handwritten letter, forwarded through three internal addresses. Eighteen months ago you spent an afternoon getting a case unstuck for a woman whose name you do not remember. She writes to say what it changed.
+
+**Keep it in your desk drawer**
+
+- You read it twice and put it in the drawer, where it stays for the rest of your career and gets taken out on the worst days.
+  <br>↳ Stress -8 · Integrity +3
+
+**Read it out at the team meeting**
+
+- You read it to a room that has spent the month on process. It is the only agenda item anyone remembers, and two people ask afterwards for the case reference.
+  <br>↳ team morale +8 · Stress -5
+
+#### Purdah
+
+*`evt.common.election_period` · weight 10*
+
+> The pre-election period has started. Nothing may be announced, published, or decided that could be read as influencing the outcome, which turns out to describe most of what the department was going to do this month.
+
+**Apply it strictly**
+
+- Everything stops that could conceivably be questioned. Six weeks of backlog, no criticism, and a department that has learned to hold its breath every four years.
+  <br>↳ Performance -3 · Integrity +3
+
+**Apply judgement, case by case**
+
+- *(weight 3)* You separate what is genuinely sensitive from what is merely scheduled, and keep two thirds of the work moving. Nobody queries any of it.
+  <br>↳ Performance +2 · Reputation +2
+- *(weight 2)* One publication is queried by a candidate. It was defensible, the answer is accepted, and the fortnight it consumes is not returned to you.
+  <br>↳ Stress +6 · Political capital -3
+
+**Use the six weeks on everything that has been deferred**
+
+- The department spends purdah doing the internal work it never has time for. It emerges in better shape than it went in, which nobody has ever managed before.
+  <br>↳ Performance +4 · team morale +4 · Stress +3
+
 ### Legal
 
 #### The answer he wanted
@@ -785,6 +1179,126 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 - You tell him, without edge, that informal legal advice is how administrations end up in court. He waits two days for the note. He is right that it was inconvenient; you are right that it was necessary.
   <br>↳ Integrity +5 · Political capital -3 · Reputation +2
 
+#### Make it lawful from last March
+
+*`evt.legal.retrospective` · weight 11 · legal*
+
+> A scheme has been operating for eleven months without the legal basis anyone assumed existed. You are asked whether it can be regularised retrospectively.
+
+**Set out precisely what retrospection can and cannot fix**
+
+- Two pages distinguishing what can be validated from what cannot. Half the problem dissolves; the other half becomes a decision for somebody more senior, correctly.
+  <br>↳ Reputation +4 · Integrity +3
+
+**Draft the validating instrument and move on**
+
+- It is signed in six weeks and nobody examines the eleven months. Somewhere there are people who were affected by a scheme that had no basis, and no record that anyone considered them.
+  <br>↳ Integrity -5 · Political capital +3
+
+**Advise that it must stop until it is lawful**
+
+- The scheme pauses for nine weeks and four hundred people are inconvenienced by your advice being correct. You are not thanked and you were right.
+  <br>↳ Integrity +5 · Political capital -5
+
+#### The junior has found something
+
+*`evt.legal.junior_counsel` · weight 11 · legal*
+
+> A trainee two years in has spotted a problem in an opinion signed off by the head of legal four years ago. She is nervous, tentative, and — you check twice — right.
+
+**Put her name on the correction**
+
+- You have her write it up and take it in with her. The head of legal takes it well, mostly, and she is a different lawyer from that week onward.
+  <br>↳ Integrity +5 · team morale +6 · Political capital -2
+
+**Raise it under your own name**
+
+- Safer for her and simpler for you. She notices, says nothing, and files it away with everything else she has learned about how this works.
+  <br>↳ Reputation +2 · team morale -3 · Integrity -2
+
+**Four years is four years**
+
+- Nothing has gone wrong yet. You tell her it is a good catch and that these things are rarely worth reopening, and watch her decide what kind of department this is.
+  <br>↳ Integrity -4 · team morale -4 · schedules "Somebody went outside" in 5 months
+
+#### Settle or fight
+
+*`evt.legal.settle_or_fight` · weight 12 · legal*
+
+> The administration will probably win, at a cost of nine months and a great deal of officer time. The claimant will accept a fifth of what they asked for, today.
+
+**Settle**
+
+- Cheaper than winning, which is the arithmetic that decides most litigation. It also means the point is never tested, and the next claimant has the same argument.
+  <br>↳ Performance +2 · Political capital +2
+
+**Fight it**
+
+- *(weight 3)* Nine months and a judgment that settles the point for every future case. Expensive, correct, and it saves a fortune over the following decade.
+  <br>↳ Reputation +5 · Stress +7
+- *(weight 2)* Nine months and a loss on a point nobody anticipated. The settlement offer was a fifth of what the administration ends up paying.
+  <br>↳ Reputation -6 · Stress +8
+
+#### Nobody understands the letters
+
+*`evt.legal.plain_language` · weight 10 · legal*
+
+> The standard decision letter is legally impeccable and, on the evidence of four hundred phone calls a month, incomprehensible. Rewriting it means accepting slightly more legal risk in exchange for people knowing what has happened to them.
+
+**Rewrite them in plain language**
+
+- Six weeks of work and the calls halve. Two years later a tribunal criticises a phrase you simplified, and you would still make the same trade.
+  <br>↳ Reputation +4 · Integrity +4 · Stress +5
+
+**Keep the wording that has never lost**
+
+- Defensible, unchanged, and four hundred calls a month from people trying to find out whether they have been refused.
+  <br>↳ Integrity -2
+
+**Send both versions**
+
+- The formal decision, and a plain covering note that explains it. Twice the paper, half the confusion, and legally unimpeachable because nothing was removed.
+  <br>↳ Integrity +4 · Performance +2 · Stress +3
+
+#### External counsel disagrees with you
+
+*`evt.legal.conflicting_advice` · weight 10 · legal*
+
+> A firm has advised the opposite of your opinion on a live matter. One of you is wrong. They cost four hundred an hour and they are not obviously better than you.
+
+**Set out both positions for the decision-maker**
+
+- You write the honest version: here is my view, here is theirs, here is where they diverge and what turns on it. The decision-maker chooses with their eyes open, which is the whole job.
+  <br>↳ Integrity +5 · Reputation +3
+
+**Defer to the firm**
+
+- They are the specialists and it is the safe institutional answer. Eighteen months later the point is litigated and your original view is the one the court takes.
+  <br>↳ Reputation -3 · Integrity -2 · schedules "The court has ruled" in 5 months
+
+**Insist on your own view**
+
+- *(weight 3)* You hold, in writing, with reasons. You are right, and the department stops instructing that firm on this class of question.
+  <br>↳ Reputation +5
+- *(weight 2)* You hold and you are wrong, in writing, at length. It is a specific and memorable kind of embarrassment.
+  <br>↳ Reputation -5 · Stress +5 · schedules "The court has ruled" in 6 months
+
+#### The powers are broader than they need to be
+
+*`evt.legal.emergency_powers` · weight 10 · legal, level 3+*
+
+> An emergency instrument is being drafted in a hurry. As written, the power it creates is considerably wider than the emergency requires, and nobody in the room is arguing for narrowing it.
+
+**Insist on narrowing it, with a sunset clause**
+
+- You add the limits and the expiry date, over the objections of people who point out, correctly, that it is slower. The power expires on schedule two years later, which almost never happens.
+  <br>↳ Integrity +6 · Reputation +3 · Political capital -4
+
+**Let it go as drafted; it is an emergency**
+
+- It is an emergency, and the power is used proportionately, and it is still on the statute book eleven years later being used for things nobody in that room imagined.
+  <br>↳ Integrity -5 · Political capital +4 · schedules "The power is being used for something else" in 7 months
+
 ### Projects
 
 #### Substantially complete
@@ -819,7 +1333,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Query it formally**
 
 - You ask, in writing, for the underlying records. They arrive, corrected, with an explanation about a data entry error. Perhaps it was. The claim is now defensible.
-  <br>↳ Integrity +3 · Performance +2 · Political capital -2
+  <br>↳ Integrity +3 · Performance +2 · Reputation +2 · Political capital -2
 
 **Pass it through**
 
@@ -923,12 +1437,12 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Refer it to the programme**
 
 - You report the related-party transaction as the rules require. The partner is furious, the programme investigates for eight months, and the finding is that it was permissible but should have been declared properly.
-  <br>↳ Integrity +5 · Political capital -4 · Stress +5
+  <br>↳ Integrity +5 · Reputation +2 · Political capital -4 · Stress +5
 
 **Demand evidence the price was competitive**
 
 - You require three comparable quotes before certifying. They produce them, grudgingly, and the price turns out to be reasonable. The file is now sound and the relationship is not.
-  <br>↳ Integrity +4 · Performance +2 · Political capital -2
+  <br>↳ Integrity +4 · Performance +2 · Reputation +3 · Political capital -2
 
 **It was disclosed; certify it**
 
@@ -955,6 +1469,131 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 - You spend an evening finding the version where thirty-five real jobs and one genuinely transferable method are more interesting than ninety invented ones. Communications prefer it. So does the programme.
   <br>↳ Integrity +3 · Reputation +3 · Stress +4
+
+#### A partner has gone into administration
+
+*`evt.projects.partner_collapse` · weight 11 · projects*
+
+> The organisation delivering a third of the project stopped trading on Tuesday. Their work package is half finished, their staff are gone, and the funder’s deadline has not moved.
+
+**Take the work package in-house**
+
+- You rebuild a third of the project inside your own administration in four months. It is the hardest thing you do that year and the project lands.
+  <br>↳ Reputation +5 · Performance +3 · Stress +11
+
+**Formally reduce the project**
+
+- You negotiate a reduced scope with the funder, honestly and early. The project delivers two thirds of what it promised, on time, with nobody surprised.
+  <br>↳ Integrity +4 · Reputation +2
+
+**Report it at the next scheduled milestone**
+
+- Eleven weeks later, when the report is due. By then the options have narrowed to one, and the funder’s first question is when you knew.
+  <br>↳ Integrity -5 · schedules "Payments are suspended" in 3 months
+
+#### The evaluation is not flattering
+
+*`evt.projects.evaluation_inconvenient` · weight 11 · projects*
+
+> The independent evaluation of your flagship project finds it achieved about half of what was claimed, for reasons that are mostly outside anyone’s control. Publication is at your discretion.
+
+**Publish it in full**
+
+- It is uncomfortable for a fortnight. It is also cited by three other administrations designing similar things, none of whom now make the same mistake.
+  <br>↳ Integrity +6 · Reputation +3 · Political capital -3
+
+**Publish a summary**
+
+- The summary is accurate and contains none of the numbers that matter. Somebody requests the full report under transparency law in about four months.
+  <br>↳ Integrity -4 · schedules "A list of eleven questions" in 4 months
+
+**Do not publish**
+
+- It sits on a shared drive. The next project is designed by people who never read it and repeats two of the three failures.
+  <br>↳ Integrity -6 · Performance -2 · schedules "A message from someone doing your old job" in 8 months
+
+#### The receipts are too neat
+
+*`evt.projects.beneficiary_fraud` · weight 11 · projects*
+
+> A beneficiary’s claim is immaculate: sequential invoice numbers, round figures, a supplier registered three weeks before the first invoice. Nothing is provably wrong.
+
+**Refer it for investigation**
+
+- *(weight 3)* It is fraud, and a fairly amateur version. Recovery takes two years and the referral is exactly what the anti-fraud framework exists for.
+  <br>↳ Integrity +5 · Reputation +4 · Stress +6
+- *(weight 2)* It is a small organisation with a bookkeeper who does everything in round numbers. The investigation nearly closes them and finds nothing.
+  <br>↳ Reputation -2 · Stress +5
+
+**Query it directly with them first**
+
+- You ask for the underlying documentation before referring anything. What comes back settles it either way in a fortnight, without destroying anyone who did nothing wrong.
+  <br>↳ Integrity +4 · Performance +2
+
+**Nothing is provably wrong**
+
+- You certify it. The claim is one of six hundred and you have four days. It is the reasonable decision and you do not entirely believe it.
+  <br>↳ Integrity -4 · schedules "Payments are suspended" in 5 months
+
+#### The match funding has not appeared
+
+*`evt.projects.co_financing_gap` · weight 11 · projects*
+
+> The programme pays sixty per cent; the administration was to find the rest. The rest has been quietly removed from next year’s budget by somebody who did not realise it was load-bearing.
+
+**Escalate immediately and loudly**
+
+- You make it unambiguous, in writing, that removing the match forfeits four times as much external money. The line is restored in a fortnight and somebody is embarrassed.
+  <br>↳ Reputation +4 · Political capital -3
+
+**Find the money somewhere else**
+
+- Three departments contribute a share in exchange for a mention in the outputs. It is held together with goodwill and it works.
+  <br>↳ Political capital -4 · Reputation +1 · Performance +3 · Stress +6
+
+**Reduce the project to what can be matched**
+
+- Honest, orderly, and the administration returns two million euros it could have spent. The decision is correct and reads badly in the annual report.
+  <br>↳ Integrity +3 · Reputation -3
+
+#### The logo is the wrong size
+
+*`evt.projects.visibility_rules` · weight 10 · projects*
+
+> The programme’s visibility requirements specify the funder’s emblem at a defined proportion on every output. An auditor has found eleven breaches across two years, all trivial, all technically ineligible expenditure.
+
+**Contest the proportionality**
+
+- *(weight 3)* You argue proportionality with evidence of the actual visibility achieved. The correction is reduced to nothing. It takes five months of correspondence about a logo.
+  <br>↳ Reputation +3 · Stress +6
+- *(weight 2)* The rule is the rule. The correction stands, and the file is passed to the people who apply corrections to whole programmes rather than single outputs.
+  <br>↳ Stress +7 · Reputation -2 · schedules "A financial correction" in 4 months
+
+**Accept the correction and fix the templates**
+
+- You pay it, then spend an afternoon making the templates impossible to get wrong. Nobody in the department ever breaches it again, which is worth more than the correction cost.
+  <br>↳ Performance +3 · budget balance -4000
+
+#### The pilot worked
+
+*`evt.projects.pilot_scaling` · weight 11 · projects, level 3+*
+
+> A small pilot has produced genuinely good results in one town. Everyone wants it scaled nationally by spring. The results depended substantially on one exceptional person who ran it.
+
+**Scale it, and say publicly what it depended on**
+
+- You scale with the caveat attached to every document. Two regions replicate the conditions properly and get the results; the others do not and know why.
+  <br>↳ Integrity +5 · Reputation +4
+
+**Scale it as fast as they want**
+
+- Nationally by spring, and by autumn the results are a third of the pilot’s everywhere except the original town. The evaluation blames implementation fidelity, which is a phrase meaning this.
+  <br>↳ Political capital +4 · Reputation -4 · Integrity -3
+
+**Run a second pilot somewhere ordinary first**
+
+- Six months of delay to find out whether it works without an exceptional person. It half works, which is the most useful finding anyone produces that year.
+  <br>↳ Integrity +5 · Political capital -4 · Performance +2 · Reputation +2
 
 ### Finance
 
@@ -1124,6 +1763,131 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 - Authorised, documented, closed. It is the proportionate decision and it is almost always right.
   <br>↳ Performance +1
+
+#### Capital or revenue
+
+*`evt.finance.creative_classification` · weight 12 · finance*
+
+> Nine hundred thousand euros of spending could, on a generous reading, be classified as capital. Classified as revenue it breaches a limit. The generous reading is not obviously wrong.
+
+**Classify it as what it is**
+
+- Revenue, breach declared, an uncomfortable meeting, and an accounts set that means what it says.
+  <br>↳ Integrity +5 · Political capital -4
+
+**Take the generous reading**
+
+- It survives the external audit, because it is defensible. It is also the first of a series of generous readings that will be taken by people who learned it from this one.
+  <br>↳ Integrity -5 · Political capital +4 · flag `creative_accounting` · schedules "Somebody went outside" in 6 months
+
+**Ask the auditors in advance**
+
+- You put the question to them before deciding, in writing. They say revenue. It costs you the option and buys a file nobody can ever criticise.
+  <br>↳ Integrity +5 · Reputation +3 · Stress +3
+
+#### The association cannot repay it
+
+*`evt.finance.grant_clawback` · weight 11 · finance*
+
+> A community organisation must return forty thousand euros of misapplied grant. They did not steal it; they spent it on the wrong line of an over-complicated form. Recovering it will close them.
+
+**Recover it as the rules require**
+
+- They close in September. Eleven part-time jobs and a service for about two hundred people, ended by a form. Every step you took was correct.
+  <br>↳ Integrity +2 · Stress +7 · Reputation -2
+
+**Find a lawful way to soften it**
+
+- A four-year repayment schedule, a small write-off within your delegated authority, and a rewritten form. It takes a fortnight of ingenuity and they survive.
+  <br>↳ Integrity +5 · Reputation +3 · Stress +5
+
+**Let it lapse**
+
+- You allow the recovery to time out without a decision anyone signed. They survive, the money is gone, and there is no record of why.
+  <br>↳ Integrity -4 · schedules "A letter from the audit authority" in 4 months
+
+#### The number at the back of the accounts
+
+*`evt.finance.pension_liability` · weight 10 · finance, level 3+*
+
+> The pension liability has been restated and is now considerably larger than the administration’s annual budget. It is a real obligation, it is decades away, and nobody wants it in the summary.
+
+**Put it in the summary with an explanation**
+
+- One paragraph explaining what the number is and is not. Two councillors understand it for the first time in a decade, and the panic that everyone predicted does not happen.
+  <br>↳ Integrity +5 · Reputation +4
+
+**Leave it in note 27 where it belongs**
+
+- Technically correct placement, entirely conventional, and it is note 27 precisely because nobody reads note 27.
+  <br>↳ Integrity -2
+
+#### Interest is accruing
+
+*`evt.finance.late_payment_penalty` · weight 11 · finance*
+
+> The administration is paying so many invoices late that statutory interest has become a budget line. Fixing it means the payments team doubling its throughput or the approval chain losing two steps.
+
+**Remove two approval steps**
+
+- *(weight 3)* Payment times halve, interest disappears, and nothing bad happens because the two steps were checking things that had already been checked.
+  <br>↳ Performance +4 · Reputation +3
+- *(weight 2)* Payment times halve and a duplicate payment of sixty thousand euros goes out four months later, because one of those steps was doing something after all.
+  <br>↳ Reputation -5 · schedules "Internal review" in 2 months
+
+**Bid for more people in the payments team**
+
+- A costed case showing the interest exceeds the salary. It takes nine months to be approved and it is approved, which almost never happens to a bid for back-office posts.
+  <br>↳ Reputation +3 · Political capital -3 · monthly budget +2200
+
+**Budget for the interest**
+
+- You put it in the budget as a line called "statutory interest" and it is approved without comment, which tells you something about how budgets are read.
+  <br>↳ Integrity -3 · Stress -2
+
+#### The third year of using reserves for running costs
+
+*`evt.finance.reserves_raid_again` · weight 11 · finance, level 2+*
+
+> The budget balances only because reserves are covering ordinary spending for the third consecutive year. At the current rate the reserves are exhausted in about four years, and nobody wants that sentence in a public document.
+
+**Put the four-year figure in the budget report**
+
+- One sentence, one chart. It causes a genuinely difficult debate and the following year’s budget is the first in a decade that does not rely on reserves.
+  <br>↳ Integrity +6 · Reputation +5 · Political capital -5
+
+**Include it as a technical annex**
+
+- It is disclosed, formally and completely, in a place calibrated to be disclosed rather than read. You have covered yourself and changed nothing.
+  <br>↳ Integrity -2 · Political capital +2
+
+**Balance the budget and say nothing**
+
+- It balances. The reserves position is in the accounts for anyone who looks. Four years is four years away and you may not be here.
+  <br>↳ Integrity -6 · schedules "A question on the council agenda" in 5 months
+
+#### The new ledger goes live on Monday
+
+*`evt.finance.systems_migration` · weight 10 · finance*
+
+> Two years of implementation. The testing was adequate rather than good, the fallback plan is "revert", and reverting after the first month of postings is not actually possible.
+
+**Delay it a quarter**
+
+- You take the criticism for a three-month slip and use the time on the testing that should have happened. It goes live in April without incident, which nobody notices.
+  <br>↳ Reputation -2 · Performance +4 · Integrity +3
+
+**Go live as planned**
+
+- *(weight 2)* It works. Two difficult weeks and then a better system, on schedule, and you never mention how thin the testing was.
+  <br>↳ Reputation +4 · Stress +8
+- *(weight 3)* Six weeks in which the administration cannot reliably say what it has spent. It is fixed by August at a cost that exceeds the implementation.
+  <br>↳ Reputation -7 · Performance -4 · Stress +12
+
+**Run both systems in parallel for a quarter**
+
+- Double the work for three months, and every discrepancy caught before it matters. The team is exhausted and the migration is the only one anybody remembers going smoothly.
+  <br>↳ Performance +3 · team morale -6 · Stress +9
 
 ### Procurement
 
@@ -1296,6 +2060,123 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 - A generous reading of one qualitative criterion closes an eleven per cent gap. Forty jobs stay in the town. The scoring sheet will not survive a challenge and everyone hopes there is not one.
   <br>↳ Integrity -6 · Political capital +5 · schedules "A formal challenge" in 2 months
+
+#### One bid
+
+*`evt.procurement.single_bid` · weight 12 · procurement*
+
+> The tender closed with a single response, from the incumbent, at a price eleven per cent above the estimate. It is compliant. Awarding it is lawful and awarding it says something.
+
+**Award it**
+
+- Compliant, defensible, and eleven per cent above estimate. The market has learned that this administration will award to a single bid, which is the expensive part.
+  <br>↳ Performance +1 · Integrity -2
+
+**Find out why nobody else bid**
+
+- *(weight 3)* Six phone calls establish that the timetable was impossible over the summer and two requirements were incomprehensible. You rerun it properly and get four bids, the cheapest nine per cent below estimate.
+  <br>↳ Reputation +5 · Integrity +4 · Stress +5
+- *(weight 2)* The market is simply thin: three firms nationally, two of them busy. You award to the single bid, having established that it was the only bid available.
+  <br>↳ Integrity +3 · Reputation +2
+
+**Negotiate the price down first**
+
+- Permitted in the circumstances, and it takes four per cent off. They knew they were the only bid and you both knew they knew.
+  <br>↳ Performance +2 · Reputation +1
+
+#### Forty per cent below everyone else
+
+*`evt.procurement.abnormally_low` · weight 11 · procurement*
+
+> The lowest bid is forty per cent under the next one. Either they have found something everyone else missed, or they intend to make it up in variations. The law requires you to ask.
+
+**Interrogate the price properly**
+
+- *(weight 3)* Their explanation does not survive four questions. You exclude the bid, document why, and the contract goes to a price that will actually be the price.
+  <br>↳ Integrity +5 · Reputation +4
+- *(weight 2)* Their explanation is excellent: a genuinely better method. You award, and they deliver at the price, and the sector talks about it for a year.
+  <br>↳ Reputation +5 · Performance +3
+
+**Take the saving**
+
+- The headline saving is announced. Eighteen months and nine variations later the final cost is above the second bid, and the announcement is what everyone remembers.
+  <br>↳ Reputation +2 · Integrity -4 · schedules "The claim" in 5 months
+
+#### Nobody is managing the contract
+
+*`evt.procurement.contract_management` · weight 11 · procurement*
+
+> The eleven-million-euro contract you awarded two years ago has no named manager. The supplier has been invoicing against milestones nobody verifies. They may well be doing everything right.
+
+**Assign a manager and audit the last two years**
+
+- *(weight 3)* The audit finds three hundred thousand euros of milestones invoiced and not delivered. It is recovered. The contract runs properly for its remaining three years.
+  <br>↳ Reputation +5 · Integrity +4 · Stress +6
+- *(weight 2)* The audit finds the supplier has been scrupulous throughout. Two months of work to establish that nothing was wrong, which is what assurance costs.
+  <br>↳ Integrity +3 · Stress +5
+
+**Assign a manager going forward only**
+
+- Sensible, forward-looking, and it draws a line under two years nobody will now examine. The supplier notices the line exactly as clearly as you do, and prices the rest of the contract accordingly.
+  <br>↳ Performance +2 · Integrity -3 · schedules "The claim" in 6 months
+
+#### Ten per cent for social value
+
+*`evt.procurement.social_value` · weight 10 · procurement*
+
+> The evaluation includes ten per cent for social value. Every bidder has promised apprenticeships. None of the promises are contractually binding, and the last three winners delivered none of them.
+
+**Write the promises into the contract**
+
+- The commitments become deliverables with remedies attached. Two bidders reduce their offers to something they can actually do, which is the first honest social value scoring anyone here has seen.
+  <br>↳ Integrity +5 · Reputation +4 · Stress +4
+
+**Score them as submitted**
+
+- Ten per cent of a major contract decided by promises nobody will check. It is what the framework says to do.
+  <br>↳ Integrity -4
+
+**Remove the criterion as unmeasurable**
+
+- Defensible and slightly cowardly. The evaluation becomes honest by becoming narrower, and the apprenticeships that were never going to happen stop being pretended about.
+  <br>↳ Integrity +2 · Political capital -3
+
+#### The framework expires in six weeks
+
+*`evt.procurement.framework_expiry` · weight 11 · procurement*
+
+> Eleven services are bought through it. Replacing it properly takes five months. The options are an unlawful extension, an emergency direct award, or eleven services stopping.
+
+**Emergency awards, fully documented, with an end date**
+
+- Six months of properly justified direct awards while the replacement runs. It is the honest use of the exception, it is expensive, and every step is on the file.
+  <br>↳ Integrity +4 · Performance +2 · Stress +6
+
+**Extend the framework**
+
+- A variation nobody will query, which is not the same as lawful. Eleven services continue and there is now a document with your name on it that would not survive a challenge.
+  <br>↳ Integrity -5 · schedules "A formal challenge" in 4 months
+
+**Report that the department failed to plan for this**
+
+- True — it was known eighteen months ago and nobody acted. You put that in writing alongside the options, which makes the emergency a decision rather than an accident.
+  <br>↳ Integrity +4 · Political capital -4 · Reputation +2
+
+#### The losing bidder wants to know why
+
+*`evt.procurement.debrief` · weight 10 · procurement*
+
+> A small firm has asked for a debrief. They came fourth of four and their bid was genuinely poor. A full and frank explanation would be useful to them and would give them everything they need to challenge.
+
+**Give them a real debrief**
+
+- An hour, specific, and occasionally blunt. They bid again in eighteen months, much better, and win. They tell people the administration is worth bidding to.
+  <br>↳ Integrity +5 · Reputation +3 · Stress +3
+
+**The statutory minimum**
+
+- Scores, headline reasons, nothing actionable. Entirely compliant, and they do not bid again, and neither do the two firms they talk to. One of them takes it to the ombudsman instead.
+  <br>↳ Integrity -2 · schedules "The ombudsman has taken the case" in 4 months
 
 ### Policy
 
@@ -1470,6 +2351,134 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 - A reasonable request, reasonably granted, and quietly filed under things that are noted about people who will not turn.
   <br>↳ Integrity +2 · Political capital -4
+
+#### The research you commissioned disagrees with you
+
+*`evt.policy.commissioned_research` · weight 12 · policy*
+
+> The institute you funded to examine the question has answered it, at length, in the opposite direction to the department’s established position. Their methodology is sound.
+
+**Publish it and engage with the finding**
+
+- You publish alongside a response setting out what the department accepts and what it disputes, with reasons. It is a model of how this should work and it is genuinely uncomfortable.
+  <br>↳ Integrity +6 · Reputation +4 · Political capital -3
+
+**Commission a critique of the methodology**
+
+- A second institute finds three arguable weaknesses. Both reports exist, neither prevails, and the question is now contested rather than answered.
+  <br>↳ Integrity -4 · Political capital +3 · budget balance -18000
+
+**Change the department’s position**
+
+- *(weight 2)* You take the finding seriously enough to move, and bring the department with you over eight months. It is the most consequential thing you ever do.
+  <br>↳ Integrity +7 · Reputation +6 · Stress +8
+- *(weight 3)* You propose the change and are overruled by people for whom the established position is now a commitment. The research is published and the position does not move.
+  <br>↳ Integrity +4 · Political capital -5
+
+#### The committee wants the submissions
+
+*`evt.policy.select_committee_request` · weight 11 · policy*
+
+> A committee has asked for every submission received during a consultation, including four from companies that wrote on the express understanding that their responses were confidential.
+
+**Provide everything**
+
+- The committee has the power and you comply in full. Four companies will never again write candidly to this department, and the next consultation is noticeably emptier.
+  <br>↳ Integrity +2 · Political capital -4
+
+**Provide them, having told the four first**
+
+- You warn each of them, explain that you have no choice, and give them a week. Two withdraw and resubmit in a form they can live with. It costs a week and preserves the relationship.
+  <br>↳ Integrity +5 · Reputation +3 · Stress +4
+
+**Provide them redacted**
+
+- The redactions are queried within a fortnight and mostly overturned. You have delayed the disclosure and added a story about the department withholding things.
+  <br>↳ Reputation -4 · Stress +4
+
+#### Two political principals, one policy
+
+*`evt.policy.two_ministers` · weight 11 · policy, level 3+*
+
+> Two parts of government want opposite things from the same measure, and each believes the department is working to their version. A single document has to go to both.
+
+**Write the disagreement down and put it to both**
+
+- One page setting out the two positions and what turns on the difference. It forces a decision that has been avoided for four months, and both offices are briefly furious with you.
+  <br>↳ Integrity +5 · Reputation +4 · Political capital -5
+
+**Draft it so both can read it their way**
+
+- A genuinely skilful piece of writing that resolves nothing. It is agreed in a fortnight and the contradiction surfaces at implementation, where it costs ten times as much.
+  <br>↳ Political capital +4 · Integrity -4 · schedules "Internal review" in 4 months
+
+**Draft for the one with more authority**
+
+- You back the stronger office, which is how these things usually resolve, and the other one remembers. It is settled quickly and one relationship is spent.
+  <br>↳ Political capital -3 · Performance +2
+
+#### The people it applies to
+
+*`evt.policy.lived_experience` · weight 11 · policy*
+
+> The consultation has produced eleven hundred organisational responses and almost nothing from the people the policy actually affects, who are not organised and do not read consultation documents.
+
+**Go and talk to them**
+
+- Four weeks, six locations, and about ninety conversations. Two of the policy’s central assumptions turn out to be wrong in ways no organisation had mentioned.
+  <br>↳ Integrity +6 · Reputation +4 · Stress +7
+
+**Rely on the organisations that represent them**
+
+- They are well-informed, professional, and represent the members they have. The policy is designed around the people organised enough to be represented.
+  <br>↳ Integrity -2
+
+**Commission research into their views**
+
+- Eleven months and thirty thousand euros to produce a report that arrives after the decision. It is excellent and it informs the review in four years.
+  <br>↳ budget balance -30000 · Integrity +2
+
+#### They want to un-announce it
+
+*`evt.policy.announcement_reversal` · weight 11 · policy*
+
+> A measure announced eight weeks ago is to be dropped. You are asked to draft the communication, and to do it in a way that does not read as a reversal.
+
+**Say it has been dropped, and why**
+
+- Four sentences: what was announced, what changed, what happens now. It is reported as a U-turn for two days and then as a department that says what it is doing.
+  <br>↳ Integrity +5 · Reputation +3 · Political capital -3
+
+**"The approach has evolved"**
+
+- A masterpiece of the form. Nobody is deceived, several journalists quote it as an example, and the phrase attaches itself to the department for a year.
+  <br>↳ Integrity -4 · Reputation -2 · Political capital +3
+
+**Publish it the afternoon of something bigger**
+
+- It is out, technically, on a day nobody is looking. Two years later somebody assembles a list of things published on such afternoons, and this is on it.
+  <br>↳ Integrity -5 · schedules "A list of eleven questions" in 6 months
+
+#### A review would be helpful
+
+*`evt.policy.long_grass` · weight 11 · policy*
+
+> A politically awkward question has arrived. The suggested response is a review, reporting in eighteen months, by which time the question will belong to somebody else.
+
+**Set up a review that will actually decide it**
+
+- Six months, a named chair with a reputation to protect, and terms of reference that require a recommendation. It reports on time and the recommendation is acted on.
+  <br>↳ Integrity +5 · Reputation +4 · Political capital -3
+
+**Eighteen months it is**
+
+- You write the terms of reference so that reporting in eighteen months is unavoidable. It is a professional piece of work in the service of nothing happening.
+  <br>↳ Integrity -5 · Political capital +4 · schedules "A message from someone doing your old job" in 9 months
+
+**Advise that the question can be answered now**
+
+- You set out the answer, the evidence for it, and the fact that a review would establish nothing new. It is refused, and the note is on the file when the review reports exactly that in eighteen months.
+  <br>↳ Integrity +5 · Political capital -4 · Reputation +2
 
 ### Milestones
 
@@ -1832,7 +2841,7 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Reject it in full**
 
 - A careful, defensible letter that does not concede the paragraph that was right. It is escalated to the ombudsman, where the same paragraph is found again, by someone with more authority.
-  <br>↳ Reputation -4 · Integrity -3 · Stress +5
+  <br>↳ Reputation -4 · Integrity -3 · Stress +5 · schedules "The ombudsman has taken the case" in 3 months
 
 **Pass it to the complaints unit**
 
@@ -1934,6 +2943,211 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 - You start at the top. Twenty-two years ago you were three days into a job in Alderford, wondering whether any of it mattered, and now the answer to that question is in your hands and it is heavier than you expected.
   <br>↳ **ends the career: minister**
+
+#### The ombudsman has taken the case
+
+*`evt.followup.ombudsman`*
+
+> The complaint you closed has been escalated, and accepted. The ombudsman’s office writes with the particular courtesy of an institution that does not need your cooperation to reach a conclusion.
+
+**Concede the point now and remedy it**
+
+- You put the remedy in place before the finding is written. The report records that the administration corrected itself once the matter was properly examined, which is the best sentence available at this stage.
+  <br>↳ Integrity +5 · Reputation -1 · Stress +4
+
+**Defend the original decision**
+
+- *(weight 2)* The decision holds. Maladministration is not found and the file closes with a note that the process was followed. It has cost four months of correspondence to prove.
+  <br>↳ Reputation +3 · Stress +6
+- *(weight 3)* Maladministration is found, a remedy is recommended, and the report is published with the administration named. The paragraph about the original response to the complaint is the one that gets quoted.
+  <br>↳ Reputation -6 · Integrity -2 · Stress +8 · schedules "A list of eleven questions" in 2 months
+
+**Treat it as a systemic question, not a single case**
+
+- You go looking for the other cases handled the same way. There are nineteen. You put all nineteen in front of the ombudsman before being asked, and the finding becomes a recommendation the whole administration adopts.
+  <br>↳ Integrity +7 · Reputation +4 · Political capital -4 · Stress +9
+
+#### The court has ruled
+
+*`evt.followup.court_ruling`*
+
+> Eighteen months after the advice was given, the point has been decided. The judgment runs to forty pages and paragraph 61 describes the administration’s legal reasoning in terms that will be quoted by other courts.
+
+**Circulate it internally with what it means for us**
+
+- You write four pages: what the court decided, which of the department’s practices are now unlawful, and what has to change by when. It is unwelcome and it is used as the working document for two years.
+  <br>↳ Integrity +5 · Reputation +4 · Stress +6
+
+**Advise that it is confined to its facts**
+
+- *(weight 2)* It is arguably confined to its facts, and the administration proceeds unchanged for three years without being contradicted.
+  <br>↳ Political capital +3 · Integrity -3
+- *(weight 3)* It is not confined to its facts. A second claimant establishes that within the year, at greater cost, and your note advising the narrow reading is disclosed in those proceedings.
+  <br>↳ Reputation -6 · Integrity -4 · schedules "Internal review" in 3 months
+
+**Recommend an appeal** *(requires Political capital ≥ 25)*
+
+- Another two years and a great deal of money to test a point the department has already lost once. It is refused on cost grounds and the refusal is the moment the practice actually changes.
+  <br>↳ Political capital -6 · Stress +5 · Reputation -1
+
+#### Payments are suspended
+
+*`evt.followup.funder_suspension`*
+
+> The managing authority has suspended all payments to the programme pending an examination of the certification process. The administration is carrying six months of costs it cannot claim, and the letter names your department.
+
+**Put a corrective action plan in within the month**
+
+- *(weight 3)* Sixty pages in three weeks: what failed, what has changed, and what has been re-checked. The suspension lifts in the summer with a partial correction, and the plan is circulated to other bodies as an example.
+  <br>↳ Reputation +4 · Performance +3 · Stress +11
+- *(weight 2)* The plan is accepted in principle and the suspension holds for another two quarters while the sample is extended. The administration borrows to cover the gap.
+  <br>↳ Reputation -3 · Stress +10 · schedules "A financial correction" in 3 months
+
+**Contest the suspension as disproportionate**
+
+- A well-argued letter about proportionality, which is answered four months later, in the negative, by people who suspend payments for a living. The delay costs more than the correction would have.
+  <br>↳ Reputation -4 · Stress +7 · schedules "A financial correction" in 2 months
+
+**Withdraw the affected claims and re-certify from scratch**
+
+- You give back the doubtful expenditure before anyone demands it and rebuild the certification trail over five months. The administration loses a substantial sum and keeps the programme.
+  <br>↳ Integrity +6 · Performance -3 · Stress +8
+
+#### A financial correction
+
+*`evt.followup.recovery_order`*
+
+> The figure is set out in the second paragraph and it has a lot of zeros. It is a flat-rate correction applied to the whole programme, because the failure was found to be systemic rather than isolated.
+
+**Accept it and rebuild the control system**
+
+- You pay, and then spend a year on the controls that should have existed. The next programme period passes its audit with two observations, and somebody in the room remembers who did that.
+  <br>↳ Integrity +5 · Performance +3 · Reputation -3 · Stress +8
+
+**Negotiate the flat rate down**
+
+- *(weight 3)* You demonstrate, file by file, that the failure was confined to one measure. The rate drops from ten per cent to two, which is four months of work and an enormous amount of money.
+  <br>↳ Reputation +6 · Stress +9
+- *(weight 2)* The sample they extend to prove your point proves the opposite. The rate goes up.
+  <br>↳ Reputation -6 · Stress +10 · schedules "A question on the council agenda" in 2 months
+
+**Recover it from the beneficiaries**
+
+- The correction is passed on to forty organisations that followed the guidance you gave them. It is lawful, it is what the rules contemplate, and eleven of them will not survive it.
+  <br>↳ Integrity -6 · Reputation -2 · schedules "A list of eleven questions" in 3 months
+
+#### The claim
+
+*`evt.followup.contractor_claim`*
+
+> The contractor has submitted a compensation claim running to nine heads and a number roughly a third of the original contract value. Most of it is opportunistic. Two heads of it are entirely justified, and both arise from decisions taken in this department.
+
+**Concede the two that are good, resist the rest**
+
+- *(weight 3)* Settled in eleven weeks at a fifth of the claim, with the justified heads paid in full and the rest abandoned. The negotiation is the cleanest thing you do that year.
+  <br>↳ Reputation +5 · Integrity +4 · Stress +7
+- *(weight 2)* They will not split it, and the whole thing goes to adjudication. The award is close to what you offered and arrives fourteen months later, having cost most of the difference in fees.
+  <br>↳ Stress +9 · Reputation -2
+
+**Reject the claim in full**
+
+- A robust letter that does not acknowledge the two good heads. It is the position the administration takes by default, and it converts a negotiation into litigation that it goes on to lose on those two heads.
+  <br>↳ Reputation -5 · Stress +8 · schedules "Internal review" in 4 months
+
+**Settle the whole claim quickly**
+
+- Paid in six weeks with a confidentiality clause, because the alternative is two years of the finance director asking about it. The contractor tells the rest of the market what happened here.
+  <br>↳ Integrity -4 · Stress -2 · Political capital -4
+
+#### Three resignations in five weeks
+
+*`evt.followup.team_exodus`*
+
+> The first was a surprise. The third was not. Between them they are taking eleven years of knowledge of how this administration actually works, and the exit interviews are being conducted by HR with a template.
+
+**Do the exit conversations yourself and report what they say**
+
+- *(weight 3)* You ask, properly, and they tell you: two of the three are leaving because of decisions you made. You write it up, unedited, and put your name on it. It is the most useful document the directorate reads that year and it is about you.
+  <br>↳ Integrity +7 · Reputation -2 · team morale +8 · Stress +7
+- *(weight 2)* They are leaving for money and a shorter commute, mostly, and one of them for reasons she will not give you. The report is honest and less dramatic than the corridor version.
+  <br>↳ Integrity +4 · team morale +4
+
+**Say nothing and fill the posts fast**
+
+- Three recruitment panels in eight weeks and the establishment is whole again by autumn. Nobody asks why they left, so the reason is still in the room with the new people.
+  <br>↳ Performance -2 · team morale -4 · a junior joins · Stress +6
+
+**Ask the ones who stayed what would make them stay**
+
+- Eight conversations, an hour each, and a list of nine things. Four of them are within your gift and you do all four inside a month. It does not undo the three, and it stops the fourth.
+  <br>↳ team morale +12 · Stress +6 · Political capital -2
+
+#### Somebody went outside
+
+*`evt.followup.whistleblower`*
+
+> A protected disclosure has been made to the external authority. It concerns a decision of yours, it is accurate, and it was made by someone who sat twenty metres from you and did not come to you first.
+
+**Cooperate fully and protect the discloser**
+
+- *(weight 3)* You give the authority everything, and you make it unmistakably clear inside the building that anyone who goes looking for who made the disclosure will answer to you. The finding goes against you and the way you handled it does not.
+  <br>↳ Integrity +8 · Reputation -3 · team morale +8 · Stress +9
+- *(weight 2)* You cooperate fully, and the examination concludes that the decision was within your authority and poorly recorded. The discloser stays, and something between you does not recover.
+  <br>↳ Integrity +5 · Reputation -1 · Stress +7
+
+**Find out who it was**
+
+- It takes four days and two conversations. You do nothing with it, which you tell yourself is the same as not having found out. Everyone in the unit knows you looked.
+  <br>↳ Integrity -7 · team morale -12 · Stress +6 · flag `hunted_a_discloser`
+
+**Answer only through the administration’s lawyers**
+
+- Correct, cautious, and it converts a disclosure into a dispute. The authority takes eleven months instead of three and the department spends the year being represented rather than explaining itself.
+  <br>↳ Political capital -5 · Reputation -3 · team morale -5
+
+#### The power is being used for something else
+
+*`evt.followup.power_returns`*
+
+> The instrument drafted in a hurry during the emergency is being relied on for a purpose nobody in that room contemplated. It is, on the words, entirely capable of bearing that meaning. You know because you let the words go.
+
+**Advise that it was never intended for this, in writing**
+
+- You set out the drafting history, including your own part in it. The use is abandoned, the instrument is narrowed at the next opportunity, and your note is the reason both things happen.
+  <br>↳ Integrity +7 · Reputation +3 · Political capital -5
+
+**Advise that the words permit it**
+
+- Which they do. It is the correct legal answer to the question asked, and it is not the answer to the question that matters, and you are the only person who can tell the difference.
+  <br>↳ Integrity -6 · Political capital +4 · schedules "A list of eleven questions" in 4 months
+
+**Propose repealing it immediately**
+
+- *(weight 2)* You get it repealed within the year by making the case that the emergency ended. It is a small, unnoticed, entirely real piece of public service.
+  <br>↳ Integrity +6 · Reputation +2 · Political capital -6
+- *(weight 3)* Nobody repeals a useful power. The proposal is noted, thanked, and not progressed, and it is still on the books when you retire.
+  <br>↳ Integrity +4 · Political capital -4
+
+#### A message from someone doing your old job
+
+*`evt.followup.successor_letter`*
+
+> An officer you have never met has been through the archive and found the decision. They are not accusing you of anything. They would like to understand why it was done that way, because they have to do it again and the file does not say.
+
+**Tell them exactly what happened, including the part that was wrong**
+
+- You write two pages you would not have written at the time: the pressure, the reasoning, the thing you would do differently. They put it on the file. It is the most useful document in it.
+  <br>↳ Integrity +6 · Reputation +3
+
+**Give the version that is already on the record**
+
+- Accurate, complete, and it explains nothing they could not read for themselves. They thank you politely and make the same decision for the same unexamined reasons.
+  <br>↳ Integrity -3
+
+**You do not have time for this**
+
+- It is a courteous email from a stranger about something from years ago and there are forty in the inbox from today. You do not reply, and the institutional memory of that decision ends there.
+  <br>↳ Integrity -4 · Stress -1
 
 ## Endings
 

@@ -53,6 +53,8 @@ export const testCareerLevels: CareerLevel[] = [
     baseSalary: 3900,
     effortPoints: 12,
     taskSlots: 4,
+    headcount: 3,
+    monthlyBudget: 9000,
     promotion: {
       minReputation: 50,
       minPerformance: 55,
@@ -287,6 +289,7 @@ export function makeTestRegistry(): ContentRegistry {
     careerLevels: testCareerLevels,
     tasks: Object.fromEntries(testTasks.map((t) => [t.id, t])),
     events: Object.fromEntries(testEvents.map((e) => [e.id, e])),
+    staffNames: ['Ada Fixture', 'Bo Sample', 'Cato Stub', 'Dita Mock', 'Enzo Proxy'],
   };
 }
 

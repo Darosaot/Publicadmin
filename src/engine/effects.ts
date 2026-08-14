@@ -8,6 +8,7 @@
 import { STAT_MAX, STAT_MIN } from './constants';
 import type { ContentRegistry } from './registry';
 import { spawnTask } from './tasks';
+import { adjustTeamMorale, averageMorale, createStaff } from './team';
 import type { Condition, Effect, GameState, PlayerStats, StatId } from './types';
 
 /** Structural clone of the state. Cheap enough at this size, and keeps the engine honest. */
@@ -17,6 +18,9 @@ export function cloneState(state: GameState): GameState {
     player: { ...state.player },
     stats: { ...state.stats },
     tasks: state.tasks.map((t) => ({ ...t })),
+    staff: state.staff.map((s) => ({ ...s })),
+    hiring: state.hiring ? { ...state.hiring } : undefined,
+    budget: state.budget ? { ...state.budget } : undefined,
     pendingEvents: state.pendingEvents.map((p) => ({
       ...p,
       resolution: p.resolution ? { ...p.resolution } : undefined,
@@ -83,6 +87,56 @@ export function applyEffects(
         break;
       }
 
+      case 'teamMorale':
+        next = adjustTeamMorale(next, effect.delta);
+        break;
+
+      case 'teamSkill':
+        next = {
+          ...next,
+          staff: next.staff.map((member) => ({
+            ...member,
+            skill: clampStat(member.skill + effect.delta),
+          })),
+        };
+        break;
+
+      case 'budget':
+        if (next.budget) {
+          next.budget = { ...next.budget, balance: next.budget.balance + effect.delta };
+        }
+        break;
+
+      case 'budgetMonthly':
+        if (next.budget) {
+          next.budget = {
+            ...next.budget,
+            monthly: Math.max(0, next.budget.monthly + effect.delta),
+          };
+        }
+        break;
+
+      case 'loseStaff': {
+        // The least engaged person is the one who goes; that is usually how it happens.
+        if (next.staff.length > 0) {
+          const leaver = [...next.staff].sort((a, b) => a.morale - b.morale)[0]!;
+          next = {
+            ...next,
+            staff: next.staff.filter((s) => s.id !== leaver.id),
+            tasks: next.tasks.map((task) =>
+              task.assignedTo === leaver.id ? { ...task, assignedTo: undefined } : task,
+            ),
+          };
+        }
+        break;
+      }
+
+      case 'gainStaff': {
+        const made = createStaff(next, registry, effect.seniority);
+        next = { ...made.state, staff: [...made.state.staff, made.staff] };
+        break;
+      }
+
       case 'endGame':
         next.ending = effect.ending;
         next.phase = 'ended';
@@ -107,7 +161,7 @@ export function statDeltas(before: PlayerStats, after: PlayerStats): Partial<Pla
 
 /** Why a condition failed, so the UI can tell the player what they're missing. */
 export interface ConditionFailure {
-  reason: 'level' | 'department' | 'turn' | 'stat' | 'salary' | 'flag';
+  reason: 'level' | 'department' | 'turn' | 'stat' | 'salary' | 'flag' | 'team';
   stat?: StatId;
   required?: number;
   comparison?: 'min' | 'max';
@@ -149,6 +203,23 @@ export function checkCondition(
       if (stats[stat] > required) {
         return { reason: 'stat', stat, required, comparison: 'max' };
       }
+    }
+  }
+
+  if (condition.requiresTeam !== undefined) {
+    const managing = state.staff.length > 0 || (state.budget?.monthly ?? 0) > 0;
+    if (condition.requiresTeam !== managing) return { reason: 'team' };
+  }
+  if (condition.minStaffCount !== undefined && state.staff.length < condition.minStaffCount) {
+    return { reason: 'team' };
+  }
+  if (condition.minTeamMorale !== undefined || condition.maxTeamMorale !== undefined) {
+    const morale = averageMorale(state);
+    if (condition.minTeamMorale !== undefined && morale < condition.minTeamMorale) {
+      return { reason: 'team' };
+    }
+    if (condition.maxTeamMorale !== undefined && morale > condition.maxTeamMorale) {
+      return { reason: 'team' };
     }
   }
 

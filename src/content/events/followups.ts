@@ -357,6 +357,7 @@ export const followupEvents = [
           { kind: 'stat', stat: 'reputation', delta: -4 },
           { kind: 'stat', stat: 'integrity', delta: -3 },
           { kind: 'stat', stat: 'stress', delta: 5 },
+          { kind: 'queueEvent', eventId: 'evt.followup.ombudsman', delayTurns: 3 },
         ],
       },
       {

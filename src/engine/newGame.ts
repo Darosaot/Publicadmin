@@ -51,6 +51,10 @@ export function createGame(options: NewGameOptions, registry: ContentRegistry): 
     tasks: [],
     nextTaskUid: 1,
 
+    // No unit until the first management post.
+    staff: [],
+    nextStaffUid: 1,
+
     pendingEvents: [],
     scheduledEvents: [],
     firedEvents: [],

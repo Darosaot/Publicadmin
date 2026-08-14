@@ -34,7 +34,9 @@ export const careerLevels: CareerLevel[] = [
     orgShortKey: text('career.3.org_short', 'the Region'),
     baseSalary: 3900,
     effortPoints: 14,
-    taskSlots: 5,
+    taskSlots: 6,
+    headcount: 4,
+    monthlyBudget: 11500,
     promotion: {
       minReputation: 50,
       minPerformance: 55,
@@ -49,7 +51,9 @@ export const careerLevels: CareerLevel[] = [
     orgShortKey: text('career.4.org_short', 'the Agency'),
     baseSalary: 5200,
     effortPoints: 16,
-    taskSlots: 5,
+    taskSlots: 7,
+    headcount: 6,
+    monthlyBudget: 18500,
     promotion: {
       minReputation: 65,
       minPerformance: 60,
@@ -64,7 +68,9 @@ export const careerLevels: CareerLevel[] = [
     orgShortKey: text('career.5.org_short', 'the Ministry'),
     baseSalary: 6800,
     effortPoints: 18,
-    taskSlots: 6,
+    taskSlots: 8,
+    headcount: 8,
+    monthlyBudget: 26000,
     promotion: {
       minReputation: 78,
       minPerformance: 65,

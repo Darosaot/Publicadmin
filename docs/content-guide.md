@@ -107,6 +107,8 @@ The same shape gates events and individual choices:
   minStat?: { reputation?: 40, politicalCapital?: 25, … };
   maxStat?: { integrity?: 30, … };
   requiredFlags?: string[];       forbiddenFlags?: string[];
+  requiresTeam?: boolean;         minStaffCount?: number;
+  minTeamMorale?: number;         maxTeamMorale?: number;
 }
 ```
 
@@ -126,6 +128,17 @@ is almost always a flag plus a follow-up event.
 | Add a task | `{ kind: 'spawnTask', templateId }` | Lands on the board immediately |
 | Schedule an event | `{ kind: 'queueEvent', eventId, delayTurns? }` | The consequence mechanism |
 | End the game | `{ kind: 'endGame', ending }` | Short-circuits everything else |
+| Team morale | `{ kind: 'teamMorale', delta }` | Every member of the unit |
+| Team skill | `{ kind: 'teamSkill', delta }` | Every member of the unit |
+| One-off money | `{ kind: 'budget', delta }` | Against this year's balance |
+| Standing allocation | `{ kind: 'budgetMonthly', delta }` | Changes the monthly line itself |
+| Lose someone | `{ kind: 'loseStaff' }` | The lowest morale in the unit walks |
+| Gain someone | `{ kind: 'gainStaff', seniority }` | Arrives next month, no vacancy needed |
+
+The six team effects are **no-ops for a player who has no unit yet**, so a common event can carry
+one without needing a level gate. But an event whose *scene* only makes sense with staff in the
+room should still be gated with `requiresTeam: true` — a no-op effect is not the same as a
+sentence that reads as nonsense.
 
 **Chains stay short.** A choice may schedule a follow-up, and that follow-up may resolve — two
 steps. Longer chains are hard to test and harder to balance.
@@ -154,6 +167,21 @@ retire a template as you climb — but prefer letting `baseEffort` scale automat
 a separate template per level. **Never write department-specific content per level**; that's a 5×5
 matrix nobody can fill.
 
+### Keeping the five departments comparable
+
+The task board is the biggest lever on how a career goes, and it is easy to make one department
+harder than the others without noticing. Two numbers matter more than they look:
+
+- **The tightest deadline.** A `deadlineRange` starting at 2 on a template with meaningful
+  `baseEffort` is close to an automatic failure at low levels, and failures compound: they cost
+  Performance, which costs quality, which costs more failures.
+- **The cheapest template.** Every department needs one low-effort, low-difficulty, high-weight
+  file. It is what keeps a completion rate up while the real work is in progress.
+
+Procurement once had the tightest deadlines and no cheap template, and averaged nearly two career
+levels below Policy for it. `tests/engine/autoplay.test.ts` now fails if the best and worst
+departments drift more than 1.2 levels apart; `npm run balance` prints the real spread.
+
 ## Adding a language
 
 1. Get the full key list: `npm run docs:script` writes every string into
@@ -164,6 +192,17 @@ matrix nobody can fill.
 
 Only names and numbers are interpolated (`{name}`, `{amount}`), so no sentence depends on English
 grammar for its structure.
+
+## Adding a follow-up
+
+A follow-up is never drawn at random, so writing one is only half the job: **something has to
+schedule it**. Add the `queueEvent` effect to the choice, outcome or task result that earns it, in
+the same commit. A follow-up nothing leads to is content no player can ever see, and validation
+fails on it.
+
+Give consequences room. A `delayTurns` of 4 to 8 is usually right for the slow ones — the audit,
+the court, the letter from whoever has your old job now — so that when it lands the player has to
+remember what they did rather than being told.
 
 ## Regenerating the script
 

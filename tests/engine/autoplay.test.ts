@@ -78,6 +78,26 @@ describe('simulated careers', () => {
     expect(subset.meanLevel).toBeGreaterThan(1.5);
     expect(subset.meanLevel).toBeLessThan(5);
   });
+
+  it('does not punish the player for the department they chose', () => {
+    // The five departments drifted a long way apart once each had its own task board and event
+    // pool: at one point a procurement career averaged two levels below a policy one, for no
+    // reason the player could see or act on. Adding content to one department without checking
+    // the others is exactly how that happens again, so it is pinned here.
+    //
+    // The sample is small, so the band is generous; `npm run balance` reports the real spread.
+    const levels = DEPARTMENT_IDS.map((department) => ({
+      department,
+      level: summarise(results.filter((r) => r.department === department)).meanLevel,
+    }));
+    const best = levels.reduce((a, b) => (a.level >= b.level ? a : b));
+    const worst = levels.reduce((a, b) => (a.level <= b.level ? a : b));
+
+    expect(
+      best.level - worst.level,
+      `${best.department} outruns ${worst.department} by too much`,
+    ).toBeLessThan(1.2);
+  });
 });
 
 describe('every ending is reachable', () => {

@@ -36,18 +36,17 @@ describe('effort budget', () => {
   });
 
   it('sums an allocation across tasks and personal time', () => {
-    const total = allocationTotal({ tasks: { a: 3, b: 2 }, rest: 1, networking: 4, overtime: false });
+    const total = allocationTotal(allocate({ tasks: { a: 3, b: 2 }, rest: 1, networking: 4 }));
     expect(total).toBe(10);
   });
 
   it('trims an over-budget allocation instead of throwing', () => {
     const state = game();
-    const greedy: Allocation = {
+    const greedy: Allocation = allocate({
       tasks: Object.fromEntries(state.tasks.map((t) => [t.uid, 99])),
       rest: 5,
       networking: 5,
-      overtime: false,
-    };
+    });
     const normalized = normalizeAllocation(state, registry, greedy);
     expect(allocationTotal(normalized)).toBe(10);
   });
@@ -55,7 +54,7 @@ describe('effort budget', () => {
   it('ignores negative and fractional points', () => {
     const state = game();
     const uid = state.tasks[0]!.uid;
-    const messy: Allocation = { tasks: { [uid]: 3.7 }, rest: -4, networking: 0, overtime: false };
+    const messy: Allocation = allocate({ tasks: { [uid]: 3.7 }, rest: -4 });
     const normalized = normalizeAllocation(state, registry, messy);
     expect(normalized.tasks[uid]).toBe(3);
     expect(normalized.rest).toBe(0);
