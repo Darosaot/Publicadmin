@@ -3,6 +3,7 @@ import { financeTasks } from './finance';
 import { legalTasks } from './legal';
 import { policyTasks } from './policy';
 import { procurementTasks } from './procurement';
+import { seniorTasks } from './senior';
 import { projectsTasks } from './projects';
 import { sharedTasks } from './shared';
 
@@ -13,6 +14,7 @@ export const allTasks: TaskTemplate[] = [
   ...financeTasks,
   ...procurementTasks,
   ...policyTasks,
+  ...seniorTasks,
 ];
 
 export const taskRegistry: Record<string, TaskTemplate> = Object.fromEntries(

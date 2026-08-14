@@ -116,6 +116,30 @@ export function validateContent(): string[] {
     if (!hasDepartmentEvent(id)) {
       problems.push(`department ${id}: no random event targets this department`);
     }
+
+    // Tasks are level-banded so the desk changes as you climb. The risk that introduces is
+    // starving a level: capping the clerical work without writing enough senior work to replace
+    // it leaves a Director-General with three templates on repeat.
+    for (const level of careerLevels) {
+      const eligible = allTasks.filter(
+        (task) =>
+          (task.departments === 'any' || task.departments.includes(id)) &&
+          (task.minLevel ?? 1) <= level.level &&
+          (task.maxLevel ?? Infinity) >= level.level,
+      );
+      const needed = level.taskSlots + 2;
+      if (eligible.length < needed) {
+        problems.push(
+          `department ${id} at level ${level.level}: only ${eligible.length} eligible task ` +
+            `templates for ${level.taskSlots} slots (want at least ${needed} for variety)`,
+        );
+      }
+      // And the band should actually differ, or the levelling is cosmetic.
+      const departmentSpecific = eligible.filter((t) => t.departments !== 'any');
+      if (departmentSpecific.length === 0) {
+        problems.push(`department ${id} at level ${level.level}: no department-specific work`);
+      }
+    }
   }
 
   /* -------------------------------------------------------------- career */

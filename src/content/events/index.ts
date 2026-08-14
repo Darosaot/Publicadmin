@@ -3,6 +3,7 @@ import { commonEvents } from './common';
 import { financeEvents } from './finance';
 import { followupEvents } from './followups';
 import { legalEvents } from './legal';
+import { managementEvents } from './management';
 import { milestoneEvents } from './milestones';
 import { policyEvents } from './policy';
 import { procurementEvents } from './procurement';
@@ -15,6 +16,7 @@ export const allEvents: GameEvent[] = [
   ...financeEvents,
   ...procurementEvents,
   ...policyEvents,
+  ...managementEvents,
   ...milestoneEvents,
   ...followupEvents,
 ];

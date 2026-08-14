@@ -51,6 +51,42 @@ describe('every department is playable', () => {
   });
 });
 
+describe('the desk changes with the post', () => {
+  const eligibleAt = (department: DepartmentId, level: number) =>
+    new Set(
+      allTasks
+        .filter(
+          (task) =>
+            (task.departments === 'any' || task.departments.includes(department)) &&
+            (task.minLevel ?? 1) <= level &&
+            (task.maxLevel ?? Infinity) >= level,
+        )
+        .map((task) => task.id),
+    );
+
+  it.each(DEPARTMENT_IDS)('%s sees different work at the top than at the bottom', (department: DepartmentId) => {
+    const junior = eligibleAt(department, 1);
+    const top = eligibleAt(department, careerLevels[careerLevels.length - 1]!.level);
+
+    // Work that has been left behind, and work that has opened up.
+    const retired = [...junior].filter((id) => !top.has(id));
+    const unlocked = [...top].filter((id) => !junior.has(id));
+
+    expect(retired.length, 'clerical work should stop appearing').toBeGreaterThan(0);
+    expect(unlocked.length, 'senior work should appear').toBeGreaterThan(2);
+  });
+
+  it('never puts the inbox backlog on a director’s desk', () => {
+    expect(eligibleAt('finance', 5).has('task.shared.inbox')).toBe(false);
+    expect(eligibleAt('finance', 1).has('task.shared.inbox')).toBe(true);
+  });
+
+  it('opens management work only once there is something to manage', () => {
+    expect(eligibleAt('policy', 1).has('task.senior.workforce_plan')).toBe(false);
+    expect(eligibleAt('policy', 5).has('task.senior.workforce_plan')).toBe(true);
+  });
+});
+
 describe('translation', () => {
   it('resolves every generated content key', () => {
     for (const event of allEvents) {

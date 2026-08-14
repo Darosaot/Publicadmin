@@ -3,7 +3,7 @@
 > **Generated file.** Produced from the shipped content by `npm run docs:script`. Edit the
 > content in `src/content/` and regenerate — changes made directly to this file are lost.
 
-The complete corpus: 82 events, 46 task templates, 5 departments, 5 career levels and 6 endings. Stat effects are shown after each outcome.
+The complete corpus: 94 events, 62 task templates, 5 departments, 5 career levels and 6 endings. Stat effects are shown after each outcome.
 
 ## Departments
 
@@ -63,12 +63,18 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
-| Clear the inbox backlog | any desk | 4 | 2–4 | 1 | — |
+| Clear the inbox backlog | any desk, level 1–2 | 4 | 2–4 | 1 | — |
 | Transparency request | any desk | 6 | 2–3 | 2 | missed: schedules "A list of eleven questions" in 1 months |
-| Committee papers | any desk | 5 | 2–3 | 1 | — |
+| Committee papers | any desk, level 1–3 | 5 | 2–3 | 1 | — |
 | Staff appraisal round | any desk, level 2+ | 7 | 3–5 | 2 | excellent: Political capital +2; poor: schedules "A grievance" in 2 months |
 | Reorganisation consultation | any desk | 6 | 3–4 | 2 | — |
 | Annual activity report | any desk | 8 | 3–5 | 2 | excellent: Reputation +2; missed: schedules "A conversation with the door closed" in 1 months |
+| Unit business plan | any desk, level 3+ | 8 | 3–4 | 2 | excellent: Reputation +2 · team morale +4; poor: team morale -4 |
+| Budget bid | any desk, level 3+ | 9 | 2–3 | 3 | excellent: monthly budget +1200 · Reputation +2; poor: monthly budget -800; missed: monthly budget -1200 · Reputation -2 |
+| Paper for the management board | any desk, level 3+ | 6 | 2–2 | 2 | excellent: Political capital +3 |
+| Workforce plan | any desk, level 3+ | 7 | 3–5 | 2 | excellent: team morale +5; poor: team morale -6 |
+| Quarterly performance return | any desk, level 3+ | 5 | 2–2 | 1 | — |
+| Briefing for the executive | any desk, level 4+ | 6 | 2–2 | 3 | excellent: Political capital +4; poor: Political capital -3; missed: schedules "A question on the council agenda" in 1 months |
 
 **Clear the inbox backlog** — Two hundred and forty unread messages, of which perhaps nine matter. Finding out which nine is the work.
 **Transparency request** — A citizen has asked for every document relating to a decision taken four years ago. The clock started the moment it arrived.
@@ -76,19 +82,27 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Staff appraisal round** — Everyone in the unit needs a written assessment, a development objective, and half an hour of your undivided attention.
 **Reorganisation consultation** — The structure is being redrawn again. Your department is asked to comment, which is not the same as being asked.
 **Annual activity report** — Twelve months of work, compressed into a document that will be read by four people and cited by none.
+**Unit business plan** — What the unit will achieve next year, in a document that will be used to judge you and to justify your headcount.
+**Budget bid** — Next year’s allocation is decided in a room you will be in for eleven minutes. This is the paper that speaks for you the rest of the time.
+**Paper for the management board** — Six pages for people who will read two of them, on a decision that cannot be unmade.
+**Workforce plan** — Which posts you will need in three years, which you will lose, and how you intend to explain the second part to the people in them.
+**Quarterly performance return** — Your unit’s numbers, assembled for people who will compare them with units doing something entirely different.
+**Briefing for the executive** — Two pages, tonight, on a subject that has been developing for three years and became urgent this afternoon.
 
 ### Legal
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
 | Contract review | legal | 6 | 2–4 | 2 | poor: schedules "Internal review" in 3 months; missed: schedules "A formal challenge" in 1 months |
-| Licensing appeal | legal | 7 | 2–3 | 2 | missed: schedules "A formal complaint" in 1 months |
+| Licensing appeal | legal, level 1–3 | 7 | 2–3 | 2 | missed: schedules "A formal complaint" in 1 months |
 | Legal opinion | legal | 5 | 2–3 | 2 | excellent: Political capital +2 |
 | Byelaw revision | legal | 8 | 3–5 | 2 | — |
 | Litigation bundle | legal | 10 | 2–4 | 3 | excellent: Reputation +3; missed: Reputation -3 · schedules "A conversation with the door closed" in 1 months |
 | Data protection assessment | legal | 7 | 3–4 | 2 | missed: schedules "A letter from the audit authority" in 2 months |
-| Land registry dispute | legal | 9 | 3–5 | 3 | — |
+| Land registry dispute | legal, level 1–3 | 9 | 3–5 | 3 | — |
 | Framework terms and conditions | legal, level 2+ | 9 | 3–5 | 3 | excellent: Reputation +3; poor: schedules "Internal review" in 4 months |
+| Drafting instructions | legal, level 4+ | 11 | 3–5 | 3 | excellent: Reputation +4 |
+| Legal risk register | legal, level 4+ | 8 | 3–4 | 2 | — |
 
 **Contract review** — Forty pages of clauses drafted by the supplier’s lawyers, who were paid rather more than you are.
 **Licensing appeal** — A refused permit, an angry applicant, and a deadline set by statute rather than by anyone you can negotiate with.
@@ -98,6 +112,8 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Data protection assessment** — A new system will process personal data on eleven thousand residents. Someone has to write down exactly why that is lawful.
 **Land registry dispute** — Two neighbours, one boundary, and a municipal map last surveyed in 1974.
 **Framework terms and conditions** — Standard clauses for every contract the administration will sign for the next four years. Get one wrong and you get it wrong four hundred times.
+**Drafting instructions** — What the legislation should do, written precisely enough that parliamentary counsel can turn it into words that will bind people for a generation.
+**Legal risk register** — Every case the administration could lose, what it would cost, and how likely it is. Read once a year by everyone, in a bad week.
 
 ### Projects
 
@@ -108,9 +124,11 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 | Partner coordination | projects | 5 | 2–3 | 2 | excellent: Political capital +3 |
 | Project budget revision | projects | 7 | 2–3 | 2 | — |
 | Eligibility check | projects | 8 | 3–4 | 3 | poor: schedules "A letter from the audit authority" in 3 months; missed: schedules "A letter from the audit authority" in 1 months |
-| Interim payment claim | projects | 7 | 2–3 | 2 | missed: Political capital -3 · schedules "A question on the council agenda" in 1 months |
-| Monitoring visit | projects | 5 | 3–4 | 1 | — |
+| Interim payment claim | projects, level 1–4 | 7 | 2–3 | 2 | missed: Political capital -3 · schedules "A question on the council agenda" in 1 months |
+| Monitoring visit | projects, level 1–3 | 5 | 3–4 | 1 | — |
 | Project closure dossier | projects, level 2+ | 10 | 3–5 | 3 | excellent: Reputation +3; missed: schedules "A letter from the audit authority" in 2 months |
+| National programme design | projects, level 4+ | 12 | 3–5 | 3 | excellent: Reputation +4 · Political capital +2 |
+| Portfolio prioritisation | projects, level 4+ | 9 | 2–4 | 3 | poor: Political capital -3 |
 
 **Milestone report** — The funding programme wants evidence that month six happened. Month six did happen, but not quite in the order the application promised.
 **Grant application** — Sixty pages, four annexes, and a budget table that must add up in three different currencies of optimism.
@@ -120,19 +138,23 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Interim payment claim** — The administration has spent the money. Getting it back requires proving that in the format the programme prescribes.
 **Monitoring visit** — A day on site, a checklist, and the growing suspicion that the works you are inspecting are three months behind what the reports say.
 **Project closure dossier** — Everything the project ever produced, assembled in one file that will be kept for ten years and opened by an auditor in year eight.
+**National programme design** — Four hundred million euros, seven years, and the structure that decides whether any of it reaches anybody.
+**Portfolio prioritisation** — Nineteen projects, funding for eleven. The other eight belong to people who will be in the room.
 
 ### Finance
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
-| Monthly closing | finance | 5 | 2–2 | 2 | missed: schedules "A conversation with the door closed" in 1 months |
-| Invoice backlog | finance | 6 | 2–3 | 1 | missed: schedules "A formal challenge" in 1 months |
+| Monthly closing | finance, level 1–4 | 5 | 2–2 | 2 | missed: schedules "A conversation with the door closed" in 1 months |
+| Invoice backlog | finance, level 1–2 | 6 | 2–3 | 1 | missed: schedules "A formal challenge" in 1 months |
 | Budget amendment | finance | 7 | 2–4 | 2 | excellent: Political capital +2 |
 | Treasury forecast | finance | 6 | 2–3 | 2 | — |
 | Subsidy justification review | finance | 8 | 3–4 | 2 | poor: schedules "A question on the council agenda" in 2 months |
 | Draft annual budget | finance | 11 | 3–5 | 3 | excellent: Reputation +3 · Political capital +2; missed: schedules "A question on the council agenda" in 1 months |
 | Cost centre reconciliation | finance | 7 | 3–4 | 3 | — |
 | Audit response file | finance, level 2+ | 9 | 2–4 | 3 | excellent: Reputation +3; missed: schedules "A letter from the audit authority" in 1 months |
+| Spending review submission | finance, level 4+ | 12 | 3–4 | 3 | excellent: monthly budget +2000 · Reputation +3; missed: monthly budget -2500 |
+| Multi-year financial framework | finance, level 4+ | 10 | 3–5 | 3 | — |
 
 **Monthly closing** — The ledger must balance by the eighth. It currently does not, by an amount small enough to be maddening.
 **Invoice backlog** — Suppliers are waiting. Some have been waiting long enough to start writing letters that mention interest.
@@ -142,6 +164,8 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Draft annual budget** — Every department has asked for more than exists. Your job is to produce a document in which that is not visible.
 **Cost centre reconciliation** — Two systems that were supposed to talk to each other have been quietly disagreeing since March.
 **Audit response file** — The external auditors have eleven observations. Each needs an answer that is accurate, complete, and does not concede more than it must.
+**Spending review submission** — Justify every euro the directorate spends, to a treasury that has already decided the answer is less.
+**Multi-year financial framework** — Three years of numbers for an administration that has never successfully predicted one.
 
 ### Procurement
 
@@ -150,11 +174,13 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 | Tender specification | procurement | 7 | 2–4 | 2 | poor: schedules "A formal challenge" in 2 months |
 | Evaluation committee | procurement | 8 | 2–3 | 3 | excellent: Reputation +3; poor: schedules "A formal challenge" in 1 months; missed: schedules "A formal challenge" in 1 months |
 | Framework renewal | procurement | 6 | 2–3 | 2 | missed: Reputation -2 · schedules "A question on the council agenda" in 1 months |
-| Bidder clarifications | procurement | 5 | 2–2 | 2 | — |
-| Award publication | procurement | 4 | 2–2 | 2 | missed: schedules "A formal challenge" in 1 months |
+| Bidder clarifications | procurement, level 1–3 | 5 | 2–2 | 2 | — |
+| Award publication | procurement, level 1–3 | 4 | 2–2 | 2 | missed: schedules "A formal challenge" in 1 months |
 | Supplier performance review | procurement | 6 | 3–4 | 2 | excellent: Integrity +2 |
 | Direct award justification | procurement | 6 | 2–3 | 3 | poor: schedules "A letter from the audit authority" in 3 months |
 | Response to a challenge | procurement, level 2+ | 9 | 2–3 | 3 | excellent: Reputation +4; missed: Reputation -3 · schedules "A list of eleven questions" in 1 months |
+| Procurement policy reform | procurement, level 4+ | 11 | 3–5 | 3 | excellent: Reputation +4 · Integrity +2 |
+| Category strategy | procurement, level 4+ | 9 | 3–4 | 3 | poor: schedules "A formal challenge" in 3 months |
 
 **Tender specification** — Describe what the administration needs precisely enough to get it, and generally enough that only one company cannot possibly qualify.
 **Evaluation committee** — Six bids, four evaluators, and a scoring grid that will be read very carefully by whoever comes second.
@@ -164,12 +190,14 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Supplier performance review** — The contractor has been late on every milestone and charming about all of them. The file should say so.
 **Direct award justification** — The department wants to skip the tender. The law allows it in narrow circumstances, and someone must write down which one applies.
 **Response to a challenge** — A losing bidder has formally contested the award. Every note you took during the evaluation now belongs to the file.
+**Procurement policy reform** — Rewrite the rules everyone complains about, knowing that whatever you replace them with is what they will complain about next.
+**Category strategy** — How the administration will buy an entire class of things for the next five years, and which suppliers that quietly favours.
 
 ### Policy
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
-| Council brief | policy | 4 | 2–2 | 1 | excellent: Political capital +2 |
+| Council brief | policy, level 1–3 | 4 | 2–2 | 1 | excellent: Political capital +2 |
 | Public consultation | policy | 7 | 3–4 | 2 | missed: schedules "A formal complaint" in 1 months |
 | Strategy paper | policy | 9 | 3–5 | 3 | excellent: Reputation +3 |
 | Impact assessment | policy | 8 | 3–4 | 3 | — |
@@ -177,6 +205,8 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 | Stakeholder roundtable | policy | 6 | 2–4 | 2 | excellent: Political capital +3 |
 | Position paper | policy, level 2+ | 8 | 3–4 | 3 | excellent: Political capital +3 |
 | Annual policy review | policy | 9 | 3–5 | 2 | poor: schedules "A list of eleven questions" in 2 months; missed: schedules "A conversation with the door closed" in 1 months |
+| Green paper | policy, level 4+ | 11 | 3–5 | 3 | excellent: Reputation +4 |
+| Appearance before the committee | policy, level 4+ | 8 | 2–3 | 3 | excellent: Reputation +4; poor: schedules "A list of eleven questions" in 1 months; missed: Reputation -4 |
 
 **Council brief** — Two pages for someone who will read one of them, ten minutes before speaking about it in public.
 **Public consultation** — Six weeks of submissions from residents, associations and one man who writes every week about the same roundabout.
@@ -186,6 +216,8 @@ Council briefs, strategy papers, consultations and the art of the defensible sen
 **Stakeholder roundtable** — Eleven organisations around a table, each of which has been told this is the meeting where their concern will be addressed.
 **Position paper** — The administration’s formal view, to be defended in a forum where every other administration has brought one too.
 **Annual policy review** — Which of last year’s commitments were met, in a document that must be honest enough to be useful and diplomatic enough to be published.
+**Green paper** — The administration’s thinking, published for argument. Everything you leave out is a decision, and everyone will notice which.
+**Appearance before the committee** — Three hours of questions, on the record, about decisions taken by people who no longer work here.
 
 ## Events
 

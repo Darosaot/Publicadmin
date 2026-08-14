@@ -5,6 +5,7 @@ export const policyTasks = [
     title: 'Council brief',
     desc: 'Two pages for someone who will read one of them, ten minutes before speaking about it in public.',
     departments: ['policy'],
+    maxLevel: 3,
     baseEffort: 4,
     deadlineRange: [2, 2],
     difficulty: 1,
