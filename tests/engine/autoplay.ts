@@ -11,11 +11,22 @@
  */
 
 import { registry } from '../../src/content';
-import { MINISTER_MIN_POLITICAL_CAPITAL } from '../../src/engine/constants';
+import {
+  AGENCY_TEMP_COST,
+  AGENCY_TEMP_EFFORT,
+  AGENCY_TEMP_MAX,
+  COACHING_EFFORT_COST,
+  DELEGATION_EFFORT_COST,
+  MINISTER_MIN_POLITICAL_CAPITAL,
+  ONE_TO_ONE_EFFORT_COST,
+  RECRUITING_EFFORT_COST,
+  TRAINING_COST,
+} from '../../src/engine/constants';
 import { isChoiceAvailable } from '../../src/engine/events';
 import { createGame } from '../../src/engine/newGame';
 import { nextInt, seedToState } from '../../src/engine/rng';
 import { getCareerLevel } from '../../src/engine/registry';
+import { averageMorale, headcountFor, staffCost, staffOutput, startHiring } from '../../src/engine/team';
 import {
   acceptOffer,
   beginNextTurn,
@@ -65,6 +76,66 @@ function planAllocation(game: GameState, strategy: Strategy): Allocation {
   const overtime = strategy === 'reckless';
   allocation.overtime = overtime;
   let budget = effortAvailable(game, registry, overtime);
+
+  /* ------------------------------------------------------------ managing */
+
+  // Once there is a unit, most of the month's value comes from running it rather than from
+  // doing the work personally. A manager who behaves like a senior officer drowns, which the
+  // first balance run after the office landed demonstrated rather forcefully.
+  const managing = game.staff.length > 0;
+  if (managing && strategy !== 'reckless') {
+    const morale = averageMorale(game);
+
+    // Keep the worst-off person from walking out.
+    const lowest = [...game.staff].sort((a, b) => a.morale - b.morale)[0];
+    if (lowest && (morale < 62 || lowest.morale < 45) && budget >= ONE_TO_ONE_EFFORT_COST) {
+      allocation.oneToOnes.push(lowest.id);
+      budget -= ONE_TO_ONE_EFFORT_COST;
+    }
+
+    // Keep the vacancy moving.
+    if (game.hiring && budget >= RECRUITING_EFFORT_COST) {
+      allocation.recruiting = true;
+      budget -= RECRUITING_EFFORT_COST;
+    }
+
+    // Hand out the files, strongest people onto the tightest deadlines.
+    const byOutput = [...game.staff].sort((a, b) => staffOutput(b) - staffOutput(a));
+    const byDeadline = [...game.tasks].sort((a, b) => a.deadlineTurn - b.deadlineTurn);
+    for (let i = 0; i < byOutput.length && i < byDeadline.length; i += 1) {
+      if (budget < DELEGATION_EFFORT_COST) break;
+      allocation.delegations[byDeadline[i]!.uid] = byOutput[i]!.id;
+      budget -= DELEGATION_EFFORT_COST;
+    }
+
+    // Invest in someone if there is room left in the month.
+    const weakest = [...game.staff].sort((a, b) => a.skill - b.skill)[0];
+    if (weakest && budget >= COACHING_EFFORT_COST + 3) {
+      allocation.coaching.push(weakest.id);
+      budget -= COACHING_EFFORT_COST;
+    }
+
+    // Spend the budget. An allocation you did not need is one you will not be given again, so
+    // the slack goes on training rather than back to the centre.
+    const unit = game.budget;
+    if (unit) {
+      const slack = unit.monthly - staffCost(game);
+      let toSpend = Math.max(0, slack);
+      const trainable = [...game.staff].sort((a, b) => a.skill - b.skill);
+      for (const member of trainable) {
+        if (toSpend < TRAINING_COST) break;
+        allocation.training.push(member.id);
+        toSpend -= TRAINING_COST;
+      }
+      if (toSpend >= AGENCY_TEMP_COST) {
+        allocation.agencyTemps = Math.min(
+          AGENCY_TEMP_MAX,
+          Math.floor(toSpend / AGENCY_TEMP_COST),
+        );
+        budget += allocation.agencyTemps * AGENCY_TEMP_EFFORT;
+      }
+    }
+  }
 
   // Look after yourself before the wheels come off.
   if (strategy !== 'reckless' && game.stats.stress >= REST_THRESHOLD) {
@@ -170,6 +241,18 @@ export function playCareer(
           game = acceptOffer(game, registry, offer.id);
           promotions += 1;
           break;
+        }
+
+        // Fill the establishment. A unit below headcount is a unit whose budget will be judged
+        // underspent, on top of being short of hands.
+        const establishment = headcountFor(game, registry);
+        if (
+          strategy !== 'reckless' &&
+          establishment > 0 &&
+          !game.hiring &&
+          game.staff.length < establishment
+        ) {
+          game = startHiring(game, game.staff.length < establishment - 1 ? 'officer' : 'senior');
         }
         game = resolveTurn(game, registry, planAllocation(game, strategy));
         tasksCompleted += game.lastReport?.completed.length ?? 0;

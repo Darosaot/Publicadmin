@@ -47,7 +47,7 @@ import {
   runReview,
 } from './career';
 import { getCareerLevel, type ContentRegistry } from './registry';
-import { isComplete, isDue, refillBoard, rollQuality } from './tasks';
+import { creditScale, isComplete, isDue, refillBoard, rollQuality, scaleCredit } from './tasks';
 import {
   adjustStaffMorale,
   applyAssignments,
@@ -251,6 +251,9 @@ export function resolveTurn(
     }),
   };
 
+  // One file is worth less to a director with eight of them than to an officer with four.
+  const credit = creditScale(getCareerLevel(registry, next.player.level).taskSlots);
+
   const completed: CompletedTaskReport[] = [];
   const failed: FailedTaskReport[] = [];
   const followUpEffects: Effect[] = [];
@@ -273,8 +276,8 @@ export function resolveTurn(
       next = { ...next, rngState: roll.rngState };
 
       const tierEffect = TASK_QUALITY_EFFECTS[roll.tier];
-      adjustStat(next.stats, 'performance', tierEffect.performance);
-      adjustStat(next.stats, 'reputation', tierEffect.reputation);
+      adjustStat(next.stats, 'performance', scaleCredit(tierEffect.performance, credit));
+      adjustStat(next.stats, 'reputation', scaleCredit(tierEffect.reputation, credit));
 
       if (carrier && roll.tier === 'excellent') {
         staffMoraleDeltas[carrier.id] =
@@ -295,8 +298,8 @@ export function resolveTurn(
     }
 
     if (isDue(task, next.turn)) {
-      adjustStat(next.stats, 'performance', TASK_FAILURE_EFFECTS.performance);
-      adjustStat(next.stats, 'reputation', TASK_FAILURE_EFFECTS.reputation);
+      adjustStat(next.stats, 'performance', scaleCredit(TASK_FAILURE_EFFECTS.performance, credit));
+      adjustStat(next.stats, 'reputation', scaleCredit(TASK_FAILURE_EFFECTS.reputation, credit));
 
       // Missing a deadline lands on whoever was holding it, not only on you.
       if (carrier) {

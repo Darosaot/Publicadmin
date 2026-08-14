@@ -50,7 +50,7 @@ export const BASELINE_STRESS_PER_TURN = 2;
  *
  * Integrity is deliberately exempt. A record does not fade.
  */
-export const REPUTATION_DECAY_RATE = 0.03;
+export const REPUTATION_DECAY_RATE = 0.05;
 export const POLITICAL_CAPITAL_DECAY_RATE = 0.04;
 export const PERFORMANCE_REVERSION_RATE = 0.05;
 export const PERFORMANCE_BASELINE = 50;
@@ -89,6 +89,16 @@ export const QUALITY_JITTER = 12;
 
 export const QUALITY_EXCELLENT_THRESHOLD = 75;
 export const QUALITY_GOOD_THRESHOLD = 45;
+
+/**
+ * The board a level-1 officer works, used as the reference for per-file credit.
+ *
+ * A director's standing is not the sum of forty files; it is the record of the unit. Without
+ * this, reputation income grows with the size of the board and every senior career saturates at
+ * 100 regardless of how it was played — which is precisely what the balance run showed once
+ * delegation let a manager finish eight files a month.
+ */
+export const REFERENCE_TASK_SLOTS = 4;
 
 export const TASK_QUALITY_EFFECTS = {
   excellent: { performance: 4, reputation: 3 },

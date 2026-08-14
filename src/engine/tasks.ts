@@ -21,6 +21,7 @@ import {
   QUALITY_STRESS_WEIGHT,
   TASK_EFFORT_LEVEL_SCALE,
   TASK_EFFORT_MULTIPLIER,
+  REFERENCE_TASK_SLOTS,
 } from './constants';
 import { getCareerLevel, type ContentRegistry } from './registry';
 import { nextInt, nextRange, weightedPick } from './rng';
@@ -152,6 +153,23 @@ export function rollQuality(
     tier: tierForScore(score),
     rngState: jitterRoll.rngState,
   };
+}
+
+/**
+ * How much personal credit one finished file is worth at this level.
+ *
+ * Scaled down as the board grows, so that a month's total reputation movement stays comparable
+ * across the career and the promotion thresholds keep meaning the same thing.
+ */
+export function creditScale(taskSlots: number): number {
+  return REFERENCE_TASK_SLOTS / Math.max(1, taskSlots);
+}
+
+/** Applies that scale without letting an effect round away to nothing. */
+export function scaleCredit(delta: number, scale: number): number {
+  if (delta === 0) return 0;
+  const scaled = delta * scale;
+  return scaled < 0 ? Math.min(-1, Math.round(scaled)) : Math.max(1, Math.round(scaled));
 }
 
 /** A task is due once its deadline turn has arrived: finish it this month or it fails. */
