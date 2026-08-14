@@ -1,11 +1,13 @@
 import type { TaskTemplate } from '../../engine/types';
 import { financeTasks } from './finance';
+import { inspectionTasks } from './inspection';
 import { legalTasks } from './legal';
 import { policyTasks } from './policy';
 import { procurementTasks } from './procurement';
 import { seniorTasks } from './senior';
 import { projectsTasks } from './projects';
 import { sharedTasks } from './shared';
+import { socialTasks } from './social';
 
 export const allTasks: TaskTemplate[] = [
   ...sharedTasks,
@@ -14,6 +16,8 @@ export const allTasks: TaskTemplate[] = [
   ...financeTasks,
   ...procurementTasks,
   ...policyTasks,
+  ...inspectionTasks,
+  ...socialTasks,
   ...seniorTasks,
 ];
 

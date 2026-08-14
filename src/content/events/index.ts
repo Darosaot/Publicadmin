@@ -4,6 +4,7 @@ import { commonEvents } from './common';
 import { commonExtraEvents } from './common-extra';
 import { departmentExtraEvents } from './departments-extra';
 import { financeEvents } from './finance';
+import { inspectionEvents } from './inspection';
 import { followupEvents } from './followups';
 import { followupExtraEvents } from './followups-extra';
 import { leadershipEvents } from './leadership';
@@ -13,6 +14,7 @@ import { milestoneEvents } from './milestones';
 import { policyEvents } from './policy';
 import { procurementEvents } from './procurement';
 import { reckoningEvents } from './reckonings';
+import { socialEvents } from './social';
 import { trackEvents } from './tracks';
 import { projectsEvents } from './projects';
 
@@ -25,6 +27,8 @@ export const allEvents: GameEvent[] = [
   ...financeEvents,
   ...procurementEvents,
   ...policyEvents,
+  ...inspectionEvents,
+  ...socialEvents,
   ...departmentExtraEvents,
   ...managementEvents,
   ...leadershipEvents,

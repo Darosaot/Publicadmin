@@ -246,4 +246,78 @@ export const seniorTasks = [
     },
     onFail: [{ kind: 'stat', stat: 'reputation', delta: -4 }],
   }),
+
+  /* ------------------------------------------------------------ inspection */
+
+  defineTask('task.senior.inspection_regime', {
+    title: 'Redesign the inspection regime',
+    desc: 'How often, on what, and against which standard — for every body in the sector at once. Get it wrong and you have created four years of the wrong questions being asked very thoroughly.',
+    departments: ['inspection'],
+    minLevel: 4,
+    baseEffort: 21,
+    deadlineRange: [3, 5],
+    difficulty: 3,
+    weight: 12,
+    onComplete: {
+      excellent: [
+        { kind: 'stat', stat: 'reputation', delta: 4 },
+        { kind: 'stat', stat: 'integrity', delta: 2 },
+      ],
+    },
+  }),
+
+  defineTask('task.senior.inspection_special_measures', {
+    title: 'Put a body into special measures',
+    desc: 'The evidence is there and the consequences are enormous: a chief executive, four hundred staff and a service that has to keep running while it is taken apart.',
+    departments: ['inspection'],
+    minLevel: 4,
+    baseEffort: 17,
+    deadlineRange: [2, 4],
+    difficulty: 3,
+    weight: 11,
+    onComplete: {
+      excellent: [{ kind: 'stat', stat: 'reputation', delta: 5 }],
+      poor: [{ kind: 'queueEvent', eventId: 'evt.followup.press_question', delayTurns: 1 }],
+    },
+    onFail: [{ kind: 'stat', stat: 'reputation', delta: -4 }],
+  }),
+
+  /* ---------------------------------------------------------------- social */
+
+  defineTask('task.senior.social_commissioning', {
+    title: 'Recommission the whole care market',
+    desc: 'Eleven providers, four thousand people receiving a service, and a budget that has not moved in three years. Everybody in this is somebody’s parent.',
+    departments: ['social'],
+    minLevel: 4,
+    baseEffort: 22,
+    deadlineRange: [3, 5],
+    difficulty: 3,
+    weight: 12,
+    onComplete: {
+      excellent: [
+        { kind: 'stat', stat: 'reputation', delta: 4 },
+        { kind: 'stat', stat: 'integrity', delta: 3 },
+      ],
+    },
+    onFail: [
+      { kind: 'stat', stat: 'reputation', delta: -4 },
+      { kind: 'stat', stat: 'stress', delta: 8 },
+    ],
+  }),
+
+  defineTask('task.senior.social_threshold', {
+    title: 'Set the eligibility threshold',
+    desc: 'Where the line goes between the people the service helps and the people it does not. It is arithmetic on a spreadsheet and it is several thousand specific lives.',
+    departments: ['social'],
+    minLevel: 4,
+    baseEffort: 18,
+    deadlineRange: [2, 4],
+    difficulty: 3,
+    weight: 11,
+    onComplete: {
+      excellent: [{ kind: 'stat', stat: 'integrity', delta: 4 }],
+      poor: [{ kind: 'queueEvent', eventId: 'evt.followup.complaint', delayTurns: 2 }],
+    },
+    onFail: [{ kind: 'stat', stat: 'stress', delta: 8 }],
+  }),
 ];

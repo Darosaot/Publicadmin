@@ -6,7 +6,14 @@
  * reproducible from a seed.
  */
 
-export type DepartmentId = 'legal' | 'projects' | 'finance' | 'procurement' | 'policy';
+export type DepartmentId =
+  | 'legal'
+  | 'projects'
+  | 'finance'
+  | 'procurement'
+  | 'policy'
+  | 'inspection'
+  | 'social';
 
 export const DEPARTMENT_IDS: readonly DepartmentId[] = [
   'legal',
@@ -14,6 +21,8 @@ export const DEPARTMENT_IDS: readonly DepartmentId[] = [
   'finance',
   'procurement',
   'policy',
+  'inspection',
+  'social',
 ];
 
 export type StatId =
