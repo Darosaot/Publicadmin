@@ -36,6 +36,7 @@ import {
   TASK_FAILURE_EFFECTS,
   TASK_QUALITY_EFFECTS,
 } from './constants';
+import { hoursStressDelta } from './directives';
 import { adjustStat, applyEffects, statDeltas } from './effects';
 import { checkEnding } from './endings';
 import { applyChoice, drawEvents, popResolvedEvent } from './events';
@@ -426,7 +427,10 @@ export function resolveTurn(
   const stressDelta =
     BASELINE_STRESS_PER_TURN +
     (allocation.overtime ? OVERTIME_STRESS : 0) -
-    allocation.rest * REST_STRESS_RELIEF;
+    allocation.rest * REST_STRESS_RELIEF +
+    // An office where nobody works late is one point a month easier to survive; one that pushes
+    // is one point harder. Small, permanent, and compounding over three hundred months.
+    hoursStressDelta(next);
   adjustStat(next.stats, 'stress', stressDelta);
 
   if (allocation.networking > 0) {

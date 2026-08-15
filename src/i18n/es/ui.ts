@@ -63,6 +63,8 @@ export const uiStrings: Record<string, string> = {
   'init.budget_note': 'Los mismos puntos que los expedientes. Esa es la decisión.',
   'init.about_heading': 'Sobre esto',
   'init.about': 'Nada las genera y nadie las reclama. Tardan años, cuestan los meses que habrías dedicado al trabajo que llegó solo, y cambian el país en lugar de tu expediente. Desatiende una el tiempo suficiente y se muere sin ruido.',
+  'directive.heading': 'Cómo funciona esta oficina',
+  'directive.intro': 'Normas permanentes, no el plan de este mes. Se mantienen hasta que las cambies, y en ninguna de ellas hay un lado que sea el correcto.',
   'action.career': 'Carrera',
   'action.team': 'Equipo',
   'action.dashboard': 'Mesa',

@@ -63,6 +63,8 @@ export const uiStrings: Record<string, string> = {
   'init.budget_note': 'The same points as the files. That is the decision.',
   'init.about_heading': 'About this',
   'init.about': 'Nothing produces these and nobody chases them. They take years, they cost the months you would otherwise have spent on the work that arrived, and they change the country rather than your record. Leave one alone long enough and it quietly dies.',
+  'directive.heading': 'How this office runs',
+  'directive.intro': 'Standing rules, not this month’s plan. They hold until you change them, and neither side of any of them is the right answer.',
   'action.career': 'Career',
   'action.team': 'Team',
   'action.dashboard': 'Desk',

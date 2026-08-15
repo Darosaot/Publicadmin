@@ -22,6 +22,7 @@ import {
   RECRUITING_EFFORT_COST,
   TRAINING_COST,
 } from '../../src/engine/constants';
+import { directiveFlag } from '../../src/engine/directives';
 import { isChoiceAvailable } from '../../src/engine/events';
 import {
   cycleCap,
@@ -99,6 +100,8 @@ export interface CareerOptions {
   preferredTrack?: TrackId;
   /** Off is the A side of the A/B: the same careers as before initiatives existed. */
   useInitiatives?: boolean;
+  /** Likewise for the house rules. */
+  useDirectives?: boolean;
 }
 
 const REST_THRESHOLD = 62;
@@ -329,9 +332,30 @@ export function playCareer(options: CareerOptions): RunResult {
     stopAtLevel,
     preferredTrack,
     useInitiatives = true,
+    useDirectives = true,
   } = options;
 
   let game = createGame({ name: 'Bot', department, seed }, registry);
+
+  // The bot picks its house rules on day one and never revisits them, which is roughly what
+  // happens in life. It takes the pressure itself, because a bot that empties its own unit
+  // measures attrition rather than anything else; it moves fast, because on a board oversubscribed
+  // at 1.35 the extra point a documented file costs is not repaid; and it hires for experience,
+  // because it never stays anywhere long enough for potential to arrive.
+  //
+  // These are one competent set of answers, not the best ones. That is the point of measuring
+  // against them rather than against an optimiser.
+  if (useDirectives) {
+    game = {
+      ...game,
+      flags: {
+        ...game.flags,
+        [directiveFlag('hours')]: 1,
+        [directiveFlag('rigour')]: 2,
+        [directiveFlag('hiring')]: 2,
+      },
+    };
+  }
   // A second stream so the bot's decisions do not consume the game's randomness.
   let botState = seedToState(seed ^ 0x5f3759df);
 

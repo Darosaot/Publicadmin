@@ -11,6 +11,7 @@ import { strings as bodies } from './bodies';
 import { strings as careers } from './careers';
 import { strings as castPeople } from './cast';
 import { strings as departments } from './departments';
+import { strings as directives } from './directives';
 import { strings as endings } from './endings';
 import { strings as eventsCast } from './events/cast';
 import { strings as eventsCommon } from './events/common';
@@ -46,6 +47,7 @@ const dictionaries = [
   careers,
   castPeople,
   departments,
+  directives,
   endings,
   eventsCast,
   eventsCommon,

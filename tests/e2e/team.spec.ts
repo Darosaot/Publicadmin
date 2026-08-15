@@ -4,6 +4,18 @@ import type { DepartmentId, GameState, TrackId } from '../../src/engine/types';
 import { playCareer } from '../engine/autoplay';
 
 /**
+ * A top-level tab, by its label.
+ *
+ * Scoped to the nav rather than the page because `getByRole`'s name matching is a substring: once
+ * the desk grew a panel whose prose contains the word "people", a bare page-level lookup for the
+ * People tab started matching a directive button and the tab-visibility tests began passing for
+ * the wrong reason.
+ */
+function tab(page: Page, label: string) {
+  return page.locator('.tabs').getByRole('button', { name: label });
+}
+
+/**
  * The Team screen, reached the way a player reaches it.
  *
  * A management post is forty in-game months away, which is a long way to click through, so the
@@ -45,7 +57,7 @@ test('a manager gets a unit, a budget and a way to spend a month on people', asy
 
   await expect(page.locator('.statsbar__post')).toContainText('Head of Department');
 
-  await page.getByRole('button', { name: 'Team' }).click();
+  await tab(page, 'Team').click();
 
   // Everyone the bot ended up with is on the roster, with both bars rendered.
   await expect(page.locator('.staff')).toHaveCount(managing.staff.length);
@@ -66,7 +78,7 @@ test('a manager gets a unit, a budget and a way to spend a month on people', asy
 
 test('the budget adds up and warns about both ways of getting it wrong', async ({ page }) => {
   await resume(page, managing);
-  await page.getByRole('button', { name: 'Team' }).click();
+  await tab(page, 'Team').click();
 
   const budget = page.locator('.budget');
   await expect(budget).toBeVisible();
@@ -97,7 +109,7 @@ test('a file can be handed to someone, and the desk says who has it', async ({ p
   await picker.selectOption({ label: staffName });
 
   // The Team screen shows the same assignment from the other side.
-  await page.getByRole('button', { name: 'Team' }).click();
+  await tab(page, 'Team').click();
   await expect(page.locator('.staff__carrying').first()).toBeVisible();
 });
 
@@ -132,7 +144,7 @@ test('the specialist branch has no office at all, not merely a hidden one', asyn
   await resume(page, specialist);
 
   await expect(page.locator('.statsbar__post')).toContainText('Principal Specialist');
-  await expect(page.getByRole('button', { name: 'Team' })).toHaveCount(0);
+  await expect(tab(page, 'Team')).toHaveCount(0);
 
   // No unit means no delegation: the files are yours to the end.
   await expect(page.locator('.task').first().getByRole('combobox')).toHaveCount(0);
@@ -140,7 +152,7 @@ test('the specialist branch has no office at all, not merely a hidden one', asyn
 
 test('the career screen shows the branch not taken', async ({ page }) => {
   await resume(page, managing);
-  await page.getByRole('button', { name: 'Career' }).click();
+  await tab(page, 'Career').click();
 
   // Every post in the tree is on screen, and exactly one of them is where the player is.
   await expect(page.locator('.rung')).toHaveCount(15);
@@ -159,7 +171,7 @@ test('the career screen shows the branch not taken', async ({ page }) => {
 test('the people you know are on their own screen, and it remembers', async ({ page }) => {
   await resume(page, managing);
 
-  await page.getByRole('button', { name: 'People' }).click();
+  await tab(page, 'People').click();
   await expect(page.getByRole('heading', { name: 'People you know' })).toBeVisible();
 
   // Anyone met has a card; nobody unmet does.
@@ -183,7 +195,7 @@ test('the People tab stays hidden until somebody has been met', async ({ page })
   await page.getByRole('button', { name: /^Legal/ }).click();
   await page.getByRole('button', { name: 'Take the job' }).click();
 
-  await expect(page.getByRole('button', { name: 'People' })).toHaveCount(0);
+  await expect(tab(page, 'People')).toHaveCount(0);
 });
 
 test('the Team tab only exists once there is a team', async ({ page }) => {
@@ -196,8 +208,8 @@ test('the Team tab only exists once there is a team', async ({ page }) => {
   await page.getByRole('button', { name: /^Procurement/ }).click();
   await page.getByRole('button', { name: 'Take the job' }).click();
 
-  await expect(page.getByRole('button', { name: 'Desk' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Team' })).toHaveCount(0);
+  await expect(tab(page, 'Desk')).toBeVisible();
+  await expect(tab(page, 'Team')).toHaveCount(0);
 });
 
 test('the country is on screen from the first month, described rather than scored', async ({ page }) => {
@@ -212,7 +224,7 @@ test('the country is on screen from the first month, described rather than score
 
   // Unlike People, the Country tab is there immediately: the institutions your own department
   // deals with are ones you already know the state of.
-  await page.getByRole('button', { name: 'Country' }).click();
+  await tab(page, 'Country').click();
   await expect(page.getByRole('heading', { name: 'The country you work in' })).toBeVisible();
 
   const cards = page.locator('.bodycard');
@@ -230,7 +242,7 @@ test('the country is on screen from the first month, described rather than score
 test('a long career has watched places move', async ({ page }) => {
   await resume(page, managing);
 
-  await page.getByRole('button', { name: 'Country' }).click();
+  await tab(page, 'Country').click();
 
   // Twenty-odd years of drift cannot leave every institution exactly where it was founded.
   const moved = page.locator('.bodycard .pill');
@@ -247,7 +259,7 @@ test('an initiative can be taken on, funded, and moves after a month', async ({ 
   await page.getByRole('button', { name: /^Legal/ }).click();
   await page.getByRole('button', { name: 'Take the job' }).click();
 
-  await page.getByRole('button', { name: 'Initiatives' }).click();
+  await tab(page, 'Initiatives').click();
   await expect(page.getByRole('heading', { name: 'What you could take on' })).toBeVisible();
 
   // Nothing of your own yet: everything on the desk arrived there.
@@ -265,7 +277,7 @@ test('an initiative can be taken on, funded, and moves after a month', async ({ 
   await expect(page.getByTestId('effort-remaining')).toContainText('8 of 10');
 
   // Ending the month is the desk's business, so go back for it.
-  await page.getByRole('button', { name: 'Desk' }).click();
+  await tab(page, 'Desk').click();
   await page.getByRole('button', { name: 'End the month' }).click();
   // Decide whatever the month threw up, then close the report. Same shape as `playMonth` in
   // smoke.spec.ts: an event may or may not fire on a given seed, and the report always does.
@@ -282,8 +294,37 @@ test('an initiative can be taken on, funded, and moves after a month', async ({ 
     await dialog.getByRole('button', { name: 'Continue' }).click();
   }
 
-  await page.getByRole('button', { name: 'Initiatives' }).click();
+  await tab(page, 'Initiatives').click();
   await expect(page.locator('.initiative:not(.initiative--offered)').first()).toContainText(
     '2 of',
   );
+});
+
+test('a house rule can be set, and unset', async ({ page }) => {
+  await page.goto('/?seed=42');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+
+  await page.getByRole('button', { name: 'New game' }).click();
+  await page.getByLabel('Your name').fill('Renata Vos');
+  await page.getByRole('button', { name: /^Legal/ }).click();
+  await page.getByRole('button', { name: 'Take the job' }).click();
+
+  const poles = page.locator('.directive').first().locator('.directive__pole');
+  await expect(poles).toHaveCount(2);
+
+  // Both sides state their cost as flatly as their benefit — neither is the right answer.
+  await expect(poles.first()).toHaveAttribute('aria-pressed', 'false');
+  await poles.first().click();
+  await expect(poles.first()).toHaveAttribute('aria-pressed', 'true');
+  await expect(poles.last()).toHaveAttribute('aria-pressed', 'false');
+
+  // It holds across a reload, because it is a standing rule rather than this month's plan.
+  await page.reload();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(poles.first()).toHaveAttribute('aria-pressed', 'true');
+
+  // And pressing the pole you already hold releases it: "we have not decided" stays reachable.
+  await poles.first().click();
+  await expect(poles.first()).toHaveAttribute('aria-pressed', 'false');
 });

@@ -31,6 +31,7 @@ import {
   STAFF_START_SKILL,
   TRAINING_SKILL_GAIN,
 } from './constants';
+import { hiringMoraleDelta, hiringSkillDelta, hoursMoraleDelta } from './directives';
 import { getPost, type ContentRegistry } from './registry';
 import { nextChance, nextInt, pick } from './rng';
 import type {
@@ -88,8 +89,9 @@ export function createStaff(
     id: `s${state.nextStaffUid}`,
     name: namePick.value ?? `Officer ${state.nextStaffUid}`,
     seniority,
-    skill: skillRoll.value,
-    morale: moraleRoll.value,
+    // Potential arrives cheaper and keener; experience arrives able and settled.
+    skill: clamp(skillRoll.value + hiringSkillDelta(state)),
+    morale: clamp(moraleRoll.value + hiringMoraleDelta(state)),
     salary: STAFF_SALARY[seniority],
     monthsInPost: 0,
   };
@@ -227,7 +229,9 @@ export function resolveStaffMonth(
     staff: next.staff.map((member) => {
       let { skill, morale } = member;
 
-      morale += STAFF_MORALE_DRIFT;
+      // Whichever way the office has decided pressure flows, it lands on them every month — in
+      // the opposite direction to the way it lands on you.
+      morale += STAFF_MORALE_DRIFT + hoursMoraleDelta(state);
       if (coached.has(member.id)) {
         skill += COACHING_SKILL_GAIN;
         morale += COACHING_MORALE_GAIN;
