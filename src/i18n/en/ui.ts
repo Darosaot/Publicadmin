@@ -40,6 +40,7 @@ export const uiStrings: Record<string, string> = {
     'You are about to join a small city council. What happens next is thirty years of decisions.',
   'title.continue_hint': 'A career is in progress.',
   'title.save_broken': 'The saved career could not be read, so it has been cleared.',
+  'title.language': 'Language',
 
   /* ------------------------------------------------------------ new game */
   'newgame.heading': 'A new career',

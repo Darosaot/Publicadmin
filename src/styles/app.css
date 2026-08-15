@@ -226,6 +226,37 @@ input {
   font-size: var(--fs-sm);
 }
 
+.language-switcher {
+  display: inline-flex;
+  gap: var(--s-1);
+  margin-bottom: var(--s-4);
+  padding: 3px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  background: var(--c-surface);
+}
+
+.language-switcher__option {
+  padding: var(--s-1) var(--s-3);
+  border: none;
+  border-radius: calc(var(--r-sm) - 2px);
+  background: transparent;
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.language-switcher__option:hover {
+  color: var(--c-text);
+}
+
+.language-switcher__option--active {
+  background: var(--c-brand);
+  color: #fff;
+}
+
 .notice {
   background: var(--c-warn-soft);
   border: 1px solid var(--c-warn);

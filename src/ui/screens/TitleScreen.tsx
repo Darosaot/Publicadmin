@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useT } from '../../i18n';
 import { saveExists, useGame } from '../../state/GameProvider';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 export function TitleScreen({ onNewGame }: { onNewGame: () => void }) {
   const t = useT();
@@ -11,6 +12,7 @@ export function TitleScreen({ onNewGame }: { onNewGame: () => void }) {
   return (
     <main className="screen screen--title">
       <div className="title">
+        <LanguageSwitcher />
         <p className="eyebrow">{t('app.tagline')}</p>
         <h1 className="title__heading">{t('app.title')}</h1>
         <p className="title__subtitle">{t('title.subtitle')}</p>
