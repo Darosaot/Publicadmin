@@ -236,3 +236,54 @@ test('a long career has watched places move', async ({ page }) => {
   const moved = page.locator('.bodycard .pill');
   expect(await moved.count()).toBeGreaterThan(0);
 });
+
+test('an initiative can be taken on, funded, and moves after a month', async ({ page }) => {
+  await page.goto('/?seed=42');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+
+  await page.getByRole('button', { name: 'New game' }).click();
+  await page.getByLabel('Your name').fill('Renata Vos');
+  await page.getByRole('button', { name: /^Legal/ }).click();
+  await page.getByRole('button', { name: 'Take the job' }).click();
+
+  await page.getByRole('button', { name: 'Initiatives' }).click();
+  await expect(page.getByRole('heading', { name: 'What you could take on' })).toBeVisible();
+
+  // Nothing of your own yet: everything on the desk arrived there.
+  await expect(page.locator('.initiative--offered').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Take it on' }).first().click();
+
+  const live = page.locator('.initiative:not(.initiative--offered)').first();
+  await expect(live).toBeVisible();
+  await expect(live).toContainText('0 of');
+
+  // Effort comes out of the same monthly budget as the files, so the counter has to move.
+  await expect(page.getByTestId('effort-remaining')).toContainText('10 of 10');
+  await live.getByRole('button', { name: /^Add a point/ }).click();
+  await live.getByRole('button', { name: /^Add a point/ }).click();
+  await expect(page.getByTestId('effort-remaining')).toContainText('8 of 10');
+
+  // Ending the month is the desk's business, so go back for it.
+  await page.getByRole('button', { name: 'Desk' }).click();
+  await page.getByRole('button', { name: 'End the month' }).click();
+  // Decide whatever the month threw up, then close the report. Same shape as `playMonth` in
+  // smoke.spec.ts: an event may or may not fire on a given seed, and the report always does.
+  const dialog = page.getByRole('dialog');
+  for (let guard = 0; guard < 8; guard += 1) {
+    if (!(await dialog.isVisible().catch(() => false))) break;
+    const heading = await dialog.getByRole('heading').first().textContent();
+    if (heading?.startsWith('Month')) {
+      await dialog.getByRole('button', { name: 'Next month' }).click();
+      break;
+    }
+    const choice = dialog.locator('.choice:not(:disabled)').first();
+    if (await choice.isVisible().catch(() => false)) await choice.click();
+    await dialog.getByRole('button', { name: 'Continue' }).click();
+  }
+
+  await page.getByRole('button', { name: 'Initiatives' }).click();
+  await expect(page.locator('.initiative:not(.initiative--offered)').first()).toContainText(
+    '2 of',
+  );
+});

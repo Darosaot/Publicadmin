@@ -1762,3 +1762,91 @@ input {
   font-size: var(--fs-sm);
   line-height: 1.5;
 }
+
+
+/* ------------------------------------------------------------- initiatives */
+
+.initiative {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.initiative--landing {
+  border-color: var(--c-good);
+}
+
+/* Nothing has been committed to these yet, so they sit back from the ones that have. */
+.initiative--offered {
+  box-shadow: none;
+  background: transparent;
+  border-style: dashed;
+}
+
+.initiative__name {
+  font-size: var(--fs-base);
+  font-weight: 700;
+}
+
+.initiative__desc {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+/* Two bars in one groove: what is actually done, and where this cycle would leave it. Same idea
+   as the task card's projection — the player is choosing where a month goes, so the screen has to
+   show the consequence before they commit it. */
+.initiative__track {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--c-border);
+  overflow: hidden;
+}
+
+.initiative__fill,
+.initiative__projection {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 999px;
+  transition: width 200ms ease;
+}
+
+.initiative__fill {
+  background: var(--c-accent);
+  z-index: 1;
+}
+
+.initiative__projection {
+  background: var(--c-accent);
+  opacity: 0.35;
+}
+
+.initiative__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-sm);
+}
+
+.initiative__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.btn--small {
+  padding: var(--s-1) var(--s-3);
+  font-size: var(--fs-sm);
+}
