@@ -260,5 +260,9 @@ export const uiStrings: Record<string, string> = {
   'log.staff_left': '{name} resigned.',
   'log.staff_joined': '{name} joined the unit.',
   'log.budget_overspent': 'The budget year closed overspent.',
+  'log.initiative_started': 'Started: {initiative}.',
+  'log.initiative_complete': '{initiative} — done, finally.',
+  'log.initiative_lapsed': '{initiative} — quietly dropped.',
+  'log.initiative_abandoned': '{initiative} — left behind with the post.',
   'log.budget_underspent': 'The budget year closed underspent — next year’s allocation is cut.',
 };

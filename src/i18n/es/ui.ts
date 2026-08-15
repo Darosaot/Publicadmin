@@ -260,5 +260,9 @@ export const uiStrings: Record<string, string> = {
   'log.staff_left': '{name} dimitió.',
   'log.staff_joined': '{name} se incorporó a la unidad.',
   'log.budget_overspent': 'El año presupuestario cerró con sobregasto.',
+  'log.initiative_started': 'Iniciado: {initiative}.',
+  'log.initiative_complete': '{initiative}: hecho, por fin.',
+  'log.initiative_lapsed': '{initiative}: abandonado sin ruido.',
+  'log.initiative_abandoned': '{initiative}: se queda con el puesto que dejas.',
   'log.budget_underspent': 'El año presupuestario cerró con infragasto — recortan la asignación del año siguiente.',
 };

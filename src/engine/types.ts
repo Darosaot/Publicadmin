@@ -144,6 +144,57 @@ export interface ActiveTask {
   assignedTo?: string;
 }
 
+/* ------------------------------------------------------------- initiatives */
+
+/**
+ * Something the player decided to do, rather than something that landed on the desk.
+ *
+ * Files arrive by weight and have to be dealt with. An initiative is the opposite: nothing
+ * produces one, nothing chases it, and it finishes years after it starts or not at all. It is the
+ * only thing in the game the player picks rather than receives.
+ */
+export interface InitiativeTemplate {
+  id: string;
+  titleKey: string;
+  descKey: string;
+  /** What the player is told when it lands. */
+  completeKey: string;
+  /** And when it is quietly dropped. */
+  lapseKey: string;
+  /** Total effort points to finish. */
+  required: number;
+  /**
+   * The fewest cycles it can possibly take.
+   *
+   * Institutions do not move faster because you had a slack month. This caps how much progress a
+   * single cycle can absorb at `ceil(required / minCycles)`, which is what stops an initiative
+   * being a way to bank one quiet month into a payoff.
+   */
+  minCycles: number;
+  /** Who may start it, and when. */
+  available: Condition;
+  /** The payoff. Pays in kind — body condition, flags, tasks — rarely in reputation. */
+  onComplete: Effect[];
+  /** What it costs to have started something and let it die. */
+  onLapse: Effect[];
+}
+
+/** One the player has actually started. */
+export interface ActiveInitiative {
+  /**
+   * The template id doubles as the identity: the same undertaking never runs twice, so there is
+   * no uid to allocate and no way for two copies to disagree.
+   */
+  templateId: string;
+  progress: number;
+  required: number;
+  startedTurn: number;
+  /** Consecutive cycles with nothing put in. Past `INITIATIVE_LAPSE_CYCLES` it collapses. */
+  idleCycles: number;
+  /** Who is carrying it this cycle, if you handed it to someone. */
+  assignedTo?: string;
+}
+
 /* ------------------------------------------------------------------- staff */
 
 export type Seniority = 'junior' | 'officer' | 'senior';
@@ -349,6 +400,8 @@ export interface Allocation {
   rest: number;
   networking: number;
   overtime: boolean;
+  /** Initiative template id -> points. Desk work, so it competes with the board directly. */
+  initiativeEffort: Record<string, number>;
 
   /* ---- management, available once you have a unit ---- */
 
@@ -364,6 +417,8 @@ export interface Allocation {
   agencyTemps: number;
   /** Staff ids sent on a training course, paid from the budget rather than your time. */
   training: string[];
+  /** Initiative template id -> staff id. Shares the same carrying capacity as files do. */
+  initiativeDelegations: Record<string, string>;
 }
 
 export interface CompletedTaskReport {
@@ -406,6 +461,9 @@ export interface TurnReport {
   newOffers: JobOffer[];
   promotedTo?: number;
   team?: TeamReport;
+  /** Undertakings that landed or died this cycle. Template ids; the UI looks up the prose. */
+  initiativesCompleted?: string[];
+  initiativesLapsed?: string[];
 }
 
 export interface LogEntry {
@@ -459,6 +517,16 @@ export interface GameState {
 
   tasks: ActiveTask[];
   nextTaskUid: number;
+
+  /**
+   * Undertakings in flight.
+   *
+   * Deliberately transient: an initiative leaves `init.done.<id>` or `init.lapsed.<id>` behind in
+   * `flags` and is then removed from this list. The live record is first-class because it has a
+   * progress bar and a delegate; the permanent memory is a flag, because a thirty-year career
+   * would otherwise carry an archive of forty finished projects in every save.
+   */
+  initiatives: ActiveInitiative[];
 
   /** Empty until you reach a post that has a unit under it. */
   staff: StaffMember[];

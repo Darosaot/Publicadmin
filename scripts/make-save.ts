@@ -22,7 +22,7 @@ if (!DEPARTMENT_IDS.includes(department)) {
 }
 
 for (let attempt = 1; attempt <= 120; attempt += 1) {
-  const run = playCareer(attempt * 7919 + 13, department, 'balanced', 200, targetLevel);
+  const run = playCareer({ seed: attempt * 7919 + 13, department, stopAtLevel: targetLevel });
   const game = run.finalState;
 
   if (game.player.level >= targetLevel && !game.ending) {

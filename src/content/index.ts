@@ -6,6 +6,7 @@ import { departments } from './departments';
 // Imported for the side effect of registering the cast's strings, and for re-export.
 import './cast';
 import { eventRegistry } from './events';
+import { initiatives } from './initiatives';
 import { staffNames } from './staff';
 import { taskRegistry } from './tasks';
 
@@ -16,6 +17,7 @@ export { departments, departmentList } from './departments';
 export { posts } from './careers';
 export { cast } from './cast';
 export { bodies, bodyRegistry } from './bodies';
+export { initiatives, initiativeRegistry } from './initiatives';
 export { endingCopy, endingBodyKey } from './endings';
 export { allEvents, eventRegistry } from './events';
 export { allTasks, taskRegistry } from './tasks';
@@ -29,4 +31,5 @@ export const registry: ContentRegistry = {
   events: eventRegistry,
   staffNames,
   bodies,
+  initiatives,
 };

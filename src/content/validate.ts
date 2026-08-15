@@ -13,6 +13,7 @@ import { posts } from './careers';
 import { departments } from './departments';
 import { endingCopy } from './endings';
 import { allEvents, eventRegistry } from './events';
+import { initiatives } from './initiatives';
 import { allTasks, taskRegistry } from './tasks';
 
 export function validateContent(): string[] {
@@ -141,6 +142,14 @@ export function validateContent(): string[] {
   for (const task of allTasks) {
     for (const effects of Object.values(task.onComplete ?? {})) noteEffects(effects);
     noteEffects(task.onFail ?? []);
+  }
+  // Initiatives count on both sides. Missing them here would report a flag an event sets and only
+  // an initiative gates on as write-only — a false positive — and would let an initiative write a
+  // flag nothing reads, which is the real thing this census exists to catch.
+  for (const initiative of initiatives) {
+    noteCondition(initiative.available);
+    noteEffects(initiative.onComplete);
+    noteEffects(initiative.onLapse);
   }
 
   // The engine itself sets and reads this one, so the corpus never will.
@@ -307,6 +316,70 @@ export function validateContent(): string[] {
   for (const id of DEPARTMENT_IDS) {
     if (!bodies.some((body) => body.beat === id)) {
       problems.push(`department ${id}: no body in the country is on its beat`);
+    }
+  }
+
+  /* --------------------------------------------------------- initiatives */
+
+  const seenInitiativeIds = new Set<string>();
+  for (const initiative of initiatives) {
+    if (seenInitiativeIds.has(initiative.id)) {
+      problems.push(`duplicate initiative id: ${initiative.id}`);
+    }
+    seenInitiativeIds.add(initiative.id);
+
+    requireString(initiative.titleKey, `initiative ${initiative.id}`);
+    requireString(initiative.descKey, `initiative ${initiative.id}`);
+    requireString(initiative.completeKey, `initiative ${initiative.id}`);
+    requireString(initiative.lapseKey, `initiative ${initiative.id}`);
+
+    problems.push(
+      ...validateEffects(initiative.onComplete, `initiative ${initiative.id} onComplete`),
+    );
+    problems.push(...validateEffects(initiative.onLapse, `initiative ${initiative.id} onLapse`));
+
+    if (initiative.onComplete.length === 0) {
+      problems.push(`initiative ${initiative.id}: finishing it changes nothing`);
+    }
+    if (initiative.minCycles < 1) {
+      problems.push(`initiative ${initiative.id}: minCycles must be at least 1`);
+    }
+    // A junior has ten points a cycle and a board that already wants more than that. Anything
+    // needing more than a full cycle's undivided attention is not a commitment, it is a wall.
+    const perCycle = Math.ceil(initiative.required / Math.max(1, initiative.minCycles));
+    if (perCycle > 8) {
+      problems.push(
+        `initiative ${initiative.id}: needs ${perCycle} points a cycle, which is most of a month`,
+      );
+    }
+    // The payoff rule from the balance work: offers key off reputation and reputation decays, so
+    // an initiative paying a lump of it converts hoarded effort straight into promotion velocity.
+    // Pay in the world instead — condition, standing, flags, tasks, budget.
+    const reputation = initiative.onComplete.find(
+      (effect) => effect.kind === 'stat' && effect.stat === 'reputation',
+    );
+    if (reputation && reputation.kind === 'stat' && reputation.delta > 4) {
+      problems.push(
+        `initiative ${initiative.id}: pays ${reputation.delta} reputation — pay in kind instead`,
+      );
+    }
+  }
+
+  // An initiative nobody can ever start is authored consequence no player will meet, which is the
+  // same failure the write-only flag census exists to catch.
+  for (const initiative of initiatives) {
+    const gate = initiative.available;
+    if (gate.minLevel !== undefined && gate.minLevel > tiers[tiers.length - 1]!) {
+      problems.push(
+        `initiative ${initiative.id}: requires tier ${gate.minLevel}, above the top of the tree`,
+      );
+    }
+    if (
+      gate.minLevel !== undefined &&
+      gate.maxLevel !== undefined &&
+      gate.minLevel > gate.maxLevel
+    ) {
+      problems.push(`initiative ${initiative.id}: its level range is empty`);
     }
   }
 

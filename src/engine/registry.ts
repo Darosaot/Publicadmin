@@ -10,6 +10,7 @@ import type {
   Department,
   DepartmentId,
   GameEvent,
+  InitiativeTemplate,
   Post,
   TaskTemplate,
   WorldBody,
@@ -25,6 +26,8 @@ export interface ContentRegistry {
   staffNames: string[];
   /** The public bodies that make up the country, which drift with or without the player. */
   bodies: WorldBody[];
+  /** Undertakings the player may start, in menu order. */
+  initiatives: InitiativeTemplate[];
 }
 
 export function getPost(registry: ContentRegistry, id: string): Post {

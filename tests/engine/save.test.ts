@@ -178,6 +178,23 @@ describe('migrating a save forward', () => {
     expect(result.state.budget).toBeUndefined();
   });
 
+  /** Version 4 had everything but initiatives. */
+  function version4(state: GameState): string {
+    const { initiatives: _none, ...rest } = state;
+    return JSON.stringify({ ...rest, saveVersion: 4 });
+  }
+
+  it('gives a version 4 career an empty initiative list rather than rejecting it', () => {
+    const result = deserialize(version4({ ...game(), turn: 30 }), shipped);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    // A career that predates initiatives has not started any, and every one on the menu is still
+    // open to it — so there is nothing to convert, only a field to exist.
+    expect(result.state.initiatives).toEqual([]);
+  });
+
   it('leaves the migrated career playable', () => {
     const result = deserialize(version1(game()), shipped);
     expect(result.ok).toBe(true);
@@ -234,6 +251,21 @@ describe('content that has since been removed', () => {
     expect(restored.tasks.some((t) => t.templateId === 'task.retired')).toBe(false);
     expect(restored.pendingEvents.map((p) => p.eventId)).toEqual(['evt.test.common']);
     expect(restored.scheduledEvents.map((s) => s.eventId)).toEqual(['evt.test.followup']);
+  });
+
+  it('drops an initiative whose template has gone', () => {
+    // It would not throw — it would sit on the screen forever with no prose and no way to finish
+    // it, which is a worse outcome than losing the progress.
+    const state: GameState = {
+      ...game(),
+      initiatives: [
+        { templateId: 'init.cheap', progress: 3, required: 10, startedTurn: 1, idleCycles: 0 },
+        { templateId: 'init.retired', progress: 8, required: 20, startedTurn: 1, idleCycles: 0 },
+      ],
+    };
+
+    const restored = reload(state, makeTestRegistry());
+    expect(restored.initiatives.map((i) => i.templateId)).toEqual(['init.cheap']);
   });
 
   it('leaves a still-playable game behind after pruning', () => {

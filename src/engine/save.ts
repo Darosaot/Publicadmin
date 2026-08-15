@@ -82,6 +82,16 @@ const MIGRATIONS: Record<number, (raw: RawSave) => RawSave> = {
     const calendarMonth = typeof raw.calendarMonth === 'number' ? raw.calendarMonth : 0;
     return { ...raw, budget: { ...budget, yearStartMonth: calendarMonth } };
   },
+
+  /**
+   * 4 -> 5: initiatives.
+   *
+   * A new array on the state, so an old save has nothing to convert — but it does need the field
+   * to exist, because the engine iterates it unconditionally. An empty list is exactly right: a
+   * career that predates initiatives has not started any, and every one on the menu is still open
+   * to it.
+   */
+  4: (raw) => ({ ...raw, initiatives: [] }),
 };
 
 /**
@@ -146,6 +156,7 @@ function hasRequiredShape(raw: RawSave): boolean {
     typeof raw.stats === 'object' &&
     raw.stats !== null &&
     Array.isArray(raw.tasks) &&
+    Array.isArray(raw.initiatives) &&
     typeof player === 'object' &&
     player !== null &&
     typeof player.department === 'string' &&
@@ -175,6 +186,11 @@ function pruneUnknownContent(state: GameState, registry: ContentRegistry): GameS
       : state.player,
     offers: state.offers.filter((o) => registry.posts.some((p) => p.id === o.toPost)),
     tasks: state.tasks.filter((t) => registry.tasks[t.templateId] !== undefined),
+    // A dropped initiative would throw nothing but would sit on the screen forever with no prose
+    // and no way to finish it, which is worse than losing the progress.
+    initiatives: state.initiatives.filter((i) =>
+      registry.initiatives.some((t) => t.id === i.templateId),
+    ),
     pendingEvents: state.pendingEvents.filter((p) => registry.events[p.eventId] !== undefined),
     scheduledEvents: state.scheduledEvents.filter(
       (s) => registry.events[s.eventId] !== undefined,

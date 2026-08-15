@@ -41,6 +41,21 @@ console.log(`  integrity              ${round(summary.meanIntegrity)}`);
 console.log(`  stress                 ${round(summary.meanStress)}`);
 console.log(`  salary                 €${Math.round(summary.meanSalary)}`);
 console.log(`  tasks finished on time ${(summary.completionRate * 100).toFixed(1)}%`);
+console.log(`  initiatives started    ${round(summary.meanInitiativesStarted)}`);
+console.log(`  initiatives finished   ${round(summary.meanInitiativesCompleted)}`);
+console.log(`  initiatives dropped    ${summary.totalInitiativesLapsed} across the corpus`);
+
+// The A side: the same seeds played as if initiatives had never been added. This is the number
+// that says whether the feature is a choice or a tax.
+const withoutInitiatives = summarise(
+  playMany(seeds, DEPARTMENT_IDS, { useInitiatives: false }),
+);
+console.log('\nWith initiatives switched off, same seeds');
+console.log(
+  `  level ${round(withoutInitiatives.meanLevel)} (${round(summary.meanLevel)})  ` +
+    `years ${round(withoutInitiatives.meanYears)} (${round(summary.meanYears)})  ` +
+    `reputation ${round(withoutInitiatives.meanReputation)} (${round(summary.meanReputation)})`,
+);
 
 console.log('\nBy department');
 for (const department of DEPARTMENT_IDS) {
@@ -55,7 +70,7 @@ for (const department of DEPARTMENT_IDS) {
 
 console.log('\nBy track, played deliberately');
 for (const track of TRACK_IDS) {
-  const runs = playMany(seeds.slice(0, 16), DEPARTMENT_IDS, 'balanced', track);
+  const runs = playMany(seeds.slice(0, 16), DEPARTMENT_IDS, { preferredTrack: track });
   const sub = summarise(runs);
   const onTrack = runs.filter((r) => r.track === track).length;
   console.log(
@@ -70,7 +85,7 @@ for (const track of TRACK_IDS) {
 // strategies that pursue them. An ending nothing can reach is a content bug.
 console.log('\nReachability of the endings the balanced bot avoids');
 for (const strategy of ['ruthless', 'reckless'] as const) {
-  const runs = playMany(seeds.slice(0, 12), DEPARTMENT_IDS, strategy);
+  const runs = playMany(seeds.slice(0, 12), DEPARTMENT_IDS, { strategy });
   const sub = summarise(runs);
   const endings = Object.entries(sub.byEnding)
     .sort((a, b) => b[1] - a[1])

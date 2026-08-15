@@ -7,7 +7,7 @@
 
 import type { PlayerStats } from './types';
 
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 
 export const STAT_MIN = 0;
 export const STAT_MAX = 100;
@@ -145,6 +145,28 @@ export const DELEGATION_CAPACITY: Record<'junior' | 'officer' | 'senior', number
   officer: 1,
   senior: 2,
 };
+
+/* ------------------------------------------------------------- initiatives */
+
+/**
+ * How many cycles an initiative survives with nothing put into it.
+ *
+ * Three, so a single month of firefighting never kills one, and forgetting about it for a year
+ * always does. This is the whole cost of starting something: not money, not effort, but having
+ * to keep coming back to it while the board keeps refilling.
+ */
+export const INITIATIVE_LAPSE_CYCLES = 3;
+
+/**
+ * How many may be in flight at once, by tier.
+ *
+ * One until you run a unit, two after. A second slot is the actual reward for seniority here —
+ * more effort points only buy more of the same month, whereas a second initiative buys a second
+ * thing you are trying to change.
+ */
+export const INITIATIVE_SLOTS_BASE = 1;
+export const INITIATIVE_SLOTS_SENIOR = 2;
+export const INITIATIVE_SLOTS_SENIOR_TIER = 3;
 
 /** Monthly output by grade, before skill and morale are applied. */
 export const STAFF_BASE_OUTPUT: Record<'junior' | 'officer' | 'senior', number> = {

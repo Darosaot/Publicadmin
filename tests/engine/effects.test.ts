@@ -163,6 +163,16 @@ function populatedGame(): GameState {
         assignedTo: 's1',
       },
     ],
+    initiatives: [
+      {
+        templateId: 'init.quiet',
+        progress: 4,
+        required: 12,
+        startedTurn: 2,
+        idleCycles: 1,
+        assignedTo: 's1',
+      },
+    ],
     staff: [
       {
         id: 's1',

@@ -13,7 +13,7 @@ import { playCareer } from '../engine/autoplay';
  */
 function careerAtLevel(level: number, department: DepartmentId, track: TrackId): GameState {
   for (let attempt = 1; attempt <= 200; attempt += 1) {
-    const run = playCareer(attempt * 7919 + 13, department, 'balanced', 200, level, track);
+    const run = playCareer({ seed: attempt * 7919 + 13, department, stopAtLevel: level, preferredTrack: track });
     if (run.finalState.player.level >= level && run.finalState.player.track === track && !run.finalState.ending) {
       return run.finalState;
     }
