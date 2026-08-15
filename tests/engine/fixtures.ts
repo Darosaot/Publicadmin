@@ -12,6 +12,7 @@ import type {
   DepartmentId,
   GameEvent,
   TaskTemplate,
+  WorldBody,
 } from '../../src/engine/types';
 import { DEPARTMENT_IDS } from '../../src/engine/types';
 
@@ -322,6 +323,16 @@ export const testEvents: GameEvent[] = [
   },
 ];
 
+/**
+ * Three places: one rotting, one improving, one still. Enough to test drift in both directions
+ * and to prove a body with `drift: 0` is left completely alone.
+ */
+const testBodies: WorldBody[] = [
+  { id: 'sinking', baselineCondition: 40, drift: -0.5, beat: 'legal' },
+  { id: 'rising', baselineCondition: 50, drift: 0.25, beat: 'finance' },
+  { id: 'steady', baselineCondition: 60, drift: 0, beat: 'legal' },
+];
+
 export function makeTestRegistry(): ContentRegistry {
   const departments = Object.fromEntries(
     DEPARTMENT_IDS.map((id) => [id, department(id)]),
@@ -333,6 +344,7 @@ export function makeTestRegistry(): ContentRegistry {
     tasks: Object.fromEntries(testTasks.map((t) => [t.id, t])),
     events: Object.fromEntries(testEvents.map((e) => [e.id, e])),
     staffNames: ['Ada Fixture', 'Bo Sample', 'Cato Stub', 'Dita Mock', 'Enzo Proxy'],
+    bodies: testBodies,
   };
 }
 

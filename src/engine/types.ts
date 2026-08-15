@@ -321,6 +321,27 @@ export interface Department {
   startingAdjustments: Partial<PlayerStats>;
 }
 
+/**
+ * A public body, as the engine needs to see it.
+ *
+ * Deliberately the smallest possible view. The content side carries the name, the prose and the
+ * authoring helpers; all the engine does is drift these places month by month, for which it needs
+ * to know only where each one started and which way it is going.
+ *
+ * The scores themselves live in `flags` — `body.<id>.cond` and `body.<id>.stand` — holding the
+ * *deviation* from `baselineCondition`, so an unset flag reads as a body nobody has touched. That
+ * is what lets the country exist without a save migration.
+ */
+export interface WorldBody {
+  id: string;
+  /** Where this place sits when the career starts, 0–100. */
+  baselineCondition: number;
+  /** Change per calendar month with nobody intervening. Negative places are quietly rotting. */
+  drift: number;
+  /** The department that deals with this place, and so already knows what state it is in. */
+  beat: DepartmentId;
+}
+
 /** How the player spent their effort points this turn. */
 export interface Allocation {
   /** Task uid -> points. */

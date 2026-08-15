@@ -1676,3 +1676,89 @@ input {
   font-size: var(--fs-sm);
   line-height: 1.5;
 }
+
+
+/* ----------------------------------------------------------------- country */
+
+.bodies {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: var(--s-3);
+}
+
+.bodycard {
+  padding: var(--s-4);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  background: var(--c-surface);
+}
+
+.bodycard__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-2);
+  margin-bottom: var(--s-1);
+}
+
+.bodycard__name {
+  font-size: var(--fs-base);
+  font-weight: 700;
+}
+
+.bodycard__state {
+  white-space: nowrap;
+  color: var(--c-text-muted);
+}
+
+.bodycard--strong .bodycard__state { color: var(--c-good); }
+.bodycard--failing .bodycard__state,
+.bodycard--collapsing .bodycard__state { color: var(--c-bad); }
+
+.bodycard__kind {
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+  margin-bottom: var(--s-3);
+}
+
+/* Same reasoning as `.person__track`: a described band and a bar, never the figure. The player
+   needs to know a place is in trouble, not that it is at 34. */
+.bodycard__track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--c-border);
+  overflow: hidden;
+  margin-bottom: var(--s-3);
+}
+
+.bodycard__fill {
+  height: 100%;
+  background: var(--c-text-faint);
+  transition: width 200ms ease;
+}
+
+.bodycard--strong .bodycard__fill,
+.bodycard--sound .bodycard__fill { background: var(--c-good); }
+.bodycard--failing .bodycard__fill,
+.bodycard--collapsing .bodycard__fill { background: var(--c-bad); }
+
+.bodycard__movement {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+/* The row collapses when a body has neither drifted nor formed an opinion of you, which is the
+   ordinary case early on — an empty gap there would read as something missing. */
+.bodycard__movement:empty {
+  display: none;
+}
+
+.bodycard__movement:not(:empty) {
+  margin-bottom: var(--s-3);
+}
+
+.bodycard__blurb {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}

@@ -1,4 +1,5 @@
 import type { ContentRegistry } from '../engine/registry';
+import { bodies } from './bodies';
 import { posts } from './careers';
 import { departments } from './departments';
 
@@ -14,6 +15,7 @@ import './endings';
 export { departments, departmentList } from './departments';
 export { posts } from './careers';
 export { cast } from './cast';
+export { bodies, bodyRegistry } from './bodies';
 export { endingCopy, endingBodyKey } from './endings';
 export { allEvents, eventRegistry } from './events';
 export { allTasks, taskRegistry } from './tasks';
@@ -26,4 +28,5 @@ export const registry: ContentRegistry = {
   tasks: taskRegistry,
   events: eventRegistry,
   staffNames,
+  bodies,
 };

@@ -199,3 +199,40 @@ test('the Team tab only exists once there is a team', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Desk' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Team' })).toHaveCount(0);
 });
+
+test('the country is on screen from the first month, described rather than scored', async ({ page }) => {
+  await page.goto('/?seed=42');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+
+  await page.getByRole('button', { name: 'New game' }).click();
+  await page.getByLabel('Your name').fill('Renata Vos');
+  await page.getByRole('button', { name: /^Legal/ }).click();
+  await page.getByRole('button', { name: 'Take the job' }).click();
+
+  // Unlike People, the Country tab is there immediately: the institutions your own department
+  // deals with are ones you already know the state of.
+  await page.getByRole('button', { name: 'Country' }).click();
+  await expect(page.getByRole('heading', { name: 'The country you work in' })).toBeVisible();
+
+  const cards = page.locator('.bodycard');
+  expect(await cards.count()).toBeGreaterThan(0);
+
+  // A band and a bar, never the figure — the same rule the People screen follows for standing.
+  await expect(cards.first().locator('.bodycard__state')).not.toBeEmpty();
+  await expect(cards.first().locator('.bodycard__track')).toBeVisible();
+  await expect(cards.first()).not.toContainText(/\b\d{1,3}\s*\/\s*100\b/);
+
+  // And the rest of the country is counted, not listed.
+  await expect(page.getByRole('heading', { name: 'Elsewhere' })).toBeVisible();
+});
+
+test('a long career has watched places move', async ({ page }) => {
+  await resume(page, managing);
+
+  await page.getByRole('button', { name: 'Country' }).click();
+
+  // Twenty-odd years of drift cannot leave every institution exactly where it was founded.
+  const moved = page.locator('.bodycard .pill');
+  expect(await moved.count()).toBeGreaterThan(0);
+});

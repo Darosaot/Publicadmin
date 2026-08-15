@@ -4,6 +4,7 @@ import { GameProvider, useGame } from './state/GameProvider';
 import { EventModal } from './ui/components/EventModal';
 import { TurnReportModal } from './ui/components/TurnReportModal';
 import { CareerScreen } from './ui/screens/CareerScreen';
+import { CountryScreen } from './ui/screens/CountryScreen';
 import { DashboardScreen } from './ui/screens/DashboardScreen';
 import { EndingScreen } from './ui/screens/EndingScreen';
 import { NewGameScreen } from './ui/screens/NewGameScreen';
@@ -40,6 +41,8 @@ function Router() {
         <TeamScreen game={game} />
       ) : state.view === 'people' ? (
         <PeopleScreen game={game} />
+      ) : state.view === 'country' ? (
+        <CountryScreen game={game} />
       ) : (
         <DashboardScreen game={game} />
       )}

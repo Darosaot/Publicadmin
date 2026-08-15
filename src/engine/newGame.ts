@@ -5,6 +5,7 @@ import { adjustStat } from './effects';
 import { startingPost, type ContentRegistry } from './registry';
 import { seedToState } from './rng';
 import { refillBoard } from './tasks';
+import { learnLocalBodies } from './world';
 import type { DepartmentId, GameState, PlayerStats, StatId } from './types';
 
 export interface NewGameOptions {
@@ -79,5 +80,5 @@ export function createGame(options: NewGameOptions, registry: ContentRegistry): 
     ],
   };
 
-  return refillBoard(state, registry);
+  return refillBoard(learnLocalBodies(state, registry), registry);
 }

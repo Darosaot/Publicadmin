@@ -8,6 +8,7 @@
 import { ENDING_IDS, TRACK_IDS, type DepartmentId, type Effect } from '../engine/types';
 import { DEPARTMENT_IDS } from '../engine/types';
 import { EN_STRINGS } from './authoring';
+import { bodies } from './bodies';
 import { posts } from './careers';
 import { departments } from './departments';
 import { endingCopy } from './endings';
@@ -273,6 +274,39 @@ export function validateContent(): string[] {
   for (const track of TRACK_IDS) {
     if (!posts.some((p) => p.track === track && p.tier === Math.max(...tiers))) {
       problems.push(`track "${track}" has no post at the top tier`);
+    }
+  }
+
+  /* -------------------------------------------------------------- bodies */
+
+  const seenBodyIds = new Set<string>();
+  for (const body of bodies) {
+    if (seenBodyIds.has(body.id)) problems.push(`duplicate body id: ${body.id}`);
+    seenBodyIds.add(body.id);
+
+    requireString(body.kindKey, `body ${body.id}`);
+    requireString(body.blurbKey, `body ${body.id}`);
+
+    if (body.baselineCondition < 1 || body.baselineCondition > 99) {
+      problems.push(
+        `body ${body.id}: a founding condition of ${body.baselineCondition} leaves nowhere to move`,
+      );
+    }
+    if (!DEPARTMENT_IDS.includes(body.beat as DepartmentId)) {
+      problems.push(`body ${body.id}: "${body.beat}" is not a department`);
+    }
+    if (Math.abs(body.drift) > 0.5) {
+      // A whole point a month is six a year and a hundred and eighty over a career: a place that
+      // moves that fast is not drifting, it is collapsing, and should be an event.
+      problems.push(`body ${body.id}: drift of ${body.drift} a month is too fast to be drift`);
+    }
+  }
+
+  // Every department should have somewhere in the country that is its problem, or its events have
+  // nothing to point at.
+  for (const id of DEPARTMENT_IDS) {
+    if (!bodies.some((body) => body.beat === id)) {
+      problems.push(`department ${id}: no body in the country is on its beat`);
     }
   }
 

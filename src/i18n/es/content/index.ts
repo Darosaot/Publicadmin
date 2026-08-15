@@ -7,6 +7,7 @@
  * throws at import time rather than silently taking whichever file loaded last.
  */
 
+import { strings as bodies } from './bodies';
 import { strings as careers } from './careers';
 import { strings as castPeople } from './cast';
 import { strings as departments } from './departments';
@@ -40,6 +41,7 @@ import { strings as tasksShared } from './tasks/shared';
 import { strings as tasksSocial } from './tasks/social';
 
 const dictionaries = [
+  bodies,
   careers,
   castPeople,
   departments,

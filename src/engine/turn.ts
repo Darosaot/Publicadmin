@@ -49,6 +49,7 @@ import {
 } from './career';
 import { getPost, type ContentRegistry } from './registry';
 import { creditScale, isComplete, isDue, refillBoard, rollQuality, scaleCredit } from './tasks';
+import { driftWorld, learnLocalBodies } from './world';
 import {
   adjustStaffMorale,
   applyAssignments,
@@ -547,6 +548,12 @@ export function beginNextTurn(state: GameState, registry: ContentRegistry): Game
 
   next = expireOffers(next);
   next = refillBoard(next, registry);
+  // The rest of the country moved while you were working. By the same months, so a directorate's
+  // cycle takes half a year off every other institution too.
+  next = driftWorld(next, registry, worked);
+  // A post change may have moved the player to a different beat, and the institutions on it are
+  // ones you deal with rather than ones you have to go and find.
+  next = learnLocalBodies(next, registry);
 
   return { ...next, phase: 'allocation' };
 }
