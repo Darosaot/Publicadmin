@@ -389,3 +389,24 @@ test('taking a post warns you first, and lets you bring somebody', async ({ page
   // They arrive with their skill, morale and tenure intact — the point of bringing them.
   await expect(page.locator('.roster')).toContainText(broughtName!);
 });
+
+test('the ending says what the career left behind, not only what it earned', async ({ page }) => {
+  // A finished career, played out rather than stopped at a tier: the epilogue is about the whole
+  // of it. Reaching an ending is the only way to see this screen, so the fixture has to be one.
+  const finished = (() => {
+    for (let attempt = 1; attempt <= 200; attempt += 1) {
+      const run = playCareer({ seed: attempt * 3571 + 11, department: 'social' });
+      if (run.finalState.ending && run.finalState.alumni.length > 0) return run.finalState;
+    }
+    throw new Error('Could not reach an ending with anybody on the roster');
+  })();
+
+  await resume(page, finished);
+
+  await expect(page.getByRole('heading', { name: 'What is left behind' })).toBeVisible();
+
+  // The stats above say what the career was worth to the player. This says what it was worth to
+  // anybody else, which is the question the game is actually about.
+  await expect(page.locator('.epilogue')).toContainText('People who worked for you');
+  expect(await page.locator('.epilogue__list li').count()).toBeGreaterThan(0);
+});

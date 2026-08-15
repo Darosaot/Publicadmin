@@ -1950,3 +1950,30 @@ input {
 .keep__grade {
   font-size: var(--fs-sm);
 }
+
+/* ---------------------------------------------------------------- epilogue */
+
+.epilogue__block + .epilogue__block {
+  margin-top: var(--s-4);
+}
+
+.epilogue__title {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  margin-bottom: var(--s-2);
+}
+
+.epilogue__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.epilogue__name {
+  font-weight: 600;
+}
+
+.epilogue__up { color: var(--c-good); }
+.epilogue__down { color: var(--c-bad); }

@@ -140,14 +140,27 @@ a career contains about **15 scenes involving somebody it already knows**.
 ### How they are stored, and why that matters
 
 A person is **content, not state**. Names, roles and every line they speak are fixed prose written
-at authoring time — which they have to be, because event text cannot interpolate anything. The
-only thing a save carries is a number, kept in `flags` under `rel.<id>`.
+at authoring time. The only thing a save carries is a number, kept in `flags` under `rel.<id>`.
+
+> This section used to say the cast *had* to be authored prose "because event text cannot
+> interpolate anything". That was wrong, and it went unchallenged for several releases.
+> `translate` has interpolated `{name}` since the first commit and even translates a parameter
+> whose value is itself a key; the event render path simply never passed any parameters. Threading
+> a bag through `EventModal` was four lines, and it is what lets an event name a former colleague
+> (§ 8b). The cast is still authored prose, but now because that is the better way to write a
+> recurring character, not because the engine forbade the alternative.
 
 Building the cast on flags rather than on a new `GameState` array was a deliberate choice and not
 just an economy. `cloneState` hand-enumerates every mutable field and `applyEffects` mutates in
 place, so a new object or array on the state would fall through the spread as a shared reference
 and silently corrupt the pre-effect snapshot, with nothing to catch it at compile time. `flags` was
 already cloned. This is why the flag type was widened to `boolean | number` first.
+
+That trap is now a **tested invariant** rather than folklore. `tests/engine/effects.test.ts` builds
+a fully populated `GameState`, walks every key, and fails with the field name if any object or
+array survives the clone by reference. It has been checked by deletion twice — once when it was
+written and once when `initiatives` was added — because a guard that has never fired is only an
+assertion about the author's confidence.
 
 **Standing does not decay.** Reputation and political capital fade because they measure how you are
 doing lately; what a particular person thinks of you is not that. Elena remembers whose name went
@@ -507,6 +520,125 @@ You arrive one post below your establishment. Filling it takes 2 / 3 / 4 months 
 officer / senior, plus 2 effort points a month spent pushing it along, and then you get a person
 with rolled skill and no knowledge of your files.
 
+## 8a. Initiatives — the verb the game was missing
+
+Everything else in the game **arrives**. Files refill by weight, events fire by condition, offers
+appear when a die says so. An initiative is the one thing the player *starts*.
+
+| | |
+| --- | --- |
+| Where it lives | `GameState.initiatives`, mirroring `tasks` |
+| What it remembers | `init.done.<id>` / `init.lapsed.<id>` in `flags`, after the record is dropped |
+| Cost | effort from the same monthly budget as the board |
+| Concurrency | 1 below tier 3, 2 at and above |
+| Per-cycle ceiling | `ceil(required / minCycles)` |
+| Death | `INITIATIVE_LAPSE_CYCLES` (3) cycles with nothing put in; progress forfeit |
+
+**The state is a hybrid on purpose.** The live record is first-class because it has a progress bar
+and a delegate; the permanent memory is a flag. That split gates follow-on content for free
+through `requiredFlags`, keeps a thirty-year save from carrying an archive of forty finished
+projects, and leaves `pruneUnknownContent` one small list to clean.
+
+**`minCycles` exists because the obvious defeat is otherwise available**: bank one quiet month,
+dump twenty points, collect the payoff. Institutions do not move at the speed of your calendar.
+
+**Payoffs are in kind, and `validate.ts` enforces it.** Offers key off reputation and reputation
+decays 4.6% a month, so an initiative paying a lump of it would convert hoarded effort straight
+into promotion velocity — the one payoff shape that makes initiatives dominant rather than a
+choice. They pay in body condition, standing, flags and unlocked content. A reputation payoff
+above 4 fails the build.
+
+### What the balance sweep taught, in order
+
+Three bot policies were wrong before one was right, and the sequence is the actual finding:
+
+1. **Funding them before the board** — principled-sounding, and it ended careers at year fourteen
+   on tier two. At tier one the board already wants more than the month holds.
+2. **Restarting anything dropped** — 1,373 lapses against 343 completions across 84 careers.
+   That is churn measured as commitment.
+3. **Starting one below tier three** — starves every time. A unit to delegate to, or the expert
+   track's larger personal budget, is what makes an undertaking affordable.
+
+The third is the design finding hiding in the balance data: initiatives are the management layer,
+arrived at from the other direction.
+
+---
+
+## 8b. The country
+
+Fourteen named institutions with a condition (how well they are actually run), a standing (how they
+regard you) and a drift (where they go on their own).
+
+Stored in `flags` as **deviation from a baseline that lives in content**. `flagValue` reads an
+unset flag as 0, so "nobody has touched this place" is exactly what 0 should mean — which is why
+the country shipped with **no save migration, no clone edit and no new `Condition` surface**.
+
+Two deliberate omissions:
+
+- **No mean reversion.** An earlier draft pulled bodies back toward baseline so improvements
+  decayed without maintenance. It simulates entropy nicely and plays terribly: the one thing a
+  thirty-year career should leave is a mark, and a mark that fades is a mark you did not make.
+  Places get worse on their own; they get better only because somebody did something.
+- **No RNG.** Drift is a property of the institution. Making it random would mean two careers on
+  the same seed could not be compared, which is the entire basis of the balance harness.
+
+Drift runs in `beginNextTurn` scaled by `monthsPerTurn`, so a Director-General's cycle moves the
+country half a year and a junior's moves it one month.
+
+**Discovery.** Bodies on your own department's beat are known from month one — dealing with them is
+the job. Everything else has to be gone and looked at, which is what the `look → fix → finish`
+initiative chains are for: you cannot work on somewhere you have never been, and you cannot finish
+the job somewhere that has not started moving and does not yet trust you.
+
+---
+
+## 8c. Standing directives
+
+Three questions every public manager answers whether or not they say so out loud. Set once, held
+until changed, stored as a numeric flag per directive (0 undecided, 1 or 2 for a pole).
+
+| Directive | Pole 1 | Pole 2 | Lever |
+| --- | --- | --- | --- |
+| Pressure | Take it yourself | Pass it down | ±1 your stress, ∓1 staff morale, monthly |
+| Rigour | Document everything | Move fast | ±3 quality, ∓1 effort per file |
+| Recruitment | Hire for potential | Hire for experience | ∓8 skill, ±6 morale on arrival |
+
+Every hook is a small multiple of one helper that names the pole which should read positive, rather
+than negating a shared result. That makes the poles symmetrical **by construction** — a directive
+whose cost side is quietly also a benefit cannot be written — and there is a test asserting it.
+
+**Pressure is inert without a unit**, and the balance sweep is why. Applied from month one it was
+forty months of standing cost with nothing on the other side, and careers ended nine years early.
+You cannot absorb your people's pressure when you have no people; the fix and the fiction agree.
+
+---
+
+## 8d. The office that lasts
+
+Until v6 every post change destroyed the unit with one log line *after* the fact, which is not
+notice.
+
+- **You may bring two people**, intact — skill, morale and tenure. They fill establishment slots
+  rather than adding to them.
+- **Everybody else joins `GameState.alumni`**, capped at 12 and oldest-dropped. A save-size bound,
+  not a simulation one, and roughly the number of former colleagues from a thirty-year career whose
+  name a player could place.
+- **Regard is derived from morale at departure** rather than tracked separately. How somebody felt
+  about a job when they left it *is* what they say about you afterwards, and a second number would
+  only drift out of step with the first.
+- **Promotion from within** finally calls `promoteStaff`, which had existed unused since the office
+  landed — and produces the `'promoted_away'` departure reason `TeamReport` had always declared.
+  The other half of it is people good enough to have options leaving when the job stops being worth
+  having: skill gives them the option, morale decides whether they use it.
+- **`previewPostChange`** is pure and separate from `acceptOffer`, because the player is entitled
+  to know before they decide.
+
+Event prose can name one of them, via `alum.spotlight` — a **1-based** index into `alumni`. The
+1-based part is load-bearing: an unset flag reads as 0, so a 0-based index would make "the first
+alumnus" and "nobody" the same value.
+
+---
+
 ## 9. Endings
 
 Checked at the end of every month, in this order — the first one that matches wins.
@@ -573,18 +705,33 @@ Where it currently sits:
 
 | Measure | Value |
 | --- | --- |
-| Mean years of service | 27.9 |
-| Careers reaching a tier-5 post | 45% |
-| Careers reaching tier 3 or above | 91% |
-| Careers stuck at the starting post | 2% |
-| Mean level, by track | line 4.0, expert 3.9, political 4.2, oversight 3.9 |
-| Mean level, by department | 3.9 to 4.5 — a spread of 0.6 |
-| Files finished on time | 95% |
-| Mean level reached | 4.2 |
-| Mean Reputation at the end | 68 |
-| Mean cycles survived | 119 of 120 |
+| Mean years of service | 28.8 |
+| Careers reaching a tier-5 post | 29% |
+| Careers reaching tier 3 or above | 96% |
+| Careers stuck at the starting post | 0.7% |
+| Mean level, by track | line 4.4, expert 3.7, political 4.0, oversight 4.3 |
+| Mean level, by department | 3.9 to 4.3 — a spread of 0.4 |
+| Files finished on time | 98% |
+| Initiatives started / finished, per career | 9.9 / 4.9 |
+| Mean level reached | 4.1 |
+| Mean Reputation at the end | 62 |
+| Mean cycles survived | 118 of 120 |
 
-Endings, over those 280 careers: honoured retirement 65%, quiet retirement 32%, Minister 3%.
+The report also prints the **A side**: the same seeds played with initiatives switched off, which
+is literally the game as it was before they existed. Level 4.2 against 4.1, 29.2 years against
+28.8, reputation 64.9 against 62.0. Initiatives cost a career a little and are not the way to get
+promoted, which is what "a choice rather than a tax or a dominant strategy" has to mean
+numerically. Absolute bands could not have told those apart from any of the other tuning in the
+same releases.
+
+**One guardrail was rewritten rather than relaxed.** "The board must be tight enough that something
+has to give" measured file completion alone, and sat exactly on its own bound the moment
+promotion-from-within landed and the bot began running better units. That is the guardrail having
+been written when the board was the only place pressure could show. It now asks the real question
+over both channels: across a whole career, is there anything the player did not get to? Over 90% of
+careers must fail a file or drop an initiative.
+
+Endings, over those 280 careers: honoured retirement 50%, quiet retirement 46%, Minister 2.5%.
 Burnout, disgrace and dismissal do not appear, because the balanced bot rests when tired and does
 not take bribes — the first two are reached reliably by the `reckless` and `ruthless` bot
 strategies, which exist precisely to prove that an ending is not unreachable. Burnout takes a

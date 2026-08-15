@@ -338,6 +338,76 @@ Give consequences room. A `delayTurns` of 4 to 8 is usually right for the slow o
 the court, the letter from whoever has your old job now — so that when it lands the player has to
 remember what they did rather than being told.
 
+## Writing an initiative
+
+An initiative is the one thing the player chooses. `src/content/initiatives.ts`:
+
+```ts
+export const eastmoorSteady = defineInitiative('init.eastmoor_steady', {
+  title: 'Hold Eastmoor still',
+  desc: 'It does not need a plan. It needs eighteen months in which nobody arrives with one.',
+  complete: 'Nothing was reformed, launched or announced...',
+  lapse: 'The next plan arrived on schedule.',
+  required: 30,
+  minCycles: 6,
+  available: { minLevel: 2, ...eastmoor.known },
+  onComplete: [eastmoor.improve(10), eastmoor.regard(10)],
+});
+```
+
+Four rules, three of which `validate.ts` enforces:
+
+1. **Pay in kind.** Body condition, standing, flags, spawned tasks, budget. A `stat: reputation`
+   payoff above 4 fails the build — see § 8a of the design doc for why that specific shape is
+   dangerous rather than merely generous.
+2. **`required / minCycles` must be 8 or under.** A junior has ten points a cycle and a board that
+   already wants thirteen. Anything needing more than most of a month is a wall, not a commitment.
+3. **Finishing it has to change something.** An empty `onComplete` fails the build.
+4. **`onLapse` defaults to nothing.** Most things quietly dropped in government are quietly
+   dropped without consequence. Give it a penalty only when somebody was actually promised
+   something — and then usually a standing hit on the body, not a stat.
+
+Prefer chains of three — `look → fix → finish` — with each stage gating on the previous stage's
+flags. That is the discovery loop, and it is also what keeps every flag the chain writes read by
+something, which the write-only census insists on.
+
+## Adding a body
+
+`src/content/bodies.ts`, using the `body()` factory:
+
+```ts
+export const eastmoor = body(
+  'eastmoor',
+  'Eastmoor District Council',   // a proper noun: a literal string, never a key
+  'District council, and struggling',
+  'Three chief executives in six years...',
+  34,          // baseline condition, 1–99
+  -0.09,       // drift per calendar month
+  'inspection' // the department whose beat it is on
+);
+```
+
+Then add it to the `bodies` array and translate its two prose keys. The name is **not** translated,
+per the same rule the cast follows.
+
+Validation requires: a unique id, both prose keys, a baseline in 1–99, a `beat` naming a real
+department, `|drift| <= 0.5` (faster than that is not drift, it is a collapse, and should be an
+event), and every department carrying at least one body — otherwise its events have nothing to
+point at.
+
+Drift is per **calendar month**, not per cycle. −0.09 is about one point a year, which over a
+thirty-year career is most of the way from "under strain" to "failing" with nobody at fault.
+
+## Adding a directive
+
+`src/content/directives.ts` for the prose, `src/engine/directives.ts` for the two hooks. Both poles
+must be defensible ways to run an office, and both must state their cost as plainly as their
+benefit — the screen must not imply there is a right answer, because there is not.
+
+Write each hook as a multiple of `lean(state, id, positivePole)` rather than negating a shared
+result. That is what makes the poles symmetrical by construction, and there is a test that will
+catch you if you do not.
+
 ## Regenerating the script
 
 `docs/narrative-script.md` is generated, not maintained:

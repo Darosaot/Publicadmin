@@ -3,7 +3,7 @@
 > **Generated file.** Produced from the shipped content by `npm run docs:script`. Edit the
 > content in `src/content/` and regenerate — changes made directly to this file are lost.
 
-The complete corpus: 241 events, 82 task templates, 7 departments, 15 posts across 4 tracks and 6 endings. Stat effects are shown after each outcome.
+The complete corpus: 241 events, 82 task templates, 27 initiatives, 14 public bodies, 3 standing directives, 7 departments, 15 posts across 4 tracks and 6 endings. Stat effects are shown after each outcome.
 
 ## Departments
 
@@ -320,6 +320,356 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 **Serious case review** — Something went badly wrong and the review has to say why, in public, without turning into either a whitewash or a search for one person to blame.
 **Recommission the whole care market** — Eleven providers, four thousand people receiving a service, and a budget that has not moved in three years. Everybody in this is somebody’s parent.
 **Set the eligibility threshold** — Where the line goes between the people the service helps and the people it does not. It is arithmetic on a spreadsheet and it is several thousand specific lives.
+
+## Initiatives
+
+*The only content the player chooses rather than receives. Each runs look → fix → finish,
+with the stages gating on the flags the previous stage writes.*
+
+### Go back to Alderford
+
+You could find a reason to be there for a fortnight. Nobody would stop you, and nobody would understand why you wanted to.
+
+*16 points over at least 4 cycles.*
+
+**Done.** Two weeks of sitting in on things you were not invited to. Alderford is smaller than you remember and worse run than you remember, and those turn out to be the same fact.
+
+**Dropped.** You never found the fortnight.
+
+### Alderford’s records
+
+Four filing systems, none of them wrong, none of them agreeing. Everything difficult there is downstream of it.
+
+*22 points over at least 5 cycles.*
+
+**Done.** One system. It took eleven months and the argument was never about filing. Alderford will not notice this for about two years, at which point they will not remember it was you.
+
+**Dropped.** The fourth filing system is still there. So is the person who wanted it.
+
+### Rebuild Alderford properly
+
+They are listening to you now, and they are moving. That combination does not last, and it will not come round again.
+
+*34 points over at least 7 cycles.*
+
+**Done.** A council that works. Not a famous one and not a model for anything — just eighteen thousand people whose bins are collected and whose planning applications are answered, which was always the entire job.
+
+**Dropped.** You had their attention and you spent it on something else. They noticed which, and so did you.
+
+### Find out what is wrong at Eastmoor
+
+Everyone in the region agrees Eastmoor is in trouble. Nobody can say what the trouble is, which is a finding in itself.
+
+*18 points over at least 4 cycles.*
+
+**Done.** Three chief executives in six years, and every one of them arrived to fix the last one’s mistake. Nothing there is more than eighteen months old. That is the trouble.
+
+**Dropped.** Somebody else will look eventually. Probably.
+
+### Hold Eastmoor still
+
+It does not need a plan. It needs eighteen months in which nobody arrives with one.
+
+*30 points over at least 6 cycles.*
+
+**Done.** Nothing was reformed, nothing was launched, and nothing was announced. Two directorates finished something they had started. It is the most useful year Eastmoor has had in a decade and there is no way to write it up.
+
+**Dropped.** The next plan arrived on schedule.
+
+### Finish the job at Eastmoor
+
+It has stopped falling. Stopping falling is not the same as standing up, and the window between the two is where everyone before you gave up.
+
+*40 points over at least 8 cycles.*
+
+**Done.** A district council nobody has heard of, doing unremarkable work, for the first time in nine years. The regional press ran forty column inches on the crisis and none on this.
+
+**Dropped.** It was standing up when you left it. It is not now.
+
+### Visit all eleven homes
+
+The trust reports monthly and the reports are fine. Eleven buildings, two hundred residents, and a set of numbers that has been fine for four years.
+
+*18 points over at least 4 cycles.*
+
+**Done.** Nine of them are what the reports say. Two are not, and the difference between the nine and the two is not in any return the trust has ever submitted.
+
+**Dropped.** You read the returns instead. They were fine.
+
+### Kesswater’s staffing
+
+Cheap for four years running. Two hundred people depend on it. Those two facts are the same fact and somebody has to write that down.
+
+*28 points over at least 6 cycles.*
+
+**Done.** Rotas that a person could actually work, and a cost that is no longer the trust’s best feature. Two of the eleven managers left over it. They were the right two.
+
+**Dropped.** The rota stayed. So did the cost, which was the point of the rota.
+
+### Rebuild the Kesswater trust
+
+The staffing was the symptom. What produced it is a governance structure in which nobody is responsible for the residents and everybody is responsible for the budget.
+
+*38 points over at least 8 cycles.*
+
+**Done.** A board that can be held to something, and a chair who understands what she is now on the hook for. It will hold as long as she does, which is the most any structure ever promises.
+
+**Dropped.** The board minutes still record unanimous approval of everything.
+
+### Look at Northbridge properly
+
+Competently run, everyone says. Nobody has had a reason to check what they mean by that.
+
+*20 points over at least 5 cycles.*
+
+**Done.** Well run in the parts anyone has ever measured. Three services have never been looked at by anybody, and two of them are the ones a hundred and forty thousand people actually touch.
+
+**Dropped.** It has a good reputation. That will do.
+
+### Measure what Northbridge does not
+
+You cannot fix the two services nobody looks at until somebody looks at them, and looking at them is a year of work that will make nobody happy.
+
+*30 points over at least 6 cycles.*
+
+**Done.** Two services with numbers on them for the first time. The numbers are worse than anybody hoped and better than the worst case, which is the usual answer and was worth the year.
+
+**Dropped.** They went back to being well run.
+
+### Make it stick at Northbridge
+
+A measurement that depends on you is a measurement that ends when you leave. What it needs is somebody there whose job it is.
+
+*36 points over at least 7 cycles.*
+
+**Done.** A post, a budget line and a person in it who is good. The three things that turn an intervention into an institution, and the reason nobody will remember this was ever a project.
+
+**Dropped.** The reporting stopped about four months after you did.
+
+### Read the housing waiting list
+
+Not the summary. The list. Eleven thousand rows, and nobody in the agency has read it end to end in six years.
+
+*22 points over at least 5 cycles.*
+
+**Done.** Four hundred people on it twice. Two hundred who have been housed and never removed. And a category, invented in 2011 for a reason nobody can now recall, that a thousand people are stuck in.
+
+**Dropped.** The summary said much the same thing.
+
+### The maintenance backlog
+
+A decade of deferred repairs, priced once, four years ago, by somebody who was told what the answer had to be.
+
+*34 points over at least 7 cycles.*
+
+**Done.** A real number, and it is very large. Publishing it cost somebody their job and it was not you, and the following year’s allocation was the first honest one in a decade.
+
+**Dropped.** The four-year-old figure is now an eight-year-old figure.
+
+### Fix how housing decides
+
+The list and the backlog are both outputs of the same thing: an allocation policy nobody has revisited since it was written to solve a different problem.
+
+*40 points over at least 8 cycles.*
+
+**Done.** A policy that says what it does and does what it says. It will be unpopular with everybody who understood the old one well enough to work it, which is the clearest sign it was needed.
+
+**Dropped.** The policy stands. So does everything downstream of it.
+
+### Find out what transport actually built
+
+Its condition reports run about eight years behind its capital programme, which means nobody currently working there knows the real state of anything.
+
+*24 points over at least 6 cycles.*
+
+**Done.** Two schemes finished and never inspected. One cancelled in 2019 that is still being maintained. And a bridge whose file says two different things, both signed.
+
+**Dropped.** The condition reports remain reassuring.
+
+### A real asset register
+
+You cannot plan a capital programme against assets you cannot list. Everyone knows this. Nobody has had three uninterrupted years.
+
+*38 points over at least 7 cycles.*
+
+**Done.** Every asset, its actual condition, and what it will cost to keep. It is dull, it took three years, and it will quietly save more money than anything else in this building.
+
+**Dropped.** The register is about a third done and will not be finished.
+
+### Rebuild the capital programme
+
+With a register you can finally ask the question the programme has never been asked: is this the right list of things to build?
+
+*44 points over at least 8 cycles.*
+
+**Done.** A programme built on what exists rather than on what was announced. Two schemes died and four that nobody had heard of moved up, and the ones that died had constituencies.
+
+**Dropped.** The programme was approved unchanged, as it is every year.
+
+### Test whether the frameworks work
+
+It buys on behalf of everybody so that nobody has to buy badly alone. Whether that has worked is exactly the question its annual report is not built to answer.
+
+*24 points over at least 6 cycles.*
+
+**Done.** On the big frameworks, plainly yes. On the small ones, no — and the small ones are where two thirds of the transactions are.
+
+**Dropped.** The annual report was published as usual.
+
+### The small frameworks
+
+Two thirds of the transactions, a fraction of the attention, and every one of them a place where a bad supplier can sit for years.
+
+*36 points over at least 7 cycles.*
+
+**Done.** Nine frameworks closed, four rebuilt, and a rule about which is which. The savings are unglamorous and the removed suppliers have written to their members of parliament.
+
+**Dropped.** They are still there, and so are the suppliers.
+
+### Rebuild how the service buys
+
+Fixing nine frameworks is nine fixes. What produced nine bad frameworks is a way of working, and that is a harder thing to put in a submission.
+
+*42 points over at least 8 cycles.*
+
+**Done.** Category management that means something, and buyers who are allowed to say no. The service will be slower and better, and it will be judged on the first of those.
+
+**Dropped.** It buys the way it always has.
+
+### Inspect the inspectorate
+
+It judges everybody else. The one organisation in the country that has to be better run than the bodies it grades, and the one nobody grades.
+
+*26 points over at least 6 cycles.*
+
+**Done.** Its methodology has not been revised in eleven years, and two of its five judgement criteria no longer describe anything that happens in the sector.
+
+**Dropped.** Somebody senior would have to want this. Nobody does.
+
+### Rewrite the methodology
+
+Eleven years of drift between what it measures and what matters. Every inspector knows. Saying so in writing is a different matter.
+
+*38 points over at least 7 cycles.*
+
+**Done.** Five criteria that describe the present. The first round of judgements under it moved fourteen bodies, in both directions, and every one of those moves was defensible.
+
+**Dropped.** The old criteria are applied for another year.
+
+### Put the inspectorate beyond reach
+
+A methodology can be rewritten again by whoever comes next. What protects it is where the inspectorate sits, who appoints its head, and how hard it is to lean on.
+
+*46 points over at least 8 cycles.*
+
+**Done.** A fixed term, a published appointment process, and a duty to report that cannot be waived. It will annoy every minister for the next thirty years, which is what it is for.
+
+**Dropped.** It remains exactly as independent as whoever is in charge feels like allowing this year.
+
+### Sit with the ombudsman’s post
+
+Four thousand complaints a year from people who have already tried everything else. It can examine perhaps two hundred properly.
+
+*22 points over at least 5 cycles.*
+
+**Done.** How it picks the two hundred is not written down anywhere. It is one very experienced person’s judgement, exercised well, and it retires in three years.
+
+**Dropped.** Four thousand a year, and none of them yours.
+
+### Write down how it chooses
+
+The judgement is good and it lives in one head. Getting it onto paper without flattening it into a checklist is most of the difficulty.
+
+*30 points over at least 6 cycles.*
+
+**Done.** Eleven pages that a new person could actually use, with the hard cases worked through rather than defined away. She read it and changed four things, which is how you know it is right.
+
+**Dropped.** It is still in her head, and she still retires in three years.
+
+### Make the findings bite
+
+It examines two hundred cases well and then recommends. Recommendations are complied with about half the time, and nobody counts which half.
+
+*40 points over at least 8 cycles.*
+
+**Done.** A published compliance record, body by body. Nothing was made compulsory and compliance went to eighty per cent inside two years, because being on a list is worse than being asked.
+
+**Dropped.** Half, still. Nobody counting.
+
+## The country
+
+*These drift whether or not the player is looking. Names are proper nouns and are
+not translated.*
+
+| Body | Kind | Founded at | Drift a month | Beat |
+| --- | --- | ---: | ---: | --- |
+| Alderford City Council | City council, eighteen thousand people | 52 | -0.04 | legal |
+| Northbridge City Council | City council, a hundred and forty thousand people | 58 | -0.02 | policy |
+| Eastmoor District Council | District council, and struggling | 34 | -0.09 | inspection |
+| Kesswater Care Trust | Adult social care, eleven sites | 41 | -0.07 | social |
+| Regional Government of Valmara | The regional tier | 60 | 0 | policy |
+| Valmara Transport Authority | Regional transport | 48 | -0.03 | projects |
+| Valmara Housing Agency | Social housing | 44 | -0.05 | finance |
+| National Agency for Public Investment | Capital programmes | 62 | -0.01 | projects |
+| National Procurement Service | Framework agreements | 55 | -0.02 | procurement |
+| Ministry of Territorial Administration | The department | 63 | 0 | policy |
+| National Audit Authority | External audit | 71 | -0.01 | finance |
+| Public Services Inspectorate | Inspection | 68 | -0.02 | inspection |
+| Office of the Ombudsman | The last resort | 66 | -0.02 | social |
+| Office of the Council of Ministers | The centre of government | 59 | 0 | legal |
+
+**Alderford City Council.** Where you started. Small enough that one competent person changes it and one bad appointment breaks it, and it has had both since you left.
+
+**Northbridge City Council.** Big enough to have a structure chart and small enough that the structure chart is not the whole truth. Competently run, in the way a place is when nobody has had a reason to look closely.
+
+**Eastmoor District Council.** Three chief executives in six years. Everyone in the region knows it is in trouble and nobody has been able to say precisely what the trouble is, which is usually the trouble.
+
+**Kesswater Care Trust.** Two hundred people depend on it and it has been cheap for four years running. Both of those facts are in the same sentence for a reason.
+
+**Regional Government of Valmara.** Where policy stops being an argument and starts being a budget line. Large, slow, and the place most careers in this country pass through at least once.
+
+**Valmara Transport Authority.** Runs on capital projects that outlast the people who approved them, which means its real condition is always about eight years behind what its reports say.
+
+**Valmara Housing Agency.** A waiting list, a maintenance backlog, and a board that has been asking the same question about both for a decade without ever quite writing it down.
+
+**National Agency for Public Investment.** Where the money for everything visible comes from. Reasonably well run and permanently one reorganisation behind what it has been asked to do.
+
+**National Procurement Service.** Buys on behalf of everyone so that nobody has to buy badly on their own. Whether that has worked is the sort of question its own annual report is not designed to answer.
+
+**Ministry of Territorial Administration.** The centre. Its condition is mostly the condition of whoever is running it, which is why the number moves more here than anywhere else in the country.
+
+**National Audit Authority.** Reads everything, changes little directly, and changes a great deal by existing. The one institution whose condition nobody outside it thinks about until it slips.
+
+**Public Services Inspectorate.** Arrives, looks, writes it down. Its findings are only worth what its own rigour is worth, which makes it the one body in the country that has to be better run than the ones it judges.
+
+**Office of the Ombudsman.** Four thousand complaints a year from people who have already tried everywhere else. It can examine perhaps two hundred properly, and deciding which two hundred is the whole institution.
+
+**Office of the Council of Ministers.** Small, fast, and staffed by people who will not be there in three years. Everything that reaches it has already been decided by somebody; its condition is how well it knows by whom.
+
+## Standing directives
+
+*Neither pole of any of these is the right answer.*
+
+### Pressure
+
+A month’s load has to land somewhere. Nobody writes this policy down and everybody has one — it is set by what you do at seven in the evening, not by what you say at the away day.
+
+- **Take it yourself** — Your people keep their morale. You carry it.
+- **Pass it down** — You carry less. They carry it, and eventually they leave.
+
+### Rigour
+
+Whether a decision is finished when it is made or when it is written down. The answer determines what survives you and how much of it there is.
+
+- **Document everything** — Better work. Every file takes a point longer.
+- **Move fast** — Every file takes a point less. The quality shows it.
+
+### Recruitment
+
+Who you appoint when two candidates are equally plausible and one of them has done the job before.
+
+- **Hire for potential** — Keener, less able. They grow into it, over years.
+- **Hire for experience** — Able on arrival, and about as good as they will get.
 
 ## Events
 

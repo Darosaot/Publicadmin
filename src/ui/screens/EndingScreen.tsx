@@ -6,6 +6,7 @@ import { STAT_IDS, type GameState } from '../../engine/types';
 import { useT } from '../../i18n';
 import { useGame } from '../../state/GameProvider';
 import { formatSalary } from '../format';
+import { Epilogue } from '../components/Epilogue';
 
 export function EndingScreen({ game }: { game: GameState }) {
   const t = useT();
@@ -48,6 +49,8 @@ export function EndingScreen({ game }: { game: GameState }) {
             {t('ending.months', { years: yearsElapsed(game) })}
           </p>
         </section>
+
+        <Epilogue game={game} />
 
         <button
           type="button"
