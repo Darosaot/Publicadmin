@@ -5,7 +5,7 @@
  * build rather than crashing a player's third year in office.
  */
 
-import { ENDING_IDS, TRACK_IDS, type DepartmentId } from '../engine/types';
+import { ENDING_IDS, TRACK_IDS, type DepartmentId, type Effect } from '../engine/types';
 import { DEPARTMENT_IDS } from '../engine/types';
 import { EN_STRINGS } from './authoring';
 import { posts } from './careers';
@@ -309,38 +309,54 @@ function hasDepartmentEvent(id: DepartmentId): boolean {
   );
 }
 
-function validateEffects(effects: readonly unknown[], where: string): string[] {
+/**
+ * Reference-checks a list of effects.
+ *
+ * Typed against the `Effect` union rather than `unknown[]` so the switch below can be exhaustive:
+ * an effect kind that carries a content id and is not checked here would let a typo ship, and the
+ * player would meet it years into a career. Adding a kind to the union now forces a decision.
+ */
+function validateEffects(effects: readonly Effect[], where: string): string[] {
   const problems: string[] = [];
 
-  for (const effect of effects as {
-    kind: string;
-    templateId?: string;
-    eventId?: string;
-    ending?: string;
-    delta?: number;
-  }[]) {
+  for (const effect of effects) {
     switch (effect.kind) {
       case 'spawnTask':
-        if (!effect.templateId || !taskRegistry[effect.templateId]) {
+        if (!taskRegistry[effect.templateId]) {
           problems.push(`${where}: spawnTask references unknown template "${effect.templateId}"`);
         }
         break;
       case 'queueEvent':
-        if (!effect.eventId || !eventRegistry[effect.eventId]) {
+        if (!eventRegistry[effect.eventId]) {
           problems.push(`${where}: queueEvent references unknown event "${effect.eventId}"`);
         }
         break;
       case 'endGame':
-        if (!effect.ending || !ENDING_IDS.includes(effect.ending as never)) {
+        if (!ENDING_IDS.includes(effect.ending)) {
           problems.push(`${where}: endGame references unknown ending "${effect.ending}"`);
         }
         break;
       case 'stat':
       case 'salary':
+      case 'flagDelta':
         if (effect.delta === 0) problems.push(`${where}: effect with a delta of zero does nothing`);
         break;
-      default:
+
+      // These carry no content id and nothing to cross-check. Listed rather than defaulted so
+      // that a new kind cannot join them by accident.
+      case 'flag':
+      case 'teamMorale':
+      case 'teamSkill':
+      case 'budget':
+      case 'budgetMonthly':
+      case 'loseStaff':
+      case 'gainStaff':
         break;
+
+      default: {
+        const unhandled: never = effect;
+        throw new Error(`validateEffects: unhandled effect ${JSON.stringify(unhandled)}`);
+      }
     }
   }
 

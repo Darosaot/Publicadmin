@@ -459,17 +459,20 @@ export function finalizeTurn(state: GameState, registry: ContentRegistry): GameS
   let next = state;
   // Copy rather than extend in place: the report already sits in `state.lastReport`, and the
   // engine must not reach back and edit a state it has already handed out.
+  //
+  // Spread first. This used to enumerate every field, which made it a silent trap the equal of
+  // `cloneState`: anything `resolveTurn` added to the report was dropped here, before the player
+  // ever saw it — no type error, because every *required* field was still present.
   const previous = next.lastReport;
   const report: TurnReport = {
+    ...previous,
     turn: previous?.turn ?? next.turn,
+    // The mutable members still need fresh copies, for the reason above.
     completed: [...(previous?.completed ?? [])],
     failed: [...(previous?.failed ?? [])],
     statDeltas: { ...(previous?.statDeltas ?? {}) },
     salaryDelta: previous?.salaryDelta ?? 0,
     newOffers: [...(previous?.newOffers ?? [])],
-    review: previous?.review,
-    promotedTo: previous?.promotedTo,
-    team: previous?.team,
   };
 
   if (isReviewDue(next)) {
