@@ -144,6 +144,40 @@ describe('migrating a save forward', () => {
     expect(offer).not.toHaveProperty('toLevel');
   });
 
+  /** Version 3 had the tree, but counted the budget year in turns. */
+  function version3(state: GameState): string {
+    return JSON.stringify({
+      ...state,
+      budget: { monthly: 11500, balance: -900, yearStartTurn: 4, spentThisMonth: 0 },
+      saveVersion: 3,
+    });
+  }
+
+  it('restarts the budget year of a version 3 career rather than guessing at it', () => {
+    const result = deserialize(version3({ ...game(), turn: 20, calendarMonth: 44 }), shipped);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    // The old save never recorded which month the year began, so it cannot be recovered. Starting
+    // it again now costs the player at most one verdict and can never hand them a spurious one.
+    expect(result.state.budget?.yearStartMonth).toBe(44);
+    expect(result.state.budget).not.toHaveProperty('yearStartTurn');
+    // Everything else about the budget survives untouched.
+    expect(result.state.budget?.balance).toBe(-900);
+    expect(result.state.budget?.monthly).toBe(11500);
+  });
+
+  it('migrates a version 3 career that never had a unit', () => {
+    const { budget: _none, ...noUnit } = game();
+    const raw = JSON.stringify({ ...noUnit, saveVersion: 3 });
+
+    const result = deserialize(raw, shipped);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.state.budget).toBeUndefined();
+  });
+
   it('leaves the migrated career playable', () => {
     const result = deserialize(version1(game()), shipped);
     expect(result.ok).toBe(true);

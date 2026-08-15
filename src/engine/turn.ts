@@ -17,6 +17,7 @@ import {
   AGENCY_TEMP_MAX,
   BASELINE_STRESS_PER_TURN,
   COACHING_EFFORT_COST,
+  DELEGATION_CAPACITY,
   DELEGATION_EFFORT_COST,
   LOG_LIMIT,
   NETWORK_PC_GAIN,
@@ -160,10 +161,20 @@ export function normalizeAllocation(
 
   // Management comes off the top: these commitments are made before the desk work.
   if (managing) {
+    // Nobody may be handed more than they can carry. Enforced here, once, so that everything
+    // downstream — assignment, output, quality — can trust the allocation it is given.
+    const carrying = new Map<string, number>();
+    const capacityOf = (staffId: string) => {
+      const member = state.staff.find((s) => s.id === staffId);
+      return member ? DELEGATION_CAPACITY[member.seniority] : 0;
+    };
+
     for (const [taskUid, staffId] of Object.entries(allocation.delegations)) {
       if (!taskIds.has(taskUid) || !staffIds.has(staffId)) continue;
+      if ((carrying.get(staffId) ?? 0) >= capacityOf(staffId)) continue;
       if (remaining < DELEGATION_EFFORT_COST) break;
       normalized.delegations[taskUid] = staffId;
+      carrying.set(staffId, (carrying.get(staffId) ?? 0) + 1);
       remaining -= DELEGATION_EFFORT_COST;
     }
     for (const staffId of allocation.coaching) {
@@ -234,6 +245,14 @@ export function resolveTurn(
 
   // Then the unit's. Their output is computed from this month's skill and morale, before any
   // coaching lands, so investing in someone pays from next month rather than instantly.
+  //
+  // A month is a month: someone carrying two files splits it between them rather than giving each
+  // a full one. `normalizeAllocation` has already capped how many anyone may hold.
+  const load = new Map<string, number>();
+  for (const task of next.tasks) {
+    if (task.assignedTo) load.set(task.assignedTo, (load.get(task.assignedTo) ?? 0) + 1);
+  }
+
   next = {
     ...next,
     tasks: next.tasks.map((task) => {
@@ -241,7 +260,8 @@ export function resolveTurn(
       const member = findStaff(next, task.assignedTo);
       if (!member) return task;
 
-      const contribution = staffOutput(member);
+      const share = Math.max(1, load.get(member.id) ?? 1);
+      const contribution = Math.max(1, Math.round(staffOutput(member) / share));
       team.delegatedProgress.push({
         staffName: member.name,
         taskTemplateId: task.templateId,

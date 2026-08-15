@@ -186,7 +186,13 @@ export interface Budget {
   monthly: number;
   balance: number;
   /** Turn on which the current budget year began. */
-  yearStartTurn: number;
+  /**
+   * Calendar month in which the current budget year began.
+   *
+   * Months, not turns. A budget year is a year — but a cycle is one month at a junior desk and six
+   * in a directorate, so counting turns made a Director-General's "year" six real ones.
+   */
+  yearStartMonth: number;
   /** Discretionary commitments made this month, cleared at resolution. */
   spentThisMonth: number;
 }

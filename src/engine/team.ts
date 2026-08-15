@@ -159,7 +159,7 @@ export function setupTeamForPost(state: GameState, registry: ContentRegistry): G
   const budget: Budget = {
     monthly: post.monthlyBudget ?? 0,
     balance: 0,
-    yearStartTurn: next.turn,
+    yearStartMonth: next.calendarMonth,
     spentThisMonth: 0,
   };
 
@@ -341,7 +341,7 @@ export function resolveBudget(state: GameState, discretionarySpend: number): Bud
   let next: GameState = { ...state, budget };
   let verdict: 'overspent' | 'underspent' | undefined;
 
-  const monthsElapsed = next.turn - budget.yearStartTurn + 1;
+  const monthsElapsed = next.calendarMonth - budget.yearStartMonth;
   if (monthsElapsed >= BUDGET_YEAR_MONTHS) {
     const annual = budget.monthly * BUDGET_YEAR_MONTHS;
     const stats = { ...next.stats };
@@ -355,7 +355,7 @@ export function resolveBudget(state: GameState, discretionarySpend: number): Bud
       budget = { ...budget, monthly: Math.round(budget.monthly * (1 - BUDGET_UNDERSPEND_CUT)) };
     }
 
-    budget = { ...budget, balance: 0, yearStartTurn: next.turn + 1 };
+    budget = { ...budget, balance: 0, yearStartMonth: next.calendarMonth };
     next = { ...next, stats, budget };
   }
 

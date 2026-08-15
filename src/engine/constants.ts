@@ -7,7 +7,7 @@
 
 import type { PlayerStats } from './types';
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 export const STAT_MIN = 0;
 export const STAT_MAX = 100;
@@ -129,6 +129,22 @@ export const DELEGATION_EFFORT_COST = 1;
 export const COACHING_EFFORT_COST = 2;
 export const ONE_TO_ONE_EFFORT_COST = 1;
 export const RECRUITING_EFFORT_COST = 2;
+
+/**
+ * How many files one person can carry at once.
+ *
+ * A senior can hold two and a junior one, and a person's monthly output is *divided* between what
+ * they hold rather than paid in full to each. Both halves matter: without the cap you could put
+ * one senior on the whole board, and without the division doing so was free output.
+ *
+ * The trade is real either way — two files from one senior progress at half speed each, which is
+ * sometimes exactly what a pair of deadlines needs.
+ */
+export const DELEGATION_CAPACITY: Record<'junior' | 'officer' | 'senior', number> = {
+  junior: 1,
+  officer: 1,
+  senior: 2,
+};
 
 /** Monthly output by grade, before skill and morale are applied. */
 export const STAFF_BASE_OUTPUT: Record<'junior' | 'officer' | 'senior', number> = {

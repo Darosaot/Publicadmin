@@ -64,6 +64,24 @@ const MIGRATIONS: Record<number, (raw: RawSave) => RawSave> = {
       }),
     };
   },
+
+  /**
+   * 3 -> 4: the budget year became a year.
+   *
+   * `Budget.yearStartTurn` counted turns, which stopped meaning twelve months the moment a cycle
+   * became six of them — a Director-General's budget year was six real years. It is now
+   * `yearStartMonth`, against `calendarMonth`.
+   *
+   * There is no way to recover the calendar month an old budget year began, because the save never
+   * recorded it. So the year restarts now: the player loses at most one verdict and never gets a
+   * spurious one, which is the right way round.
+   */
+  3: (raw) => {
+    if (!raw.budget || typeof raw.budget !== 'object') return raw;
+    const { yearStartTurn: _dropped, ...budget } = raw.budget as Record<string, unknown>;
+    const calendarMonth = typeof raw.calendarMonth === 'number' ? raw.calendarMonth : 0;
+    return { ...raw, budget: { ...budget, yearStartMonth: calendarMonth } };
+  },
 };
 
 /**

@@ -175,7 +175,7 @@ function populatedGame(): GameState {
       },
     ],
     hiring: { seniority: 'senior', monthsRemaining: 3 },
-    budget: { monthly: 11500, balance: -400, yearStartTurn: 1, spentThisMonth: 0 },
+    budget: { monthly: 11500, balance: -400, yearStartMonth: 0, spentThisMonth: 0 },
     pendingEvents: [
       { eventId: 'evt.quiet', resolution: { choiceId: 'c', outcomeIndex: 0, textKey: 'k' } },
     ],
