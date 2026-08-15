@@ -58,6 +58,9 @@ export function createGame(options: NewGameOptions, registry: ContentRegistry): 
     // Nothing started. The menu is what the first management post is really for.
     initiatives: [],
 
+    // Nobody has worked for you yet.
+    alumni: [],
+
     // No unit until the first management post.
     staff: [],
     nextStaffUid: 1,

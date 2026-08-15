@@ -7,6 +7,7 @@
  */
 
 import {
+  KEEP_ON_MOVE_LIMIT,
   MINISTER_MIN_POLITICAL_CAPITAL,
   MINISTER_MIN_REPUTATION,
   OFFER_BASE_CHANCE,
@@ -23,7 +24,13 @@ import { edgeBetween, getPost, maxTier, postsFrom, type ContentRegistry } from '
 import { nextChance, nextRange } from './rng';
 import { refillBoard } from './tasks';
 import { setupTeamForPost } from './team';
-import type { GameState, JobOffer, ReviewRating, ReviewReport } from './types';
+import type {
+  GameState,
+  JobOffer,
+  ReviewRating,
+  ReviewReport,
+  StaffMember,
+} from './types';
 
 /** Worst to best, so "drop one band" is a single step down this list. */
 const RATING_ORDER: ReviewRating[] = ['concerning', 'adequate', 'solid', 'outstanding'];
@@ -156,10 +163,45 @@ export function expireOffers(state: GameState): GameState {
 /**
  * Takes the job. A new post means a new desk: the old task board does not come with you.
  */
+/**
+ * What taking this post would cost, without taking it.
+ *
+ * Pure, and separate from `acceptOffer`, because the player is entitled to know before they
+ * decide. The unit is destroyed on every post change and always has been; until now the only
+ * notice was a log line *after* the fact, which is not notice.
+ */
+export interface PostChangePreview {
+  /** How many of your unit you may bring. Zero at a post with no unit under it. */
+  canKeep: number;
+  /** Everybody currently reporting to you. */
+  losing: StaffMember[];
+  /** True when the destination has no unit at all — the whole office is handed over. */
+  handover: boolean;
+  /** Initiatives in flight, which do not travel. */
+  droppingInitiatives: string[];
+}
+
+export function previewPostChange(
+  state: GameState,
+  registry: ContentRegistry,
+  postId: string,
+): PostChangePreview {
+  const headcount = getPost(registry, postId).headcount ?? 0;
+
+  return {
+    canKeep: headcount === 0 ? 0 : Math.min(KEEP_ON_MOVE_LIMIT, state.staff.length),
+    losing: state.staff,
+    handover: headcount === 0 && state.staff.length > 0,
+    droppingInitiatives: state.initiatives.map((i) => i.templateId),
+  };
+}
+
 export function acceptOffer(
   state: GameState,
   registry: ContentRegistry,
   offerId: string,
+  /** Staff ids to bring with you. See `setupTeamForPost`. */
+  keep: readonly string[] = [],
 ): GameState {
   const offer = state.offers.find((o) => o.id === offerId);
   if (!offer) return state;
@@ -190,7 +232,7 @@ export function acceptOffer(
   };
 
   // The unit you inherit comes with the post — or is handed over, if the new post has none.
-  return refillBoard(setupTeamForPost(promoted, registry), registry);
+  return refillBoard(setupTeamForPost(promoted, registry, keep), registry);
 }
 
 export function declineOffer(state: GameState, offerId: string): GameState {

@@ -32,6 +32,7 @@ export function cloneState(state: GameState): GameState {
     stats: { ...state.stats },
     tasks: state.tasks.map((t) => ({ ...t })),
     initiatives: state.initiatives.map((i) => ({ ...i })),
+    alumni: state.alumni.map((a) => ({ ...a })),
     staff: state.staff.map((s) => ({ ...s })),
     hiring: state.hiring ? { ...state.hiring } : undefined,
     budget: state.budget ? { ...state.budget } : undefined,

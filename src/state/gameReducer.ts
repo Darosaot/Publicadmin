@@ -53,7 +53,7 @@ export type GameAction =
   | { type: 'CHOOSE'; eventId: string; choiceId: string }
   | { type: 'CONTINUE_EVENT' }
   | { type: 'NEXT_MONTH' }
-  | { type: 'ACCEPT_OFFER'; offerId: string }
+  | { type: 'ACCEPT_OFFER'; offerId: string; keep?: string[] }
   | { type: 'DECLINE_OFFER'; offerId: string }
   | { type: 'SET_DELEGATION'; taskUid: string; staffId: string | null }
   | { type: 'TOGGLE_COACHING'; staffId: string }
@@ -191,7 +191,7 @@ export function gameReducer(state: AppState, action: GameAction): AppState {
       // A new post means a new desk, so any effort drafted against the old board is void.
       return {
         ...state,
-        game: acceptOffer(state.game, registry, action.offerId),
+        game: acceptOffer(state.game, registry, action.offerId, action.keep ?? []),
         allocation: emptyAllocation(),
       };
     }

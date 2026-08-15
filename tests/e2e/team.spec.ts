@@ -1,6 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { SAVE_KEY, serialize } from '../../src/engine/save';
 import type { DepartmentId, GameState, TrackId } from '../../src/engine/types';
+import { registry } from '../../src/content';
+import { postsFrom } from '../../src/engine/registry';
 import { playCareer } from '../engine/autoplay';
 
 /**
@@ -36,6 +38,36 @@ function careerAtLevel(level: number, department: DepartmentId, track: TrackId):
 // The line track, explicitly: left to chase salary the bot ends up in a private office, and this
 // file is about running a unit.
 const managing = careerAtLevel(4, 'procurement', 'line');
+
+/**
+ * The same manager, with an offer on the table.
+ *
+ * The offer is constructed rather than played to, because `playCareer` only hands back a finished
+ * career and an offer in flight is by definition mid-career. It points at a post the tree really
+ * does reach from here, so everything downstream of accepting it is the production path.
+ *
+ * Constructed rather than skipped: a `test.skip` on a missing fixture is a test that reports green
+ * for having measured nothing.
+ */
+function withAnOffer(state: GameState): GameState {
+  const onward = postsFrom(registry, state.player.postId);
+  const target = onward.find((p) => (p.headcount ?? 0) > 0) ?? onward[0];
+  if (!target) throw new Error(`Nothing leads on from ${state.player.postId}`);
+
+  return {
+    ...state,
+    offers: [
+      {
+        id: 'e2e-offer',
+        toPost: target.id,
+        toTier: target.tier,
+        salary: target.baseSalary,
+        createdTurn: state.turn,
+        expiresTurn: state.turn + 6,
+      },
+    ],
+  };
+}
 
 // And one career that took the branch with no unit at all, to prove the office half really does
 // disappear rather than merely being hidden.
@@ -327,4 +359,33 @@ test('a house rule can be set, and unset', async ({ page }) => {
   // And pressing the pole you already hold releases it: "we have not decided" stays reachable.
   await poles.first().click();
   await expect(poles.first()).toHaveAttribute('aria-pressed', 'false');
+});
+
+test('taking a post warns you first, and lets you bring somebody', async ({ page }) => {
+  await resume(page, withAnOffer(managing));
+  await tab(page, 'Career').click();
+
+  await page.locator('.offer').first().getByRole('button', { name: 'Accept' }).click();
+
+  // The warning is a decision, not a confirmation: it says what is lost and offers the one
+  // choice the player actually has about it.
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: 'Before you go' })).toBeVisible();
+
+  const boxes = dialog.locator('.keep__row input');
+  const people = await boxes.count();
+  expect(people).toBeGreaterThan(0);
+
+  await boxes.first().check();
+  await boxes.nth(1).check();
+
+  // Two is the limit, so any third is closed off rather than silently ignored.
+  if (people > 2) await expect(boxes.nth(2)).toBeDisabled();
+
+  const broughtName = await dialog.locator('.keep__name').first().textContent();
+  await dialog.getByRole('button', { name: 'Take the post' }).click();
+
+  await tab(page, 'Team').click();
+  // They arrive with their skill, morale and tenure intact — the point of bringing them.
+  await expect(page.locator('.roster')).toContainText(broughtName!);
 });

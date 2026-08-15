@@ -442,6 +442,8 @@ export function resolveTurn(
     const staffMonth = resolveStaffMonth(next, registry, allocation);
     next = staffMonth.state;
     team.arrivals.push(...staffMonth.report.arrivals);
+    team.departures.push(...staffMonth.report.departures);
+    if (staffMonth.report.promotions) team.promotions = staffMonth.report.promotions;
 
     const budgetResult = resolveBudget(next, discretionarySpend(allocation));
     next = budgetResult.state;
@@ -460,12 +462,23 @@ export function resolveTurn(
     next = attrition.state;
     team.departures.push(...attrition.report.departures);
 
-    for (const departure of attrition.report.departures) {
+    for (const departure of [...team.departures, ...attrition.report.departures]) {
       logEntries.push({
         turn: next.turn,
-        messageKey: 'log.staff_left',
+        // Losing somebody because they were good and you did not look after them reads
+        // differently from losing somebody who was miserable, and the log should say which.
+        messageKey:
+          departure.reason === 'promoted_away' ? 'log.staff_poached' : 'log.staff_left',
         params: { name: departure.name },
         tone: 'bad',
+      });
+    }
+    for (const promotion of team.promotions ?? []) {
+      logEntries.push({
+        turn: next.turn,
+        messageKey: 'log.staff_promoted',
+        params: { name: promotion.name, grade: `team.grade.${promotion.to}` },
+        tone: 'good',
       });
     }
     for (const arrival of team.arrivals) {
@@ -626,6 +639,8 @@ export function acceptOffer(
   state: GameState,
   registry: ContentRegistry,
   offerId: string,
+  /** Staff ids to bring with you. See `setupTeamForPost`. */
+  keep: readonly string[] = [],
 ): GameState {
   if (state.ending) return state;
 
@@ -643,5 +658,5 @@ export function acceptOffer(
         )
       : ended.state;
 
-  return acceptOfferInternal(cleared, registry, offerId);
+  return acceptOfferInternal(cleared, registry, offerId, keep);
 }

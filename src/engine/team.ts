@@ -19,6 +19,11 @@ import {
   COACHING_MORALE_GAIN,
   COACHING_SKILL_GAIN,
   HIRING_MONTHS,
+  KEEP_ON_MOVE_LIMIT,
+  POACHING_CHANCE,
+  POACHING_MORALE,
+  POACHING_SKILL,
+  PROMOTION_SKILL,
   LOG_LIMIT,
   ONE_TO_ONE_MORALE_GAIN,
   STAFF_ATTRITION_CHANCE,
@@ -31,6 +36,7 @@ import {
   STAFF_START_SKILL,
   TRAINING_SKILL_GAIN,
 } from './constants';
+import { remember } from './alumni';
 import { hiringMoraleDelta, hiringSkillDelta, hoursMoraleDelta } from './directives';
 import { getPost, type ContentRegistry } from './registry';
 import { nextChance, nextInt, pick } from './rng';
@@ -108,9 +114,24 @@ export function createStaff(
  * Deliberately one short of the establishment: every new post comes with a vacancy someone has
  * been meaning to fill, which puts recruitment in front of the player immediately.
  */
-export function setupTeamForPost(state: GameState, registry: ContentRegistry): GameState {
+export function setupTeamForPost(
+  state: GameState,
+  registry: ContentRegistry,
+  /**
+   * Staff ids to bring with you, capped at `KEEP_ON_MOVE_LIMIT`.
+   *
+   * They arrive with their skill, morale and tenure intact, which is the whole point: an office
+   * you spent nine years building should be able to leave something behind in you as well as in
+   * the building. Everybody else joins the alumni.
+   */
+  keep: readonly string[] = [],
+): GameState {
   const post = getPost(registry, state.player.postId);
   const headcount = post.headcount ?? 0;
+
+  const kept = state.staff.filter((s) => keep.includes(s.id)).slice(0, KEEP_ON_MOVE_LIMIT);
+  const keptIds = new Set(kept.map((s) => s.id));
+  const left = state.staff.filter((s) => !keptIds.has(s.id));
 
   if (headcount === 0) {
     // The expert track has no unit, so a move onto it hands one over. Losing eight people you
@@ -128,8 +149,9 @@ export function setupTeamForPost(state: GameState, registry: ContentRegistry): G
           ]
         : [];
 
+    // A post with no unit cannot keep anyone, however much you wanted to.
     return {
-      ...state,
+      ...remember(state, state.staff),
       staff: [],
       hiring: undefined,
       budget: undefined,
@@ -145,9 +167,13 @@ export function setupTeamForPost(state: GameState, registry: ContentRegistry): G
     else shape.push('junior');
   }
 
-  let next = state;
-  const staff: StaffMember[] = [];
-  for (const seniority of shape) {
+  // Everyone not coming with you is now somebody you used to work with.
+  let next = remember(state, left);
+  const staff: StaffMember[] = [...kept];
+
+  // The people you brought fill establishment slots, so a move with two in tow arrives with two
+  // fewer strangers rather than with a unit two over headcount.
+  for (const seniority of shape.slice(kept.length)) {
     const made = createStaff(next, registry, seniority);
     next = made.state;
 
@@ -158,6 +184,18 @@ export function setupTeamForPost(state: GameState, registry: ContentRegistry): G
     staff.push({ ...made.staff, monthsInPost: tenure.value });
   }
 
+  const brought =
+    kept.length > 0
+      ? [
+          {
+            turn: state.turn,
+            messageKey: 'log.brought_with_you',
+            params: { names: kept.map((s) => s.name).join(', ') },
+            tone: 'good' as const,
+          },
+        ]
+      : [];
+
   const budget: Budget = {
     monthly: post.monthlyBudget ?? 0,
     balance: 0,
@@ -165,7 +203,13 @@ export function setupTeamForPost(state: GameState, registry: ContentRegistry): G
     spentThisMonth: 0,
   };
 
-  return { ...next, staff, hiring: undefined, budget };
+  return {
+    ...next,
+    staff,
+    hiring: undefined,
+    budget,
+    log: [...next.log, ...brought].slice(-LOG_LIMIT),
+  };
 }
 
 export function startHiring(state: GameState, seniority: Seniority): GameState {
@@ -263,6 +307,54 @@ export function resolveStaffMonth(
     }
   }
 
+  // Promotion from within, which costs the budget a salary difference and nothing else. Somebody
+  // plainly doing the next grade's job is promoted into it; not noticing is how you end up in the
+  // block below instead.
+  for (const member of next.staff) {
+    if (member.seniority === 'senior') continue;
+    if (member.skill < PROMOTION_SKILL[member.seniority]) continue;
+
+    next = promoteStaff(next, member.id);
+    report.promotions ??= [];
+    report.promotions.push({ name: member.name, to: next.staff.find((s) => s.id === member.id)!.seniority });
+  }
+
+  // And the other kind of promotion: somebody good, who has noticed that the job is not worth
+  // having, taking one somewhere else. Skill is what gives them the option and morale is what
+  // decides whether they use it — which makes this the bill for a year of not looking after them.
+  const poached: string[] = [];
+  for (const member of next.staff) {
+    if (member.skill < POACHING_SKILL || member.morale > POACHING_MORALE) continue;
+
+    const roll = nextChance(next.rngState, POACHING_CHANCE);
+    next = { ...next, rngState: roll.rngState };
+    if (!roll.value) continue;
+
+    poached.push(member.id);
+    report.departures.push({ name: member.name, reason: 'promoted_away' });
+  }
+
+  if (poached.length > 0) {
+    next = remember(
+      next,
+      next.staff.filter((s) => poached.includes(s.id)),
+    );
+    next = {
+      ...next,
+      staff: next.staff.filter((s) => !poached.includes(s.id)),
+      tasks: next.tasks.map((task) =>
+        task.assignedTo && poached.includes(task.assignedTo)
+          ? { ...task, assignedTo: undefined }
+          : task,
+      ),
+      initiatives: next.initiatives.map((initiative) =>
+        initiative.assignedTo && poached.includes(initiative.assignedTo)
+          ? { ...initiative, assignedTo: undefined }
+          : initiative,
+      ),
+    };
+  }
+
   return { state: next, report };
 }
 
@@ -295,6 +387,12 @@ export function resolveAttrition(
   }
 
   if (leaving.length === 0) return { state: next, report };
+
+  // Somebody who resigns is not gone from the career, only from the unit.
+  next = remember(
+    next,
+    next.staff.filter((s) => leaving.includes(s.id)),
+  );
 
   return {
     state: {

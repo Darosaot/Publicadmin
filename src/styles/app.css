@@ -1914,3 +1914,39 @@ input {
   line-height: 1.4;
   color: var(--c-text-muted);
 }
+
+/* --------------------------------------------------------- leaving a post */
+
+.keep {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.keep__row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  padding: var(--s-2);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+
+.keep__row:hover {
+  background: var(--c-surface-2);
+}
+
+/* Dimmed rather than hidden once the two places are taken: the people you cannot bring are as
+   much a part of the decision as the ones you can. */
+.keep__row--full {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.keep__name {
+  font-weight: 600;
+}
+
+.keep__grade {
+  font-size: var(--fs-sm);
+}

@@ -7,7 +7,7 @@
 
 import type { PlayerStats } from './types';
 
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 
 export const STAT_MIN = 0;
 export const STAT_MAX = 100;
@@ -146,6 +146,17 @@ export const DELEGATION_CAPACITY: Record<'junior' | 'officer' | 'senior', number
   senior: 2,
 };
 
+/**
+ * How many former colleagues a career remembers.
+ *
+ * Twelve, and the oldest is dropped. Not a simulation limit — a save-size one, and roughly the
+ * number of people from a thirty-year career whose name a player could actually place.
+ */
+export const ALUMNI_LIMIT = 12;
+
+/** How many of your unit you may take with you when you take a new post. */
+export const KEEP_ON_MOVE_LIMIT = 2;
+
 /* ------------------------------------------------------------- initiatives */
 
 /**
@@ -193,6 +204,30 @@ export const STAFF_START_MORALE: [number, number] = [50, 75];
 export const STAFF_MORALE_DRIFT = -1;
 export const ONE_TO_ONE_MORALE_GAIN = 9;
 export const COACHING_SKILL_GAIN = 4;
+
+/**
+ * The skill at which somebody is plainly doing the next grade's job already.
+ *
+ * Promotion from within is free — it costs the budget the difference in salary and nothing else —
+ * because that is what it costs in reality, and because the alternative to noticing is the entry
+ * below.
+ */
+export const PROMOTION_SKILL: Record<'junior' | 'officer', number> = {
+  junior: 74,
+  officer: 88,
+};
+
+/**
+ * When somebody good starts looking, and how often it works.
+ *
+ * Deliberately keyed off high skill and *low* morale together: your best people are the ones with
+ * somewhere else to go, and the only thing keeping them is whether the job is worth having. This
+ * is the departure reason `TeamReport` has declared since the office landed and nothing has ever
+ * produced.
+ */
+export const POACHING_SKILL = 74;
+export const POACHING_MORALE = 55;
+export const POACHING_CHANCE = 0.06;
 export const COACHING_MORALE_GAIN = 3;
 export const TRAINING_SKILL_GAIN = 6;
 export const TRAINING_COST = 1500;

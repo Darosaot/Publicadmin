@@ -199,6 +199,24 @@ export interface ActiveInitiative {
 
 export type Seniority = 'junior' | 'officer' | 'senior';
 
+/**
+ * Somebody who used to work for you.
+ *
+ * Kept because a career is largely the people who passed through it, and because an office you
+ * built should be able to turn up again years later in somebody else's building. `regard` is what
+ * they thought of you when they left; it is the only thing here the player can affect after the
+ * fact, and they cannot.
+ */
+export interface DepartedStaff {
+  name: string;
+  seniority: Seniority;
+  skill: number;
+  regard: number;
+  leftOnTurn: number;
+  /** Where they went, as a body id, once they have turned up somewhere. */
+  nowAt?: string;
+}
+
 export const SENIORITIES: readonly Seniority[] = ['junior', 'officer', 'senior'];
 
 /**
@@ -444,6 +462,8 @@ export interface TeamReport {
   /** Progress delivered by staff on files you handed over. */
   delegatedProgress: { staffName: string; taskTemplateId: string; progress: number }[];
   departures: { name: string; reason: 'morale' | 'promoted_away' }[];
+  /** People who moved up a grade without leaving. */
+  promotions?: { name: string; to: Seniority }[];
   arrivals: { name: string; seniority: Seniority }[];
   /** Spend against the monthly allocation: negative means over. */
   budgetDelta?: number;
@@ -527,6 +547,14 @@ export interface GameState {
    * would otherwise carry an archive of forty finished projects in every save.
    */
   initiatives: ActiveInitiative[];
+
+  /**
+   * People who have worked for you and moved on, newest last, capped at `ALUMNI_LIMIT`.
+   *
+   * Bounded on purpose: a thirty-year career would otherwise accumulate an unbounded roster in
+   * every save, and the twelve most recent are the ones a player might plausibly remember.
+   */
+  alumni: DepartedStaff[];
 
   /** Empty until you reach a post that has a unit under it. */
   staff: StaffMember[];

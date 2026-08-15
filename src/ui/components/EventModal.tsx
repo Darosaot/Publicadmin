@@ -3,7 +3,7 @@ import { checkCondition } from '../../engine/effects';
 import type { GameState, PendingEvent } from '../../engine/types';
 import { useT } from '../../i18n';
 import { useGame } from '../../state/GameProvider';
-import { describeFailure, formatDate } from '../format';
+import { describeFailure, formatDate, narrativeParams } from '../format';
 import { Modal } from './Modal';
 
 /**
@@ -20,10 +20,13 @@ export function EventModal({ game, pending }: { game: GameState; pending: Pendin
   if (!event) return null;
 
   const resolution = pending.resolution;
+  // Event prose may name the player or a former colleague. Everything else in the corpus ignores
+  // these, and an unused parameter costs nothing.
+  const params = narrativeParams(game);
 
   return (
     <Modal
-      title={t(event.titleKey)}
+      title={t(event.titleKey, params)}
       eyebrow={formatDate(t, game)}
       footer={
         resolution && (
@@ -37,14 +40,14 @@ export function EventModal({ game, pending }: { game: GameState; pending: Pendin
         )
       }
     >
-      <p className="modal__prose">{t(event.bodyKey)}</p>
+      <p className="modal__prose">{t(event.bodyKey, params)}</p>
 
       {resolution ? (
         <div className="outcome">
           <p className="outcome__chosen">
             {t(event.choices.find((c) => c.id === resolution.choiceId)?.labelKey ?? '')}
           </p>
-          <p className="modal__prose outcome__text">{t(resolution.textKey)}</p>
+          <p className="modal__prose outcome__text">{t(resolution.textKey, params)}</p>
         </div>
       ) : (
         <>

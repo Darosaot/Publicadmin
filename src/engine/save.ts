@@ -92,6 +92,15 @@ const MIGRATIONS: Record<number, (raw: RawSave) => RawSave> = {
    * to it.
    */
   4: (raw) => ({ ...raw, initiatives: [] }),
+
+  /**
+   * 5 -> 6: the people who used to work for you.
+   *
+   * Same shape of change as initiatives, and the same answer: an old career has no recorded
+   * alumni, and inventing some would be putting words in its mouth. The people it actually lost
+   * are gone, which is a small loss and an honest one.
+   */
+  5: (raw) => ({ ...raw, alumni: [] }),
 };
 
 /**
@@ -157,6 +166,7 @@ function hasRequiredShape(raw: RawSave): boolean {
     raw.stats !== null &&
     Array.isArray(raw.tasks) &&
     Array.isArray(raw.initiatives) &&
+    Array.isArray(raw.alumni) &&
     typeof player === 'object' &&
     player !== null &&
     typeof player.department === 'string' &&
