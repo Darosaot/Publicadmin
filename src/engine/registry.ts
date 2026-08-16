@@ -73,8 +73,3 @@ export function edgeBetween(
 export function maxTier(registry: ContentRegistry): number {
   return registry.posts.reduce((max, p) => Math.max(max, p.tier), 1);
 }
-
-/** Every post at a tier, for the career screen's rows and for validation. */
-export function postsAtTier(registry: ContentRegistry, tier: number): Post[] {
-  return registry.posts.filter((p) => p.tier === tier);
-}

@@ -493,7 +493,6 @@ export interface TurnReport {
   salaryDelta: number;
   review?: ReviewReport;
   newOffers: JobOffer[];
-  promotedTo?: number;
   team?: TeamReport;
   /** Undertakings that landed or died this cycle. Template ids; the UI looks up the prose. */
   initiativesCompleted?: string[];
