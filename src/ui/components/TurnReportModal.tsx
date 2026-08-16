@@ -190,6 +190,17 @@ export function TurnReportModal({ game }: { game: GameState }) {
               </li>
             ))}
           </ul>
+          {/*
+            The number behind the verdict. It was computed every month and shown nowhere, so the
+            player was told they had overspent without being told by how much.
+          */}
+          {report.team.budgetDelta !== undefined && report.team.budgetDelta !== 0 && (
+            <p className="report__salary">
+              {t('report.budget_delta', {
+                amount: formatSalary(Math.abs(report.team.budgetDelta)),
+              })}
+            </p>
+          )}
           {report.team.budgetVerdict && (
             <p className="report__offer">{t(`report.budget_${report.team.budgetVerdict}`)}</p>
           )}

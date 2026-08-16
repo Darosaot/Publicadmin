@@ -93,6 +93,18 @@ export function Epilogue({ game }: { game: GameState }) {
                       ? t('epilogue.regard_cold')
                       : t('epilogue.regard_neutral')}
                 </span>
+                {/*
+                  Where they ended up, when they were poached rather than resigning. This is the
+                  whole reason `nowAt` exists, and it went unread for two releases.
+                */}
+                {person.nowAt && (
+                  <span className="muted">
+                    {' '}
+                    {t('epilogue.now_at', {
+                      body: bodies.find((b) => b.id === person.nowAt)?.name ?? person.nowAt,
+                    })}
+                  </span>
+                )}
               </li>
             ))}
           </ul>

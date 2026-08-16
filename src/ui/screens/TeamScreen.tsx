@@ -8,7 +8,7 @@ import {
   RECRUITING_EFFORT_COST,
   TRAINING_COST,
 } from '../../engine/constants';
-import { averageMorale, headcountFor, staffCost } from '../../engine/team';
+import { averageMorale, averageSkill, headcountFor, staffCost } from '../../engine/team';
 import { discretionarySpend } from '../../engine/turn';
 import { SENIORITIES, type GameState, type Seniority, type StaffMember } from '../../engine/types';
 import { useT } from '../../i18n';
@@ -212,6 +212,11 @@ export function TeamScreen({ game }: { game: GameState }) {
             <h2 className="panel__title">{t('team.health_heading')}</h2>
             <p className="team__morale">
               {t('team.average_morale', { value: averageMorale(game) })}
+            </p>
+            <p className="team__average">
+              {/* The other half of the picture: morale is what they will give you, skill is what
+                  they have to give. Coaching moves this one and nothing showed it. */}
+              {t('team.average_skill', { value: averageSkill(game) })}
             </p>
             <p className="muted">{t('team.morale_help')}</p>
           </section>
