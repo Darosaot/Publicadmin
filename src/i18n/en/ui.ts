@@ -51,7 +51,7 @@ export const uiStrings: Record<string, string> = {
   'init.none_live': 'Nothing of your own in hand. Everything on your desk arrived there.',
   'init.menu_heading': 'What you could take on',
   'init.menu_empty': 'Nothing you could usefully start from where you are sitting.',
-  'init.menu_full': 'You already have as much of your own on as you can carry.',
+  'init.menu_full': 'You are already carrying as much of your own as you can.',
   'init.start': 'Take it on',
   'init.cap': 'at most {points} a cycle',
   'init.commitment': '{points} points, over at least {cycles} cycles',
@@ -92,6 +92,7 @@ export const uiStrings: Record<string, string> = {
   'epilogue.now_at': '— now at {body}',
   'report.budget_delta': 'Against the allocation: {amount}',
   'team.average_skill': 'Average skill: {value}',
+  'epilogue.slowed': 'still falling — {points} points slower for your work',
   'action.career': 'Career',
   'action.team': 'Team',
   'action.dashboard': 'Desk',
@@ -253,7 +254,10 @@ export const uiStrings: Record<string, string> = {
   'career.unit_of': 'a unit of {count}',
   'career.no_unit': 'no unit — the work is yours',
   'career.post_current': 'You are here',
-  'career.post_open': 'Open to you',
+  // "One step from here", not "open to you": this label marks an edge out of the current post,
+  // which says nothing about whether the requirements are met. The panel beside it was reporting
+  // reputation 77 of 80 for a post the card was calling open.
+  'career.post_open': 'One step from here',
   'career.post_past': 'Behind you',
   'career.post_missed': 'Not taken',
   'career.post_closed': 'Not from here',

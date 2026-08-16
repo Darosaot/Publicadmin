@@ -1,7 +1,7 @@
 export const strings: Record<string, string> = {
   'body.alderford.kind': 'Ayuntamiento, dieciocho mil habitantes',
   'body.alderford.blurb':
-    'Donde empezaste. Lo bastante pequeño para que una sola persona competente lo cambie y un solo mal nombramiento lo rompa, y ha tenido las dos cosas desde que te fuiste.',
+    'Donde empieza toda carrera en este país. Lo bastante pequeño para que una sola persona competente lo cambie y un solo mal nombramiento lo rompa, y ha tenido de sobra de las dos cosas.',
 
   'body.northbridge.kind': 'Ayuntamiento, ciento cuarenta mil habitantes',
   'body.northbridge.blurb':

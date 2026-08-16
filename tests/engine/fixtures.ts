@@ -350,7 +350,12 @@ const testInitiatives: InitiativeTemplate[] = [
     required: 10,
     minCycles: 1,
     available: {},
-    onComplete: [{ kind: 'flag', flag: 'cheap_done' }],
+    // Pays into the country as well as into a flag, because that is what an initiative is for and
+    // because attribution has to have something to attribute.
+    onComplete: [
+      { kind: 'flag', flag: 'cheap_done' },
+      { kind: 'flagDelta', flag: 'body.sinking.cond', delta: 6 },
+    ],
     onLapse: [{ kind: 'flag', flag: 'cheap_lapsed' }],
   },
   {

@@ -7,11 +7,13 @@ import {
   bodyKnown,
   bodyStanding,
   conditionFlag,
+  contributionTo,
   driftWorld,
   knownBodies,
   knownFlag,
   standingFlag,
 } from '../../src/engine/world';
+import { doneFlag, startInitiative } from '../../src/engine/initiatives';
 import type { GameState } from '../../src/engine/types';
 import { DRIFT_FLOOR } from '../../src/engine/constants';
 import { makeQuietRegistry } from './fixtures';
@@ -187,5 +189,57 @@ describe('what the player has looked at', () => {
 
     expect(seen.map((b) => b.id)).toEqual(['sinking', 'rising']);
     expect(bodyStanding(state, sinking)).toBe(30);
+  });
+});
+
+/**
+ * The epilogue's "places you changed" list was built on net movement and so listed eight
+ * institutions for a career that had touched two — six of them pure drift, reported as places the
+ * player had left worse than they found them. These are the tests that make that impossible: what
+ * the player did and what happened anyway are separate numbers, and only the first is theirs.
+ */
+describe('what the player can be credited with', () => {
+  it('credits nobody for drift, however far a place has fallen', () => {
+    let state = game();
+    for (let month = 0; month < 240; month += 1) state = driftWorld(state, registry, 1);
+
+    // The place is visibly worse than it was founded...
+    expect(bodyCondition(state, sinking)).toBeLessThan(sinking.baselineCondition);
+    // ...and none of that is anybody's doing.
+    expect(contributionTo(state, registry, sinking.id)).toBe(0);
+  });
+
+  it('counts what a finished initiative paid into a place, and nothing else', () => {
+    const state = applyEffects(game(), [{ kind: 'flag', flag: doneFlag('init.cheap') }], registry);
+
+    expect(contributionTo(state, registry, sinking.id)).toBe(6);
+    // `init.cheap` also sets `cheap_done` and pays nothing to anywhere else.
+    expect(contributionTo(state, registry, rising.id)).toBe(0);
+  });
+
+  it('ignores an initiative that is merely under way', () => {
+    const state = game();
+    const started = startInitiative(state, registry, 'init.cheap');
+
+    expect(started.initiatives).toHaveLength(1);
+    expect(contributionTo(started, registry, sinking.id)).toBe(0);
+  });
+
+  /**
+   * The honest and most common outcome of one career against thirty years of neglect: the work
+   * landed, and the place still ended lower than it started. The epilogue needs both halves to
+   * say so — a positive contribution against a negative net.
+   */
+  it('stays positive on a rescue that landed while the place still ended down', () => {
+    let state = applyEffects(game(), [{ kind: 'flag', flag: doneFlag('init.cheap') }], registry);
+    state = applyEffects(
+      state,
+      [{ kind: 'flagDelta', flag: conditionFlag(sinking.id), delta: 6 }],
+      registry,
+    );
+    for (let month = 0; month < 120; month += 1) state = driftWorld(state, registry, 1);
+
+    expect(contributionTo(state, registry, sinking.id)).toBeGreaterThan(0);
+    expect(bodyCondition(state, sinking)).toBeLessThan(sinking.baselineCondition);
   });
 });

@@ -27,6 +27,7 @@
 
 import { DRIFT_FLOOR, STAT_MAX, STAT_MIN } from './constants';
 import { flagValue } from './effects';
+import { doneFlag } from './initiatives';
 import type { ContentRegistry } from './registry';
 import type { GameState, WorldBody } from './types';
 
@@ -154,6 +155,36 @@ function decay(body: WorldBody, condition: number): number {
   if (room <= 0) return 0;
 
   return Math.max(0, Math.min(1, (condition - DRIFT_FLOOR) / room));
+}
+
+/**
+ * How many condition points of this place are the player's own doing.
+ *
+ * Attribution, not net movement — and the difference is the whole point. A body's distance from its
+ * founding condition is mostly drift: forty-three years of entropy on somewhere the player never
+ * went. An epilogue built on that number lists institutions the player never touched and reports
+ * them as places they left worse, which blames somebody for the weather.
+ *
+ * So this counts only what finished initiatives paid into the body's condition flag. It reads 0 for
+ * a place nobody worked on however far it has fallen, and stays positive for a rescue that landed
+ * even when the place still ended below where it started — which is the ordinary outcome of one
+ * career against thirty years of neglect, and deserves to be described as what it is.
+ */
+export function contributionTo(
+  state: GameState,
+  registry: ContentRegistry,
+  bodyId: string,
+): number {
+  const flag = conditionFlag(bodyId);
+
+  return registry.initiatives
+    .filter((template) => state.flags[doneFlag(template.id)])
+    .flatMap((template) => template.onComplete)
+    .reduce(
+      (total, effect) =>
+        effect.kind === 'flagDelta' && effect.flag === flag ? total + effect.delta : total,
+      0,
+    );
 }
 
 /** Bodies the player has looked at, worst first — the order a Country screen wants. */
