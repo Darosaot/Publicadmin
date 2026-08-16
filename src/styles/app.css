@@ -1977,3 +1977,14 @@ input {
 
 .epilogue__up { color: var(--c-good); }
 .epilogue__down { color: var(--c-bad); }
+
+/* The completion prose for an initiative that landed. Set in the serif face the endings use,
+   because after nine years this is closer to an ending than to a status line. */
+.report__initiative {
+  font-family: var(--f-serif);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  margin-top: var(--s-3);
+  padding-left: var(--s-3);
+  border-left: 2px solid var(--c-good);
+}

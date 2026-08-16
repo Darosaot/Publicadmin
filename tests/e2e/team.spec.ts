@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { SAVE_KEY, serialize } from '../../src/engine/save';
 import type { DepartmentId, GameState, TrackId } from '../../src/engine/types';
 import { registry } from '../../src/content';
+
 import { postsFrom } from '../../src/engine/registry';
 import { playCareer } from '../engine/autoplay';
 
@@ -409,4 +410,52 @@ test('the ending says what the career left behind, not only what it earned', asy
   // anybody else, which is the question the game is actually about.
   await expect(page.locator('.epilogue')).toContainText('People who worked for you');
   expect(await page.locator('.epilogue__list li').count()).toBeGreaterThan(0);
+});
+
+test('the month an initiative lands, the report says so', async ({ page }) => {
+  // The assertion this whole follow-up exists for. Against the previous release the report
+  // rendered nothing for an initiative and announced the month as "nothing finished".
+  const start = withAnOffer(managing);
+  const template = registry.initiatives.find((x) => x.id === 'init.alderford_records')!;
+
+  // One point short of done, so the next cycle finishes it whatever else the month does.
+  const nearlyDone: GameState = {
+    ...start,
+    offers: [],
+    flags: { ...start.flags, 'body.alderford.known': true },
+    initiatives: [
+      {
+        templateId: template.id,
+        progress: template.required - 1,
+        required: template.required,
+        startedTurn: 1,
+        idleCycles: 0,
+      },
+    ],
+  };
+
+  await resume(page, nearlyDone);
+
+  await tab(page, 'Initiatives').click();
+  const live = page.locator('.initiative:not(.initiative--offered)').first();
+  await live.getByRole('button', { name: /^Add a point/ }).click();
+
+  await tab(page, 'Desk').click();
+  await page.getByRole('button', { name: 'End the month' }).click();
+
+  const dialog = page.getByRole('dialog');
+  for (let guard = 0; guard < 8; guard += 1) {
+    if (!(await dialog.isVisible().catch(() => false))) break;
+    const heading = await dialog.getByRole('heading').first().textContent();
+    if (heading?.startsWith('Month')) break;
+    const choice = dialog.locator('.choice:not(:disabled)').first();
+    if (await choice.isVisible().catch(() => false)) await choice.click();
+    await dialog.getByRole('button', { name: 'Continue' }).click();
+  }
+
+  await expect(dialog.getByRole('heading', { name: 'Things you started' })).toBeVisible();
+  await expect(dialog).toContainText('Alderford’s records');
+  await expect(dialog).toContainText('Done');
+  // And the month is emphatically not empty.
+  await expect(dialog).not.toContainText('Nothing was finished this month');
 });
