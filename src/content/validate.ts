@@ -319,6 +319,52 @@ export function validateContent(): string[] {
     }
   }
 
+  /* ------------------------------------------------------- naming a person */
+
+  /**
+   * The interpolation channel, checked in both directions.
+   *
+   * `{alum}` is filled at render time from the alumni roster, and `namesAlumnus` is what makes the
+   * event wait until there is somebody to name and tells the engine which end of the roster to
+   * point at. Prose without the declaration would render a sentence with a hole in it.
+   *
+   * The second direction is the one that earns its place. The whole channel — the spotlight, the
+   * param, the helpers — was once built, documented, unit-tested and then used by no content at
+   * all, and nothing in the build had anything to say about it. A declaration on prose that never
+   * interpolates is the smallest visible symptom of that mistake, so it is now an error.
+   */
+  for (const event of allEvents) {
+    const prose = [EN_STRINGS[event.titleKey], EN_STRINGS[event.bodyKey]]
+      .concat(
+        event.choices.flatMap((choice) => [
+          EN_STRINGS[choice.labelKey],
+          ...choice.outcomes.map((outcome) => EN_STRINGS[outcome.textKey]),
+        ]),
+      )
+      .join(' ');
+
+    const interpolates = prose.includes('{alum}');
+
+    if (interpolates && event.namesAlumnus === undefined) {
+      problems.push(
+        `event ${event.id}: prose uses {alum} but the event does not declare namesAlumnus, so it ` +
+          `can fire with nobody to name`,
+      );
+    }
+    if (!interpolates && event.namesAlumnus !== undefined) {
+      problems.push(
+        `event ${event.id}: declares namesAlumnus but never uses {alum} — the declaration costs ` +
+          `the event its eligibility for nothing`,
+      );
+    }
+  }
+
+  if (!allEvents.some((event) => event.namesAlumnus !== undefined)) {
+    // The census above cannot fire if nothing ever opts in. This is the backstop that would have
+    // caught the original gap, where the machinery shipped and the corpus never used it.
+    problems.push('no event ever names a former colleague, so the alumni roster is write-only');
+  }
+
   /* --------------------------------------------------------- initiatives */
 
   const seenInitiativeIds = new Set<string>();

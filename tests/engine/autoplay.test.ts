@@ -11,7 +11,10 @@ import {
 import { bodies } from '../../src/content';
 import { DRIFT_FLOOR } from '../../src/engine/constants';
 import { bodyCondition } from '../../src/engine/world';
+import { registry as shippedRegistry } from '../../src/content';
 import { playCareer, playMany, summarise } from './autoplay';
+
+const registryEvents = shippedRegistry.events;
 
 /**
  * Balance guardrails.
@@ -246,6 +249,40 @@ describe('the house rules change the career', () => {
 
   it('does not add up to a free win', () => {
     expect(Math.abs(withRules.meanLevel - without.meanLevel)).toBeLessThan(0.5);
+  });
+});
+
+/**
+ * The guardrail whose absence is the reason any of this follow-up exists.
+ *
+ * `spotlight()`, `warmestAlumnus()`, `alum.spotlight`, `{alum}` and `nowAt` were all built,
+ * documented, tested in isolation, and then used by nothing. This is what would have caught that,
+ * and it was written before the content it guards so that it failed first.
+ */
+describe('the people who worked for you come back', () => {
+  const runs = playMany(seeds.slice(0, 10), DEPARTMENT_IDS);
+
+  it('leaves a roster behind on a good share of careers', () => {
+    // About half, measured. The other half is the expert track, which never has a unit, plus the
+    // managers who reached a post with people and then never moved again — both real careers.
+    const withRoster = runs.filter((r) => r.finalState.alumni.length > 0);
+    expect(withRoster.length / runs.length).toBeGreaterThan(0.4);
+  });
+
+  it('actually names one of them in ordinary play', () => {
+    // The whole point of the interpolation channel. An event that names a former colleague has to
+    // have fired somewhere across seventy careers, or the machinery is decoration.
+    const named = runs.filter((run) =>
+      run.finalState.firedEvents.some(
+        (id) => registryEvents[id]?.namesAlumnus !== undefined,
+      ),
+    );
+    expect(named.length, 'no event ever named a former colleague').toBeGreaterThan(0);
+  });
+
+  it('knows where somebody went when they were poached away', () => {
+    const placed = runs.flatMap((run) => run.finalState.alumni.filter((a) => a.nowAt !== undefined));
+    expect(placed.length, 'nobody who left ever turned up anywhere').toBeGreaterThan(0);
   });
 });
 

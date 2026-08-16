@@ -637,6 +637,18 @@ Event prose can name one of them, via `alum.spotlight` — a **1-based** index i
 1-based part is load-bearing: an unset flag reads as 0, so a 0-based index would make "the first
 alumnus" and "nobody" the same value.
 
+An event opts in with `namesAlumnus: 'warm' | 'cold'`, which both gates it on the roster being
+non-empty and tells `drawEvents` which end to aim at. Eight events use it; they fire around ninety
+times across seventy simulated careers.
+
+> The first version of all this shipped with the machinery and **no content using it** — the
+> spotlight, the param, the helpers, `nowAt`, all unreferenced, in a repository whose own content
+> guide opens the corresponding section by describing twenty-five write-only flags as "a great deal
+> of consequence no player could reach". Nothing in the build objected, because the guardrail that
+> would have objected was one of three named in the plan and never written. `validate.ts` now
+> refuses a corpus in which nothing names anybody, and `autoplay.test.ts` refuses one in which the
+> events exist and never fire.
+
 ---
 
 ## 9. Endings

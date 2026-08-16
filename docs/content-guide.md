@@ -371,6 +371,47 @@ Prefer chains of three — `look → fix → finish` — with each stage gating 
 flags. That is the discovery loop, and it is also what keeps every flag the chain writes read by
 something, which the write-only census insists on.
 
+## Writing an event that names a former colleague
+
+`{alum}` is filled at render time from `GameState.alumni`, and the event must say so:
+
+```ts
+defineEvent('evt.alum.other_side', {
+  kind: 'random',
+  title: 'The other side of the table',
+  body: 'The panel you have come to give evidence to is chaired by {alum}, who used to work for you…',
+  namesAlumnus: 'warm',   // or 'cold'
+  conditions: { minYearsElapsed: 8, minLevel: 3 },
+  choices: [ /* … */ ],
+});
+```
+
+`namesAlumnus` does two things. It makes the event **ineligible** while the roster is empty — an
+unfilled `{alum}` renders as a sentence with a hole in it — and it tells `drawEvents` which end of
+the roster to point `alum.spotlight` at: `'warm'` is whoever thought best of you, `'cold'` whoever
+thought worst.
+
+**`validate.ts` checks it in both directions**, and the second direction is the one that earns its
+place:
+
+- prose using `{alum}` without the declaration → build fails
+- the declaration on prose that never uses `{alum}` → build fails
+- no event in the whole corpus declaring it → build fails
+
+That last backstop exists because the interpolation channel was once built, documented,
+unit-tested, and then used by no content at all, and nothing in the build had a word to say about
+it. A guardrail that cannot fire is worth nothing; these were all checked by deliberately breaking
+them.
+
+### What the prose may assume
+
+The player does not choose who turns up, so nothing can depend on anything about them — not their
+grade, not how good they were, not how long ago they left. The single fact the engine guarantees is
+which end of the roster they came from: a `warm` alumnus is glad to see you, a `cold` one is not.
+
+Gate on `minYearsElapsed` rather than `minTurn`. The point is that enough time has passed for
+somebody to have gone somewhere and become somebody.
+
 ## Adding a body
 
 `src/content/bodies.ts`, using the `body()` factory:

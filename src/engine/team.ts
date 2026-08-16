@@ -37,6 +37,7 @@ import {
   TRAINING_SKILL_GAIN,
 } from './constants';
 import { remember } from './alumni';
+import { knownBodies } from './world';
 import { hiringMoraleDelta, hiringSkillDelta, hoursMoraleDelta } from './directives';
 import { getPost, type ContentRegistry } from './registry';
 import { nextChance, nextInt, pick } from './rng';
@@ -335,9 +336,15 @@ export function resolveStaffMonth(
   }
 
   if (poached.length > 0) {
+    // Somebody good does not vanish, they go somewhere — and where they went should be a place
+    // the player has heard of, or the sentence "they are at Eastmoor now" means nothing. Picking
+    // the worst-run body the player knows is not arbitrary: struggling institutions are the ones
+    // recruiting, and it puts your best former officer where the trouble is.
+    const known = knownBodies(next, registry);
     next = remember(
       next,
       next.staff.filter((s) => poached.includes(s.id)),
+      known[0]?.id,
     );
     next = {
       ...next,
