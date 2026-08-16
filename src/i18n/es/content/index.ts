@@ -7,9 +7,11 @@
  * throws at import time rather than silently taking whichever file loaded last.
  */
 
+import { strings as bodies } from './bodies';
 import { strings as careers } from './careers';
 import { strings as castPeople } from './cast';
 import { strings as departments } from './departments';
+import { strings as directives } from './directives';
 import { strings as endings } from './endings';
 import { strings as eventsCast } from './events/cast';
 import { strings as eventsCommon } from './events/common';
@@ -29,6 +31,7 @@ import { strings as eventsProjects } from './events/projects';
 import { strings as eventsReckonings } from './events/reckonings';
 import { strings as eventsSocial } from './events/social';
 import { strings as eventsTracks } from './events/tracks';
+import { strings as initiatives } from './initiatives';
 import { strings as tasksFinance } from './tasks/finance';
 import { strings as tasksInspection } from './tasks/inspection';
 import { strings as tasksLegal } from './tasks/legal';
@@ -40,9 +43,11 @@ import { strings as tasksShared } from './tasks/shared';
 import { strings as tasksSocial } from './tasks/social';
 
 const dictionaries = [
+  bodies,
   careers,
   castPeople,
   departments,
+  directives,
   endings,
   eventsCast,
   eventsCommon,
@@ -62,6 +67,7 @@ const dictionaries = [
   eventsReckonings,
   eventsSocial,
   eventsTracks,
+  initiatives,
   tasksFinance,
   tasksInspection,
   tasksLegal,

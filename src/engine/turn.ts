@@ -17,6 +17,7 @@ import {
   AGENCY_TEMP_MAX,
   BASELINE_STRESS_PER_TURN,
   COACHING_EFFORT_COST,
+  DELEGATION_CAPACITY,
   DELEGATION_EFFORT_COST,
   LOG_LIMIT,
   NETWORK_PC_GAIN,
@@ -35,6 +36,7 @@ import {
   TASK_FAILURE_EFFECTS,
   TASK_QUALITY_EFFECTS,
 } from './constants';
+import { hoursStressDelta } from './directives';
 import { adjustStat, applyEffects, statDeltas } from './effects';
 import { checkEnding } from './endings';
 import { applyChoice, drawEvents, popResolvedEvent } from './events';
@@ -48,6 +50,13 @@ import {
 } from './career';
 import { getPost, type ContentRegistry } from './registry';
 import { creditScale, isComplete, isDue, refillBoard, rollQuality, scaleCredit } from './tasks';
+import {
+  applyInitiativeAssignments,
+  cycleCap,
+  lapseAllInitiatives,
+  resolveInitiatives,
+} from './initiatives';
+import { driftWorld, learnLocalBodies } from './world';
 import {
   adjustStaffMorale,
   applyAssignments,
@@ -76,12 +85,14 @@ export function emptyAllocation(): Allocation {
     rest: 0,
     networking: 0,
     overtime: false,
+    initiativeEffort: {},
     delegations: {},
     coaching: [],
     oneToOnes: [],
     recruiting: false,
     agencyTemps: 0,
     training: [],
+    initiativeDelegations: {},
   };
 }
 
@@ -99,7 +110,9 @@ export function effortAvailable(
 /** The effort cost of the management half of a month. */
 export function managementCost(allocation: Allocation): number {
   return (
-    Object.keys(allocation.delegations).length * DELEGATION_EFFORT_COST +
+    (Object.keys(allocation.delegations).length +
+      Object.keys(allocation.initiativeDelegations).length) *
+      DELEGATION_EFFORT_COST +
     allocation.coaching.length * COACHING_EFFORT_COST +
     allocation.oneToOnes.length * ONE_TO_ONE_EFFORT_COST +
     (allocation.recruiting ? RECRUITING_EFFORT_COST : 0)
@@ -108,8 +121,16 @@ export function managementCost(allocation: Allocation): number {
 
 export function allocationTotal(allocation: Allocation): number {
   const taskPoints = Object.values(allocation.tasks).reduce((sum, n) => sum + Math.max(0, n), 0);
+  // Initiative effort is ordinary desk work and counts here in full. Leaving it out would make
+  // the UI over-report what is left while the engine silently truncated the difference — the two
+  // would disagree about the same month.
+  const initiativePoints = Object.values(allocation.initiativeEffort).reduce(
+    (sum, n) => sum + Math.max(0, n),
+    0,
+  );
   return (
     taskPoints +
+    initiativePoints +
     Math.max(0, allocation.rest) +
     Math.max(0, allocation.networking) +
     managementCost(allocation)
@@ -138,6 +159,7 @@ export function normalizeAllocation(
   const managing = hasTeam(state, registry);
   const staffIds = new Set(state.staff.map((s) => s.id));
   const taskIds = new Set(state.tasks.map((t) => t.uid));
+  const activeInitiativeIds = new Set(state.initiatives.map((i) => i.templateId));
 
   const agencyTemps = managing
     ? Math.min(Math.max(0, Math.floor(allocation.agencyTemps)), AGENCY_TEMP_MAX)
@@ -148,22 +170,34 @@ export function normalizeAllocation(
     rest: 0,
     networking: 0,
     overtime: allocation.overtime,
+    initiativeEffort: {},
     delegations: {},
     coaching: [],
     oneToOnes: [],
     recruiting: false,
     agencyTemps,
     training: [],
+    initiativeDelegations: {},
   };
 
   let remaining = effortAvailable(state, registry, allocation.overtime, agencyTemps);
 
   // Management comes off the top: these commitments are made before the desk work.
   if (managing) {
+    // Nobody may be handed more than they can carry. Enforced here, once, so that everything
+    // downstream — assignment, output, quality — can trust the allocation it is given.
+    const carrying = new Map<string, number>();
+    const capacityOf = (staffId: string) => {
+      const member = state.staff.find((s) => s.id === staffId);
+      return member ? DELEGATION_CAPACITY[member.seniority] : 0;
+    };
+
     for (const [taskUid, staffId] of Object.entries(allocation.delegations)) {
       if (!taskIds.has(taskUid) || !staffIds.has(staffId)) continue;
+      if ((carrying.get(staffId) ?? 0) >= capacityOf(staffId)) continue;
       if (remaining < DELEGATION_EFFORT_COST) break;
       normalized.delegations[taskUid] = staffId;
+      carrying.set(staffId, (carrying.get(staffId) ?? 0) + 1);
       remaining -= DELEGATION_EFFORT_COST;
     }
     for (const staffId of allocation.coaching) {
@@ -178,11 +212,38 @@ export function normalizeAllocation(
       normalized.oneToOnes.push(staffId);
       remaining -= ONE_TO_ONE_EFFORT_COST;
     }
+    // Handing an initiative to someone runs through the same capacity budget as a file, because
+    // it is the same person's month either way.
+    for (const [templateId, staffId] of Object.entries(allocation.initiativeDelegations)) {
+      if (!activeInitiativeIds.has(templateId) || !staffIds.has(staffId)) continue;
+      if ((carrying.get(staffId) ?? 0) >= capacityOf(staffId)) continue;
+      if (remaining < DELEGATION_EFFORT_COST) break;
+      normalized.initiativeDelegations[templateId] = staffId;
+      carrying.set(staffId, (carrying.get(staffId) ?? 0) + 1);
+      remaining -= DELEGATION_EFFORT_COST;
+    }
     if (allocation.recruiting && state.hiring && remaining >= RECRUITING_EFFORT_COST) {
       normalized.recruiting = true;
       remaining -= RECRUITING_EFFORT_COST;
     }
     normalized.training = allocation.training.filter((id) => staffIds.has(id));
+  }
+
+  // Initiatives are settled before the board, not after it.
+  //
+  // This is the whole point of the mechanic: something you chose has to be paid for ahead of the
+  // work that arrived, or it only ever gets the leftovers and never finishes. The per-cycle cap
+  // means a flush month cannot buy the whole thing at once — see `cycleCap`.
+  for (const initiative of state.initiatives) {
+    const template = registry.initiatives.find((t) => t.id === initiative.templateId);
+    if (!template) continue;
+
+    const wanted = Math.max(0, Math.floor(allocation.initiativeEffort[initiative.templateId] ?? 0));
+    const spend = Math.min(wanted, cycleCap(template), remaining);
+    if (spend > 0) {
+      normalized.initiativeEffort[initiative.templateId] = spend;
+      remaining -= spend;
+    }
   }
 
   for (const task of state.tasks) {
@@ -222,6 +283,7 @@ export function resolveTurn(
 
   // Record who is carrying what before anyone does any work.
   next = applyAssignments(next, allocation);
+  next = applyInitiativeAssignments(next, allocation);
 
   // Your own effort onto the board.
   next = {
@@ -234,6 +296,14 @@ export function resolveTurn(
 
   // Then the unit's. Their output is computed from this month's skill and morale, before any
   // coaching lands, so investing in someone pays from next month rather than instantly.
+  //
+  // A month is a month: someone carrying two files splits it between them rather than giving each
+  // a full one. `normalizeAllocation` has already capped how many anyone may hold.
+  const load = new Map<string, number>();
+  for (const task of next.tasks) {
+    if (task.assignedTo) load.set(task.assignedTo, (load.get(task.assignedTo) ?? 0) + 1);
+  }
+
   next = {
     ...next,
     tasks: next.tasks.map((task) => {
@@ -241,7 +311,8 @@ export function resolveTurn(
       const member = findStaff(next, task.assignedTo);
       if (!member) return task;
 
-      const contribution = staffOutput(member);
+      const share = Math.max(1, load.get(member.id) ?? 1);
+      const contribution = Math.max(1, Math.round(staffOutput(member) / share));
       team.delegatedProgress.push({
         staffName: member.name,
         taskTemplateId: task.templateId,
@@ -324,6 +395,13 @@ export function resolveTurn(
 
   next = { ...next, tasks: survivors };
 
+  // Then the things you started. After the board, because a month's files are what the initiative
+  // was competing against, and their outcomes are already settled by the time it is scored.
+  const initiativeResult = resolveInitiatives(next, registry, allocation);
+  next = initiativeResult.state;
+  followUpEffects.push(...initiativeResult.effects);
+  logEntries.push(...initiativeResult.log);
+
   for (const [staffId, delta] of Object.entries(staffMoraleDeltas)) {
     next = adjustStaffMorale(next, staffId, delta);
   }
@@ -349,7 +427,10 @@ export function resolveTurn(
   const stressDelta =
     BASELINE_STRESS_PER_TURN +
     (allocation.overtime ? OVERTIME_STRESS : 0) -
-    allocation.rest * REST_STRESS_RELIEF;
+    allocation.rest * REST_STRESS_RELIEF +
+    // An office where nobody works late is one point a month easier to survive; one that pushes
+    // is one point harder. Small, permanent, and compounding over three hundred months.
+    hoursStressDelta(next);
   adjustStat(next.stats, 'stress', stressDelta);
 
   if (allocation.networking > 0) {
@@ -361,6 +442,8 @@ export function resolveTurn(
     const staffMonth = resolveStaffMonth(next, registry, allocation);
     next = staffMonth.state;
     team.arrivals.push(...staffMonth.report.arrivals);
+    team.departures.push(...staffMonth.report.departures);
+    if (staffMonth.report.promotions) team.promotions = staffMonth.report.promotions;
 
     const budgetResult = resolveBudget(next, discretionarySpend(allocation));
     next = budgetResult.state;
@@ -379,12 +462,23 @@ export function resolveTurn(
     next = attrition.state;
     team.departures.push(...attrition.report.departures);
 
-    for (const departure of attrition.report.departures) {
+    for (const departure of [...team.departures, ...attrition.report.departures]) {
       logEntries.push({
         turn: next.turn,
-        messageKey: 'log.staff_left',
+        // Losing somebody because they were good and you did not look after them reads
+        // differently from losing somebody who was miserable, and the log should say which.
+        messageKey:
+          departure.reason === 'promoted_away' ? 'log.staff_poached' : 'log.staff_left',
         params: { name: departure.name },
         tone: 'bad',
+      });
+    }
+    for (const promotion of team.promotions ?? []) {
+      logEntries.push({
+        turn: next.turn,
+        messageKey: 'log.staff_promoted',
+        params: { name: promotion.name, grade: `team.grade.${promotion.to}` },
+        tone: 'good',
       });
     }
     for (const arrival of team.arrivals) {
@@ -416,6 +510,9 @@ export function resolveTurn(
     salaryDelta: 0,
     newOffers: [],
     team: hasTeam(next, registry) ? team : undefined,
+    initiativesCompleted:
+      initiativeResult.completed.length > 0 ? initiativeResult.completed : undefined,
+    initiativesLapsed: initiativeResult.lapsed.length > 0 ? initiativeResult.lapsed : undefined,
   };
   next = { ...next, lastReport: report };
 
@@ -459,17 +556,20 @@ export function finalizeTurn(state: GameState, registry: ContentRegistry): GameS
   let next = state;
   // Copy rather than extend in place: the report already sits in `state.lastReport`, and the
   // engine must not reach back and edit a state it has already handed out.
+  //
+  // Spread first. This used to enumerate every field, which made it a silent trap the equal of
+  // `cloneState`: anything `resolveTurn` added to the report was dropped here, before the player
+  // ever saw it — no type error, because every *required* field was still present.
   const previous = next.lastReport;
   const report: TurnReport = {
+    ...previous,
     turn: previous?.turn ?? next.turn,
+    // The mutable members still need fresh copies, for the reason above.
     completed: [...(previous?.completed ?? [])],
     failed: [...(previous?.failed ?? [])],
     statDeltas: { ...(previous?.statDeltas ?? {}) },
     salaryDelta: previous?.salaryDelta ?? 0,
     newOffers: [...(previous?.newOffers ?? [])],
-    review: previous?.review,
-    promotedTo: previous?.promotedTo,
-    team: previous?.team,
   };
 
   if (isReviewDue(next)) {
@@ -524,6 +624,12 @@ export function beginNextTurn(state: GameState, registry: ContentRegistry): Game
 
   next = expireOffers(next);
   next = refillBoard(next, registry);
+  // The rest of the country moved while you were working. By the same months, so a directorate's
+  // cycle takes half a year off every other institution too.
+  next = driftWorld(next, registry, worked);
+  // A post change may have moved the player to a different beat, and the institutions on it are
+  // ones you deal with rather than ones you have to go and find.
+  next = learnLocalBodies(next, registry);
 
   return { ...next, phase: 'allocation' };
 }
@@ -533,7 +639,24 @@ export function acceptOffer(
   state: GameState,
   registry: ContentRegistry,
   offerId: string,
+  /** Staff ids to bring with you. See `setupTeamForPost`. */
+  keep: readonly string[] = [],
 ): GameState {
   if (state.ending) return state;
-  return acceptOfferInternal(state, registry, offerId);
+
+  // Whatever you had started, you are not the one finishing it. An initiative is bound to the
+  // office that began it: the successor inherits the file and not the intent. The board follows
+  // the same rule, but a file is one month's work and an initiative may be five years of it, so
+  // this one gets its `onLapse` and a line in the log rather than vanishing.
+  const ended = lapseAllInitiatives(state, registry);
+  const cleared =
+    ended.effects.length > 0 || ended.log.length > 0
+      ? applyEffects(
+          { ...ended.state, log: [...ended.state.log, ...ended.log].slice(-LOG_LIMIT) },
+          ended.effects,
+          registry,
+        )
+      : ended.state;
+
+  return acceptOfferInternal(cleared, registry, offerId, keep);
 }

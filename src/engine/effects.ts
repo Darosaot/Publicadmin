@@ -31,6 +31,8 @@ export function cloneState(state: GameState): GameState {
     player: { ...state.player },
     stats: { ...state.stats },
     tasks: state.tasks.map((t) => ({ ...t })),
+    initiatives: state.initiatives.map((i) => ({ ...i })),
+    alumni: state.alumni.map((a) => ({ ...a })),
     staff: state.staff.map((s) => ({ ...s })),
     hiring: state.hiring ? { ...state.hiring } : undefined,
     budget: state.budget ? { ...state.budget } : undefined,
@@ -158,6 +160,14 @@ export function applyEffects(
         next.ending = effect.ending;
         next.phase = 'ended';
         return next;
+
+      default: {
+        // A new `Effect` kind with no case here would otherwise be a silent no-op: the content
+        // would validate, the game would run, and the consequence would simply never happen.
+        // This turns that into a compile error at the moment the union grows.
+        const unhandled: never = effect;
+        throw new Error(`unhandled effect: ${JSON.stringify(unhandled)}`);
+      }
     }
   }
 

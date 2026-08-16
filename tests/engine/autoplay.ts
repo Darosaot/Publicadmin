@@ -22,7 +22,14 @@ import {
   RECRUITING_EFFORT_COST,
   TRAINING_COST,
 } from '../../src/engine/constants';
+import { directiveFlag } from '../../src/engine/directives';
 import { isChoiceAvailable } from '../../src/engine/events';
+import {
+  cycleCap,
+  lapsedFlag,
+  startInitiative,
+  startableInitiatives,
+} from '../../src/engine/initiatives';
 import { createGame } from '../../src/engine/newGame';
 import { nextInt, seedToState } from '../../src/engine/rng';
 import { getPost, postsFrom } from '../../src/engine/registry';
@@ -63,6 +70,38 @@ export interface RunResult {
   promotions: number;
   tasksCompleted: number;
   tasksFailed: number;
+  /** The new verb, counted so a guardrail can tell whether the bot ever actually used it. */
+  initiativesStarted: number;
+  initiativesCompleted: number;
+  initiativesLapsed: number;
+}
+
+/**
+ * How a career is played.
+ *
+ * An options object rather than the seven positional parameters this was heading towards. The
+ * immediate reason is `useInitiatives`: the balance guardrail has to run the *same seeds* with the
+ * feature on and off, and a boolean in seventh position is unreadable at every call site.
+ */
+export interface CareerOptions {
+  seed: number;
+  department: DepartmentId;
+  strategy?: Strategy;
+  maxTurns?: number;
+  /** Stop as soon as this tier is reached, rather than playing the career out. */
+  stopAtLevel?: number;
+  /**
+   * Which branch to take when the tree forks.
+   *
+   * Left undefined the bot climbs by money, which is what an ambitious player does by default and
+   * which keeps the headline balance figure comparable with the old single ladder. Set it to
+   * measure one branch on its own — every track has to be survivable, and none may be a walkover.
+   */
+  preferredTrack?: TrackId;
+  /** Off is the A side of the A/B: the same careers as before initiatives existed. */
+  useInitiatives?: boolean;
+  /** Likewise for the house rules. */
+  useDirectives?: boolean;
 }
 
 const REST_THRESHOLD = 62;
@@ -77,7 +116,11 @@ const REST_THRESHOLD = 62;
 export type Strategy = 'balanced' | 'ruthless' | 'reckless';
 
 /** Decides how to spend the month. */
-function planAllocation(game: GameState, strategy: Strategy): Allocation {
+function planAllocation(
+  game: GameState,
+  strategy: Strategy,
+  useInitiatives: boolean,
+): Allocation {
   const allocation: Allocation = emptyAllocation();
 
   // The reckless bot never rests and always works overtime. It is trying to burn out.
@@ -114,6 +157,19 @@ function planAllocation(game: GameState, strategy: Strategy): Allocation {
       if (budget < DELEGATION_EFFORT_COST) break;
       allocation.delegations[byDeadline[i]!.uid] = byOutput[i]!.id;
       budget -= DELEGATION_EFFORT_COST;
+    }
+
+    // Hand an initiative to somebody too. Preferring whoever was not given a file keeps their
+    // month undivided; a senior can take a second thing, at half speed on each, which is the
+    // trade `DELEGATION_CAPACITY` exists to offer.
+    if (useInitiatives && game.initiatives.length > 0 && budget >= DELEGATION_EFFORT_COST) {
+      const spare = byOutput.filter((s) => !Object.values(allocation.delegations).includes(s.id));
+      const carrier = spare[0] ?? byOutput.find((s) => s.seniority === 'senior');
+      const live = game.initiatives[0];
+      if (carrier && live) {
+        allocation.initiativeDelegations[live.templateId] = carrier.id;
+        budget -= DELEGATION_EFFORT_COST;
+      }
     }
 
     // Invest in someone if there is room left in the month.
@@ -190,6 +246,40 @@ function planAllocation(game: GameState, strategy: Strategy): Allocation {
     }
   }
 
+  // Then what you chose to do, out of what the board did not need.
+  //
+  // The first version of this took a third of the month *before* the files, on the theory that
+  // something funded out of leftovers never gets done. It is a good theory and it wrecked the
+  // simulation: at tier one the board already wants more than the month holds, so pre-committing
+  // a third meant missed deadlines, a collapsing performance score, and careers that ended at
+  // year fourteen on tier two. The scheduling loop above already spreads each file over the
+  // months it has, so what survives it is genuine slack — and slack is exactly what a real
+  // official finds for the thing they actually care about.
+  //
+  // Half the slack rather than all of it: the points the board did not schedule still buy
+  // quality on the files they land on, and a bot that stops spending them entirely trades six
+  // years of career for the initiative. Half is the split that leaves both worth doing.
+  if (useInitiatives && game.initiatives.length > 0) {
+    // At least one point whenever there is any slack at all. `floor(budget / 2)` alone rounds a
+    // one-point month down to nothing, and three of those in a row is a dead initiative — which
+    // is how the first run managed to lapse two hundred and twenty-three of them and finish
+    // eleven. Keeping it ticking over is most of what keeping a project alive actually is.
+    let envelope = Math.min(budget, Math.max(1, Math.floor(budget / 2)));
+    for (const live of game.initiatives) {
+      if (envelope <= 0 || budget <= 0) break;
+      const template = registry.initiatives.find((t) => t.id === live.templateId);
+      if (!template) continue;
+
+      const outstanding = Math.max(0, live.required - live.progress);
+      const spend = Math.min(cycleCap(template), outstanding, envelope, budget);
+      if (spend > 0) {
+        allocation.initiativeEffort[live.templateId] = spend;
+        envelope -= spend;
+        budget -= spend;
+      }
+    }
+  }
+
   // Anything left over goes onto the most urgent file rather than being wasted.
   const first = byUrgency[0];
   if (budget > 0 && first) {
@@ -233,29 +323,48 @@ function decide(
   return { choiceId: pool[roll.value]!.id, botState: roll.rngState };
 }
 
-export function playCareer(
-  seed: number,
-  department: DepartmentId,
-  strategy: Strategy = 'balanced',
-  maxTurns = 200,
-  /** Stop as soon as this tier is reached, rather than playing the career out. */
-  stopAtLevel?: number,
-  /**
-   * Which branch to take when the tree forks.
-   *
-   * Left undefined the bot climbs by money, which is what an ambitious player does by default and
-   * which keeps the headline balance figure comparable with the old single ladder. Set it to
-   * measure one branch on its own — every track has to be survivable, and none may be a walkover.
-   */
-  preferredTrack?: TrackId,
-): RunResult {
+export function playCareer(options: CareerOptions): RunResult {
+  const {
+    seed,
+    department,
+    strategy = 'balanced',
+    maxTurns = 200,
+    stopAtLevel,
+    preferredTrack,
+    useInitiatives = true,
+    useDirectives = true,
+  } = options;
+
   let game = createGame({ name: 'Bot', department, seed }, registry);
+
+  // The bot picks its house rules on day one and never revisits them, which is roughly what
+  // happens in life. It takes the pressure itself, because a bot that empties its own unit
+  // measures attrition rather than anything else; it moves fast, because on a board oversubscribed
+  // at 1.35 the extra point a documented file costs is not repaid; and it hires for experience,
+  // because it never stays anywhere long enough for potential to arrive.
+  //
+  // These are one competent set of answers, not the best ones. That is the point of measuring
+  // against them rather than against an optimiser.
+  if (useDirectives) {
+    game = {
+      ...game,
+      flags: {
+        ...game.flags,
+        [directiveFlag('hours')]: 1,
+        [directiveFlag('rigour')]: 2,
+        [directiveFlag('hiring')]: 2,
+      },
+    };
+  }
   // A second stream so the bot's decisions do not consume the game's randomness.
   let botState = seedToState(seed ^ 0x5f3759df);
 
   let promotions = 0;
   let tasksCompleted = 0;
   let tasksFailed = 0;
+  let initiativesStarted = 0;
+  let initiativesCompleted = 0;
+  let initiativesLapsed = 0;
   let guard = 0;
 
   while (!game.ending && guard < maxTurns * 12) {
@@ -300,9 +409,38 @@ export function playCareer(
         ) {
           game = startHiring(game, game.staff.length < establishment - 1 ? 'officer' : 'senior');
         }
-        game = resolveTurn(game, registry, planAllocation(game, strategy));
+        // Start something when the desk is under control — no missed deadlines last cycle, and
+        // stress in hand. An official who is drowning does not take on a five-year project, and a
+        // bot that does produces a corpus of careers that all end in dismissal rather than a
+        // measurement of what initiatives are worth.
+        // And only once there is a way to *feed* it. Below tier three you have ten points and a
+        // board that wants thirteen, so an initiative started there starves — the bot burns its
+        // one attempt and learns nothing. A unit to delegate to, or the expert track's much
+        // larger personal budget, is what actually makes an undertaking affordable.
+        const canAfford = game.staff.length > 0 || game.player.track === 'expert';
+        const coping =
+          canAfford &&
+          (game.lastReport?.failed.length ?? 0) === 0 &&
+          game.stats.stress < REST_THRESHOLD;
+        if (useInitiatives && coping) {
+          // Never pick up something already dropped. The engine allows a second attempt — that is
+          // a real player's prerogative — but a bot that takes it restarts the same undertaking
+          // sixteen times a career and measures churn instead of commitment.
+          const open = startableInitiatives(game, registry).filter(
+            (t) => !game.flags[lapsedFlag(t.id)],
+          );
+          if (open.length > 0) {
+            const before = game.initiatives.length;
+            game = startInitiative(game, registry, open[0]!.id);
+            if (game.initiatives.length > before) initiativesStarted += 1;
+          }
+        }
+
+        game = resolveTurn(game, registry, planAllocation(game, strategy, useInitiatives));
         tasksCompleted += game.lastReport?.completed.length ?? 0;
         tasksFailed += game.lastReport?.failed.length ?? 0;
+        initiativesCompleted += game.lastReport?.initiativesCompleted?.length ?? 0;
+        initiativesLapsed += game.lastReport?.initiativesLapsed?.length ?? 0;
         break;
       }
 
@@ -352,19 +490,21 @@ export function playCareer(
     promotions,
     tasksCompleted,
     tasksFailed,
+    initiativesStarted,
+    initiativesCompleted,
+    initiativesLapsed,
   };
 }
 
 export function playMany(
   seeds: number[],
   departments: readonly DepartmentId[],
-  strategy: Strategy = 'balanced',
-  preferredTrack?: TrackId,
+  options: Omit<CareerOptions, 'seed' | 'department'> = {},
 ): RunResult[] {
   const results: RunResult[] = [];
   for (const department of departments) {
     for (const seed of seeds) {
-      results.push(playCareer(seed, department, strategy, 200, undefined, preferredTrack));
+      results.push(playCareer({ ...options, seed, department }));
     }
   }
   return results;
@@ -395,6 +535,9 @@ export function summarise(results: RunResult[]) {
     meanIntegrity: mean((r) => r.stats.integrity),
     meanPoliticalCapital: mean((r) => r.stats.politicalCapital),
     meanSalary: mean((r) => r.salary),
+    meanInitiativesStarted: mean((r) => r.initiativesStarted),
+    meanInitiativesCompleted: mean((r) => r.initiativesCompleted),
+    totalInitiativesLapsed: results.reduce((n, r) => n + r.initiativesLapsed, 0),
     completionRate: mean((r) =>
       r.tasksCompleted + r.tasksFailed === 0
         ? 1

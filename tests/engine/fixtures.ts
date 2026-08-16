@@ -11,7 +11,9 @@ import type {
   Department,
   DepartmentId,
   GameEvent,
+  InitiativeTemplate,
   TaskTemplate,
+  WorldBody,
 } from '../../src/engine/types';
 import { DEPARTMENT_IDS } from '../../src/engine/types';
 
@@ -322,6 +324,61 @@ export const testEvents: GameEvent[] = [
   },
 ];
 
+/**
+ * Three places: one rotting, one improving, one still. Enough to test drift in both directions
+ * and to prove a body with `drift: 0` is left completely alone.
+ */
+const testBodies: WorldBody[] = [
+  { id: 'sinking', baselineCondition: 40, drift: -0.5, beat: 'legal' },
+  { id: 'rising', baselineCondition: 50, drift: 0.25, beat: 'finance' },
+  { id: 'steady', baselineCondition: 60, drift: 0, beat: 'legal' },
+];
+
+/**
+ * Three undertakings: a cheap one anyone can start, a gated one, and one whose cap bites.
+ *
+ * `capped` has `required` 12 over 6 cycles, so no single cycle may put in more than 2 however
+ * much effort is thrown at it — which is the rule most easily broken by accident.
+ */
+const testInitiatives: InitiativeTemplate[] = [
+  {
+    id: 'init.cheap',
+    titleKey: 'init.cheap.title',
+    descKey: 'init.cheap.desc',
+    completeKey: 'init.cheap.complete',
+    lapseKey: 'init.cheap.lapse',
+    required: 10,
+    minCycles: 1,
+    available: {},
+    onComplete: [{ kind: 'flag', flag: 'cheap_done' }],
+    onLapse: [{ kind: 'flag', flag: 'cheap_lapsed' }],
+  },
+  {
+    id: 'init.gated',
+    titleKey: 'init.gated.title',
+    descKey: 'init.gated.desc',
+    completeKey: 'init.gated.complete',
+    lapseKey: 'init.gated.lapse',
+    required: 20,
+    minCycles: 4,
+    available: { minLevel: 3 },
+    onComplete: [{ kind: 'stat', stat: 'reputation', delta: 5 }],
+    onLapse: [],
+  },
+  {
+    id: 'init.capped',
+    titleKey: 'init.capped.title',
+    descKey: 'init.capped.desc',
+    completeKey: 'init.capped.complete',
+    lapseKey: 'init.capped.lapse',
+    required: 12,
+    minCycles: 6,
+    available: {},
+    onComplete: [{ kind: 'flag', flag: 'capped_done' }],
+    onLapse: [],
+  },
+];
+
 export function makeTestRegistry(): ContentRegistry {
   const departments = Object.fromEntries(
     DEPARTMENT_IDS.map((id) => [id, department(id)]),
@@ -333,6 +390,8 @@ export function makeTestRegistry(): ContentRegistry {
     tasks: Object.fromEntries(testTasks.map((t) => [t.id, t])),
     events: Object.fromEntries(testEvents.map((e) => [e.id, e])),
     staffNames: ['Ada Fixture', 'Bo Sample', 'Cato Stub', 'Dita Mock', 'Enzo Proxy'],
+    bodies: testBodies,
+    initiatives: testInitiatives,
   };
 }
 

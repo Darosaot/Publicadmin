@@ -11,6 +11,8 @@ import { registry } from '../content';
 import { createGame, type NewGameOptions } from '../engine/newGame';
 import { AGENCY_TEMP_MAX } from '../engine/constants';
 import { declineOffer } from '../engine/career';
+import { directiveFlag } from '../engine/directives';
+import { startInitiative } from '../engine/initiatives';
 import { cancelHiring, startHiring } from '../engine/team';
 import { clearSave, loadGame } from '../engine/save';
 import {
@@ -23,7 +25,7 @@ import {
 } from '../engine/turn';
 import type { Allocation, GameState, Seniority } from '../engine/types';
 
-export type GameView = 'desk' | 'team' | 'people' | 'career';
+export type GameView = 'desk' | 'team' | 'people' | 'country' | 'initiatives' | 'career';
 
 export interface AppState {
   /** Null means the title screen. */
@@ -39,6 +41,10 @@ export type GameAction =
   | { type: 'NEW_GAME'; options: NewGameOptions }
   | { type: 'CONTINUE_SAVED' }
   | { type: 'SET_TASK_EFFORT'; uid: string; points: number }
+  | { type: 'SET_INITIATIVE_EFFORT'; templateId: string; points: number }
+  | { type: 'SET_INITIATIVE_DELEGATION'; templateId: string; staffId: string | null }
+  | { type: 'START_INITIATIVE'; templateId: string }
+  | { type: 'SET_DIRECTIVE'; directiveId: string; stance: 0 | 1 | 2 }
   | { type: 'SET_REST'; points: number }
   | { type: 'SET_NETWORKING'; points: number }
   | { type: 'TOGGLE_OVERTIME' }
@@ -47,7 +53,7 @@ export type GameAction =
   | { type: 'CHOOSE'; eventId: string; choiceId: string }
   | { type: 'CONTINUE_EVENT' }
   | { type: 'NEXT_MONTH' }
-  | { type: 'ACCEPT_OFFER'; offerId: string }
+  | { type: 'ACCEPT_OFFER'; offerId: string; keep?: string[] }
   | { type: 'DECLINE_OFFER'; offerId: string }
   | { type: 'SET_DELEGATION'; taskUid: string; staffId: string | null }
   | { type: 'TOGGLE_COACHING'; staffId: string }
@@ -102,6 +108,39 @@ export function gameReducer(state: AppState, action: GameAction): AppState {
       return { ...state, allocation: { ...state.allocation, tasks } };
     }
 
+    case 'SET_INITIATIVE_EFFORT': {
+      const points = Math.max(0, Math.floor(action.points));
+      const initiativeEffort = { ...state.allocation.initiativeEffort };
+      if (points === 0) delete initiativeEffort[action.templateId];
+      else initiativeEffort[action.templateId] = points;
+      return { ...state, allocation: { ...state.allocation, initiativeEffort } };
+    }
+
+    case 'SET_INITIATIVE_DELEGATION': {
+      const initiativeDelegations = { ...state.allocation.initiativeDelegations };
+      if (action.staffId === null) delete initiativeDelegations[action.templateId];
+      else initiativeDelegations[action.templateId] = action.staffId;
+      return { ...state, allocation: { ...state.allocation, initiativeDelegations } };
+    }
+
+    case 'START_INITIATIVE': {
+      if (!state.game) return state;
+      return { ...state, game: startInitiative(state.game, registry, action.templateId) };
+    }
+
+    case 'SET_DIRECTIVE': {
+      if (!state.game) return state;
+      // A house rule is state, not an allocation: it holds until it is changed, which is the whole
+      // difference between it and everything else the player decides.
+      return {
+        ...state,
+        game: {
+          ...state.game,
+          flags: { ...state.game.flags, [directiveFlag(action.directiveId)]: action.stance },
+        },
+      };
+    }
+
     case 'SET_REST':
       return {
         ...state,
@@ -152,7 +191,7 @@ export function gameReducer(state: AppState, action: GameAction): AppState {
       // A new post means a new desk, so any effort drafted against the old board is void.
       return {
         ...state,
-        game: acceptOffer(state.game, registry, action.offerId),
+        game: acceptOffer(state.game, registry, action.offerId, action.keep ?? []),
         allocation: emptyAllocation(),
       };
     }

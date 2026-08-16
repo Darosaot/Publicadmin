@@ -5,13 +5,15 @@
  * build rather than crashing a player's third year in office.
  */
 
-import { ENDING_IDS, TRACK_IDS, type DepartmentId } from '../engine/types';
+import { ENDING_IDS, TRACK_IDS, type DepartmentId, type Effect } from '../engine/types';
 import { DEPARTMENT_IDS } from '../engine/types';
 import { EN_STRINGS } from './authoring';
+import { bodies } from './bodies';
 import { posts } from './careers';
 import { departments } from './departments';
 import { endingCopy } from './endings';
 import { allEvents, eventRegistry } from './events';
+import { initiatives } from './initiatives';
 import { allTasks, taskRegistry } from './tasks';
 
 export function validateContent(): string[] {
@@ -140,6 +142,14 @@ export function validateContent(): string[] {
   for (const task of allTasks) {
     for (const effects of Object.values(task.onComplete ?? {})) noteEffects(effects);
     noteEffects(task.onFail ?? []);
+  }
+  // Initiatives count on both sides. Missing them here would report a flag an event sets and only
+  // an initiative gates on as write-only — a false positive — and would let an initiative write a
+  // flag nothing reads, which is the real thing this census exists to catch.
+  for (const initiative of initiatives) {
+    noteCondition(initiative.available);
+    noteEffects(initiative.onComplete);
+    noteEffects(initiative.onLapse);
   }
 
   // The engine itself sets and reads this one, so the corpus never will.
@@ -276,6 +286,103 @@ export function validateContent(): string[] {
     }
   }
 
+  /* -------------------------------------------------------------- bodies */
+
+  const seenBodyIds = new Set<string>();
+  for (const body of bodies) {
+    if (seenBodyIds.has(body.id)) problems.push(`duplicate body id: ${body.id}`);
+    seenBodyIds.add(body.id);
+
+    requireString(body.kindKey, `body ${body.id}`);
+    requireString(body.blurbKey, `body ${body.id}`);
+
+    if (body.baselineCondition < 1 || body.baselineCondition > 99) {
+      problems.push(
+        `body ${body.id}: a founding condition of ${body.baselineCondition} leaves nowhere to move`,
+      );
+    }
+    if (!DEPARTMENT_IDS.includes(body.beat as DepartmentId)) {
+      problems.push(`body ${body.id}: "${body.beat}" is not a department`);
+    }
+    if (Math.abs(body.drift) > 0.5) {
+      // A whole point a month is six a year and a hundred and eighty over a career: a place that
+      // moves that fast is not drifting, it is collapsing, and should be an event.
+      problems.push(`body ${body.id}: drift of ${body.drift} a month is too fast to be drift`);
+    }
+  }
+
+  // Every department should have somewhere in the country that is its problem, or its events have
+  // nothing to point at.
+  for (const id of DEPARTMENT_IDS) {
+    if (!bodies.some((body) => body.beat === id)) {
+      problems.push(`department ${id}: no body in the country is on its beat`);
+    }
+  }
+
+  /* --------------------------------------------------------- initiatives */
+
+  const seenInitiativeIds = new Set<string>();
+  for (const initiative of initiatives) {
+    if (seenInitiativeIds.has(initiative.id)) {
+      problems.push(`duplicate initiative id: ${initiative.id}`);
+    }
+    seenInitiativeIds.add(initiative.id);
+
+    requireString(initiative.titleKey, `initiative ${initiative.id}`);
+    requireString(initiative.descKey, `initiative ${initiative.id}`);
+    requireString(initiative.completeKey, `initiative ${initiative.id}`);
+    requireString(initiative.lapseKey, `initiative ${initiative.id}`);
+
+    problems.push(
+      ...validateEffects(initiative.onComplete, `initiative ${initiative.id} onComplete`),
+    );
+    problems.push(...validateEffects(initiative.onLapse, `initiative ${initiative.id} onLapse`));
+
+    if (initiative.onComplete.length === 0) {
+      problems.push(`initiative ${initiative.id}: finishing it changes nothing`);
+    }
+    if (initiative.minCycles < 1) {
+      problems.push(`initiative ${initiative.id}: minCycles must be at least 1`);
+    }
+    // A junior has ten points a cycle and a board that already wants more than that. Anything
+    // needing more than a full cycle's undivided attention is not a commitment, it is a wall.
+    const perCycle = Math.ceil(initiative.required / Math.max(1, initiative.minCycles));
+    if (perCycle > 8) {
+      problems.push(
+        `initiative ${initiative.id}: needs ${perCycle} points a cycle, which is most of a month`,
+      );
+    }
+    // The payoff rule from the balance work: offers key off reputation and reputation decays, so
+    // an initiative paying a lump of it converts hoarded effort straight into promotion velocity.
+    // Pay in the world instead — condition, standing, flags, tasks, budget.
+    const reputation = initiative.onComplete.find(
+      (effect) => effect.kind === 'stat' && effect.stat === 'reputation',
+    );
+    if (reputation && reputation.kind === 'stat' && reputation.delta > 4) {
+      problems.push(
+        `initiative ${initiative.id}: pays ${reputation.delta} reputation — pay in kind instead`,
+      );
+    }
+  }
+
+  // An initiative nobody can ever start is authored consequence no player will meet, which is the
+  // same failure the write-only flag census exists to catch.
+  for (const initiative of initiatives) {
+    const gate = initiative.available;
+    if (gate.minLevel !== undefined && gate.minLevel > tiers[tiers.length - 1]!) {
+      problems.push(
+        `initiative ${initiative.id}: requires tier ${gate.minLevel}, above the top of the tree`,
+      );
+    }
+    if (
+      gate.minLevel !== undefined &&
+      gate.maxLevel !== undefined &&
+      gate.minLevel > gate.maxLevel
+    ) {
+      problems.push(`initiative ${initiative.id}: its level range is empty`);
+    }
+  }
+
   /* ------------------------------------------------------------- endings */
 
   for (const ending of ENDING_IDS) {
@@ -309,38 +416,54 @@ function hasDepartmentEvent(id: DepartmentId): boolean {
   );
 }
 
-function validateEffects(effects: readonly unknown[], where: string): string[] {
+/**
+ * Reference-checks a list of effects.
+ *
+ * Typed against the `Effect` union rather than `unknown[]` so the switch below can be exhaustive:
+ * an effect kind that carries a content id and is not checked here would let a typo ship, and the
+ * player would meet it years into a career. Adding a kind to the union now forces a decision.
+ */
+function validateEffects(effects: readonly Effect[], where: string): string[] {
   const problems: string[] = [];
 
-  for (const effect of effects as {
-    kind: string;
-    templateId?: string;
-    eventId?: string;
-    ending?: string;
-    delta?: number;
-  }[]) {
+  for (const effect of effects) {
     switch (effect.kind) {
       case 'spawnTask':
-        if (!effect.templateId || !taskRegistry[effect.templateId]) {
+        if (!taskRegistry[effect.templateId]) {
           problems.push(`${where}: spawnTask references unknown template "${effect.templateId}"`);
         }
         break;
       case 'queueEvent':
-        if (!effect.eventId || !eventRegistry[effect.eventId]) {
+        if (!eventRegistry[effect.eventId]) {
           problems.push(`${where}: queueEvent references unknown event "${effect.eventId}"`);
         }
         break;
       case 'endGame':
-        if (!effect.ending || !ENDING_IDS.includes(effect.ending as never)) {
+        if (!ENDING_IDS.includes(effect.ending)) {
           problems.push(`${where}: endGame references unknown ending "${effect.ending}"`);
         }
         break;
       case 'stat':
       case 'salary':
+      case 'flagDelta':
         if (effect.delta === 0) problems.push(`${where}: effect with a delta of zero does nothing`);
         break;
-      default:
+
+      // These carry no content id and nothing to cross-check. Listed rather than defaulted so
+      // that a new kind cannot join them by accident.
+      case 'flag':
+      case 'teamMorale':
+      case 'teamSkill':
+      case 'budget':
+      case 'budgetMonthly':
+      case 'loseStaff':
+      case 'gainStaff':
         break;
+
+      default: {
+        const unhandled: never = effect;
+        throw new Error(`validateEffects: unhandled effect ${JSON.stringify(unhandled)}`);
+      }
     }
   }
 

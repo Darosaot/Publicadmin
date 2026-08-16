@@ -3,6 +3,7 @@ import {
   AGENCY_TEMP_MAX,
   BUDGET_YEAR_MONTHS,
   COACHING_EFFORT_COST,
+  DELEGATION_CAPACITY,
   DELEGATION_EFFORT_COST,
   ONE_TO_ONE_EFFORT_COST,
   STAFF_ATTRITION_MORALE,
@@ -172,6 +173,44 @@ describe('the cost of managing', () => {
     const state = manager();
     const allocation = allocate({ delegations: { [state.tasks[0]!.uid]: 'nobody' } });
     expect(normalizeAllocation(state, registry, allocation).delegations).toEqual({});
+  });
+
+  /**
+   * Before the cap you could put one senior on the whole board and be paid their full output on
+   * every file — free work, and the reason a unit's size never really constrained anything.
+   */
+  it('will not hand anyone more files than they can carry', () => {
+    const state = manager();
+    const senior = state.staff.find((s) => s.seniority === 'senior')!;
+    const delegations = Object.fromEntries(state.tasks.map((task) => [task.uid, senior.id]));
+
+    const normalized = normalizeAllocation(state, registry, allocate({ delegations }));
+    const carried = Object.values(normalized.delegations).filter((id) => id === senior.id);
+
+    expect(state.tasks.length).toBeGreaterThan(DELEGATION_CAPACITY.senior);
+    expect(carried).toHaveLength(DELEGATION_CAPACITY.senior);
+  });
+
+  it('splits a month between the files one person is carrying', () => {
+    const state = manager();
+    const senior = state.staff.find((s) => s.seniority === 'senior')!;
+    const [first, second] = state.tasks;
+
+    const alone = resolveTurn(state, registry, allocate({ delegations: { [first!.uid]: senior.id } }));
+    const shared = resolveTurn(
+      state,
+      registry,
+      allocate({ delegations: { [first!.uid]: senior.id, [second!.uid]: senior.id } }),
+    );
+
+    const progressOf = (result: GameState, uid: string) =>
+      result.lastReport?.team?.delegatedProgress.find(
+        (entry) => entry.taskTemplateId === state.tasks.find((t) => t.uid === uid)?.templateId,
+      )?.progress ?? 0;
+
+    // Two files move at once, but neither gets a whole month's work.
+    expect(progressOf(shared, first!.uid)).toBeLessThan(progressOf(alone, first!.uid));
+    expect(progressOf(shared, second!.uid)).toBeGreaterThan(0);
   });
 
   it('ignores management entirely for a player with no unit', () => {
@@ -402,7 +441,7 @@ describe('the budget', () => {
     const base = manager(51);
     const yearEnd: GameState = {
       ...base,
-      turn: base.turn + BUDGET_YEAR_MONTHS - 1,
+      calendarMonth: BUDGET_YEAR_MONTHS,
       budget: { ...base.budget!, balance: -base.budget!.monthly * 6 },
     };
     const result = resolveBudget(yearEnd, 0);
@@ -415,7 +454,7 @@ describe('the budget', () => {
     const base = manager(51);
     const yearEnd: GameState = {
       ...base,
-      turn: base.turn + BUDGET_YEAR_MONTHS - 1,
+      calendarMonth: BUDGET_YEAR_MONTHS,
       budget: { ...base.budget!, balance: base.budget!.monthly * 6 },
     };
     const result = resolveBudget(yearEnd, 0);
@@ -428,13 +467,39 @@ describe('the budget', () => {
     const base = manager(51);
     const yearEnd: GameState = {
       ...base,
-      turn: base.turn + BUDGET_YEAR_MONTHS - 1,
+      calendarMonth: BUDGET_YEAR_MONTHS,
       budget: { ...base.budget!, balance: 400 },
     };
     const result = resolveBudget(yearEnd, 0);
 
     expect(result.state.budget!.balance).toBe(0);
-    expect(result.state.budget!.yearStartTurn).toBe(yearEnd.turn + 1);
+    expect(result.state.budget!.yearStartMonth).toBe(yearEnd.calendarMonth);
+  });
+
+  /**
+   * The budget year used to be counted in turns, which stopped meaning a year the moment a cycle
+   * became six months: a Director-General's budget year was six real ones. It is counted in
+   * calendar months now, so seniority changes how many *cycles* a year takes and never how long
+   * a year is.
+   */
+  it('judges the year after twelve months however long a cycle is', () => {
+    const base = manager(51);
+
+    const twoSeniorCycles: GameState = {
+      ...base,
+      turn: base.turn + 2,
+      calendarMonth: 12,
+      budget: { ...base.budget!, balance: base.budget!.monthly * 6 },
+    };
+    expect(resolveBudget(twoSeniorCycles, 0).verdict).toBe('underspent');
+
+    const elevenJuniorCycles: GameState = {
+      ...base,
+      turn: base.turn + 11,
+      calendarMonth: 11,
+      budget: { ...base.budget!, balance: base.budget!.monthly * 6 },
+    };
+    expect(resolveBudget(elevenJuniorCycles, 0).verdict).toBeUndefined();
   });
 
   it('does nothing at all for a player with no unit', () => {

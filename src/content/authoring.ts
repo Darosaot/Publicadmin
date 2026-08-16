@@ -18,6 +18,7 @@ import type {
   Effect,
   EventKind,
   GameEvent,
+  InitiativeTemplate,
   Outcome,
   PlayerStats,
   QualityTier,
@@ -137,6 +138,44 @@ export function defineTask(id: string, spec: TaskSpec): TaskTemplate {
     weight: spec.weight ?? 10,
     onComplete: spec.onComplete,
     onFail: spec.onFail,
+  };
+}
+
+/* ------------------------------------------------------------- initiatives */
+
+export interface InitiativeSpec {
+  title: string;
+  desc: string;
+  /** Shown when it finally lands, years later. */
+  complete: string;
+  /** And when it is quietly dropped. */
+  lapse: string;
+  required: number;
+  minCycles: number;
+  available: Condition;
+  onComplete: Effect[];
+  onLapse?: Effect[];
+}
+
+/**
+ * An undertaking the player may start.
+ *
+ * `onLapse` defaults to nothing rather than to a penalty. Most things quietly dropped in
+ * government are quietly dropped without consequence, and a template that wants the opposite —
+ * because somebody was promised something — says so explicitly.
+ */
+export function defineInitiative(id: string, spec: InitiativeSpec): InitiativeTemplate {
+  return {
+    id,
+    titleKey: register(`${id}.title`, spec.title),
+    descKey: register(`${id}.desc`, spec.desc),
+    completeKey: register(`${id}.complete`, spec.complete),
+    lapseKey: register(`${id}.lapse`, spec.lapse),
+    required: spec.required,
+    minCycles: spec.minCycles,
+    available: spec.available,
+    onComplete: spec.onComplete,
+    onLapse: spec.onLapse ?? [],
   };
 }
 

@@ -10,7 +10,16 @@
 
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { allEvents, allTasks, posts, departmentList, endingCopy } from '../src/content';
+import {
+  allEvents,
+  allTasks,
+  bodies,
+  departmentList,
+  directives,
+  endingCopy,
+  initiatives,
+  posts,
+} from '../src/content';
 import { translate } from '../src/i18n/translate';
 import type { Condition, Effect, GameEvent, TaskTemplate } from '../src/engine/types';
 import { ENDING_IDS, STAT_IDS } from '../src/engine/types';
@@ -187,8 +196,9 @@ function build(): string {
   out.push('');
   out.push(
     `The complete corpus: ${allEvents.length} events, ${allTasks.length} task templates, ` +
-      `${departmentList.length} departments, ${posts.length} posts across ` +
-      `${new Set(posts.map((p) => p.track)).size} tracks and ` +
+      `${initiatives.length} initiatives, ${bodies.length} public bodies, ` +
+      `${directives.length} standing directives, ${departmentList.length} departments, ` +
+      `${posts.length} posts across ${new Set(posts.map((p) => p.track)).size} tracks and ` +
       `${ENDING_IDS.length} endings. Stat effects are shown after each outcome.`,
   );
   out.push('');
@@ -267,6 +277,67 @@ function build(): string {
       (task) => task.departments !== 'any' && task.departments.includes(department.id),
     );
     out.push(taskTable(t(department.nameKey), tasks));
+  }
+
+  /* --------------------------------------------------------- initiatives */
+
+  out.push('## Initiatives');
+  out.push('');
+  out.push(
+    '*The only content the player chooses rather than receives. Each runs look → fix → finish,',
+    'with the stages gating on the flags the previous stage writes.*',
+  );
+  out.push('');
+  for (const initiative of initiatives) {
+    out.push(`### ${t(initiative.titleKey)}`);
+    out.push('');
+    out.push(t(initiative.descKey));
+    out.push('');
+    out.push(
+      `*${initiative.required} points over at least ${initiative.minCycles} cycles.*`,
+    );
+    out.push('');
+    out.push(`**Done.** ${t(initiative.completeKey)}`);
+    out.push('');
+    out.push(`**Dropped.** ${t(initiative.lapseKey)}`);
+    out.push('');
+  }
+
+  /* -------------------------------------------------------------- country */
+
+  out.push('## The country');
+  out.push('');
+  out.push('*These drift whether or not the player is looking. Names are proper nouns and are');
+  out.push('not translated.*');
+  out.push('');
+  out.push('| Body | Kind | Founded at | Drift a month | Beat |');
+  out.push('| --- | --- | ---: | ---: | --- |');
+  for (const body of bodies) {
+    out.push(
+      `| ${body.name} | ${t(body.kindKey)} | ${body.baselineCondition} | ${body.drift} | ${body.beat} |`,
+    );
+  }
+  out.push('');
+  for (const body of bodies) {
+    out.push(`**${body.name}.** ${t(body.blurbKey)}`);
+    out.push('');
+  }
+
+  /* ----------------------------------------------------------- directives */
+
+  out.push('## Standing directives');
+  out.push('');
+  out.push('*Neither pole of any of these is the right answer.*');
+  out.push('');
+  for (const directive of directives) {
+    out.push(`### ${t(directive.nameKey)}`);
+    out.push('');
+    out.push(t(directive.blurbKey));
+    out.push('');
+    for (const pole of directive.poles) {
+      out.push(`- **${t(pole.labelKey)}** — ${t(pole.effectKey)}`);
+    }
+    out.push('');
   }
 
   /* -------------------------------------------------------------- events */

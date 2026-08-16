@@ -23,6 +23,7 @@ import {
   TASK_EFFORT_MULTIPLIER,
   REFERENCE_TASK_SLOTS,
 } from './constants';
+import { rigourEffortDelta, rigourQualityDelta } from './directives';
 import { getPost, type ContentRegistry } from './registry';
 import { nextInt, nextRange, weightedPick } from './rng';
 import type { ActiveTask, GameState, QualityTier, TaskTemplate } from './types';
@@ -43,7 +44,12 @@ export function spawnTask(state: GameState, template: TaskTemplate): GameState {
     uid: `t${state.nextTaskUid}`,
     templateId: template.id,
     progress: 0,
-    required: scaleEffort(template.baseEffort, state.player.level),
+    // The rigour directive is priced in at spawn rather than at resolution, so the cost shows on
+    // the card the player is looking at instead of arriving as a surprise at month end.
+    required: Math.max(
+      1,
+      scaleEffort(template.baseEffort, state.player.level) + rigourEffortDelta(state),
+    ),
     difficulty: template.difficulty,
     deadlineTurn: state.turn + roll.value,
     spawnedTurn: state.turn,
@@ -141,6 +147,9 @@ export function rollQuality(
 
   const score =
     QUALITY_BASE +
+    // An office that writes things down produces better work than one that does not, and pays
+    // for it in the effort every file costs — see `spawnTask`.
+    rigourQualityDelta(state) +
     earlyBonus +
     overinvestBonus +
     formBonus -

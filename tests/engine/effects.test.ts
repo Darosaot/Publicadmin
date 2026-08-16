@@ -142,17 +142,114 @@ describe('statDeltas', () => {
   });
 });
 
+/**
+ * A state with every optional field present and every collection non-empty.
+ *
+ * The guard below compares references, so anything left `undefined` or absent would be silently
+ * skipped — which is the exact failure it exists to catch.
+ */
+function populatedGame(): GameState {
+  return {
+    ...game(),
+    tasks: [
+      {
+        uid: 't1',
+        templateId: 'task.quiet',
+        progress: 2,
+        required: 6,
+        difficulty: 2,
+        deadlineTurn: 5,
+        spawnedTurn: 1,
+        assignedTo: 's1',
+      },
+    ],
+    initiatives: [
+      {
+        templateId: 'init.quiet',
+        progress: 4,
+        required: 12,
+        startedTurn: 2,
+        idleCycles: 1,
+        assignedTo: 's1',
+      },
+    ],
+    staff: [
+      {
+        id: 's1',
+        name: 'Someone',
+        seniority: 'officer',
+        skill: 55,
+        morale: 60,
+        salary: 2600,
+        monthsInPost: 9,
+      },
+    ],
+    hiring: { seniority: 'senior', monthsRemaining: 3 },
+    budget: { monthly: 11500, balance: -400, yearStartMonth: 0, spentThisMonth: 0 },
+    pendingEvents: [
+      { eventId: 'evt.quiet', resolution: { choiceId: 'c', outcomeIndex: 0, textKey: 'k' } },
+    ],
+    scheduledEvents: [{ eventId: 'evt.quiet', onTurn: 4 }],
+    firedEvents: ['evt.quiet'],
+    cooldowns: { 'evt.quiet': 12 },
+    flags: { something: true, counted: 3 },
+    offers: [
+      { id: 'o1', toPost: 'post.x', toTier: 2, salary: 3000, createdTurn: 1, expiresTurn: 4 },
+    ],
+    sinceReview: { completed: 2, failed: 1 },
+    log: [{ turn: 1, messageKey: 'log.x', tone: 'neutral' }],
+    lastReport: {
+      turn: 1,
+      completed: [],
+      failed: [],
+      statDeltas: {},
+      salaryDelta: 0,
+      newOffers: [],
+    },
+  };
+}
+
 describe('cloneState', () => {
-  it('detaches nested collections', () => {
-    const start = game();
+  /**
+   * The trap this exists for.
+   *
+   * `cloneState` hand-enumerates every mutable field, and `applyEffects` then mutates the clone in
+   * place. A field added to `GameState` and forgotten here falls through the spread as a *shared
+   * reference*, so applying an effect silently corrupts the caller's pre-effect state — with no
+   * type error and no test failure, because nothing was checking the new field.
+   *
+   * So do not test named fields. Walk the whole object: whatever anyone adds next is covered on
+   * the day they add it, and the failure message names the field they forgot.
+   *
+   * Top level only, deliberately. `lastReport`'s inner arrays are shared by design — `finalizeTurn`
+   * rebuilds that object rather than mutating it.
+   */
+  it('detaches every object and array on the state', () => {
+    const start = populatedGame();
     const copy = cloneState(start);
+
+    const shared = (Object.keys(start) as (keyof GameState)[]).filter((key) => {
+      const value = start[key];
+      return value !== null && typeof value === 'object' && value === copy[key];
+    });
+
+    expect(
+      shared,
+      `cloneState shares these fields with its input — add them to the clone in src/engine/effects.ts`,
+    ).toEqual([]);
+  });
+
+  it('leaves the original alone when the copy is written to', () => {
+    const start = populatedGame();
+    const copy = cloneState(start);
+
     copy.stats.reputation = 99;
     copy.flags.tampered = true;
     copy.tasks.push({ ...copy.tasks[0]!, uid: 'x' });
 
     expect(start.stats.reputation).not.toBe(99);
     expect(start.flags.tampered).toBeUndefined();
-    expect(start.tasks).not.toHaveLength(copy.tasks.length);
+    expect(start.tasks).toHaveLength(1);
   });
 });
 

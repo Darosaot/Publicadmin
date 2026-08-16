@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { posts, registry } from '../../content';
 import { meetsRequirements } from '../../engine/career';
 import { edgeBetween, getPost, postsFrom } from '../../engine/registry';
@@ -6,6 +7,7 @@ import { useT } from '../../i18n';
 import { useGame } from '../../state/GameProvider';
 import { formatSalary } from '../format';
 import { GameTabs } from '../components/GameTabs';
+import { PostChangeModal } from '../components/PostChangeModal';
 import { StatsBar } from '../components/StatsBar';
 
 /**
@@ -18,8 +20,10 @@ import { StatsBar } from '../components/StatsBar';
 export function CareerScreen({ game }: { game: GameState }) {
   const t = useT();
   const { dispatch } = useGame();
+  const [confirming, setConfirming] = useState<string | undefined>(undefined);
 
   const current = getPost(registry, game.player.postId);
+  const pendingOffer = game.offers.find((o) => o.id === confirming);
   const reachable = postsFrom(registry, current.id);
   const tiers = [...new Set(posts.map((p) => p.tier))].sort((a, b) => a - b);
 
@@ -60,7 +64,13 @@ export function CareerScreen({ game }: { game: GameState }) {
                       <button
                         type="button"
                         className="btn btn--primary"
-                        onClick={() => dispatch({ type: 'ACCEPT_OFFER', offerId: offer.id })}
+                        onClick={() =>
+                          // Nothing to warn about when there is nobody to leave behind and
+                          // nothing in flight, so that case takes the post directly.
+                          game.staff.length === 0 && game.initiatives.length === 0
+                            ? dispatch({ type: 'ACCEPT_OFFER', offerId: offer.id })
+                            : setConfirming(offer.id)
+                        }
                       >
                         {t('action.accept')}
                       </button>
@@ -136,6 +146,14 @@ export function CareerScreen({ game }: { game: GameState }) {
           )}
         </aside>
       </div>
+
+      {pendingOffer && (
+        <PostChangeModal
+          game={game}
+          offer={pendingOffer}
+          onClose={() => setConfirming(undefined)}
+        />
+      )}
     </>
   );
 }

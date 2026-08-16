@@ -5,6 +5,7 @@ import { adjustStat } from './effects';
 import { startingPost, type ContentRegistry } from './registry';
 import { seedToState } from './rng';
 import { refillBoard } from './tasks';
+import { learnLocalBodies } from './world';
 import type { DepartmentId, GameState, PlayerStats, StatId } from './types';
 
 export interface NewGameOptions {
@@ -54,6 +55,12 @@ export function createGame(options: NewGameOptions, registry: ContentRegistry): 
     tasks: [],
     nextTaskUid: 1,
 
+    // Nothing started. The menu is what the first management post is really for.
+    initiatives: [],
+
+    // Nobody has worked for you yet.
+    alumni: [],
+
     // No unit until the first management post.
     staff: [],
     nextStaffUid: 1,
@@ -79,5 +86,5 @@ export function createGame(options: NewGameOptions, registry: ContentRegistry): 
     ],
   };
 
-  return refillBoard(state, registry);
+  return refillBoard(learnLocalBodies(state, registry), registry);
 }

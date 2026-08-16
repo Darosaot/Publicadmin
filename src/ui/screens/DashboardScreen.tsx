@@ -3,6 +3,7 @@ import { staffOutput } from '../../engine/team';
 import type { GameState } from '../../engine/types';
 import { useT } from '../../i18n';
 import { useGame } from '../../state/GameProvider';
+import { DirectivePanel } from '../components/DirectivePanel';
 import { EffortStepper } from '../components/EffortStepper';
 import { GameTabs } from '../components/GameTabs';
 import { LogPanel } from '../components/LogPanel';
@@ -150,6 +151,8 @@ export function DashboardScreen({ game }: { game: GameState }) {
               {t('action.end_turn')}
             </button>
           </section>
+
+          <DirectivePanel game={game} />
 
           <LogPanel log={game.log} />
         </aside>

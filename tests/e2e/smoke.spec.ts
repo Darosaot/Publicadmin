@@ -1,6 +1,18 @@
 import { expect, test, type Page } from '@playwright/test';
 
 /**
+ * A top-level tab, by its label.
+ *
+ * Scoped to the nav rather than the page because `getByRole`'s name matching is a substring: once
+ * the desk grew a panel whose prose contains the word "people", a bare page-level lookup for the
+ * People tab started matching a directive button and the tab-visibility tests began passing for
+ * the wrong reason.
+ */
+function tab(page: Page, label: string) {
+  return page.locator('.tabs').getByRole('button', { name: label });
+}
+
+/**
  * Plays a handful of real months in a browser.
  *
  * The engine has its own unit tests; what this covers is the wiring — that the screens render,
@@ -126,7 +138,7 @@ test('an event blocks the month until it is decided', async ({ page }) => {
 test('the career screen shows the tree and what each way onward needs', async ({ page }) => {
   await startCareer(page, 'Policy');
 
-  await page.getByRole('button', { name: 'Career' }).click();
+  await tab(page, 'Career').click();
   await expect(page.getByRole('heading', { name: 'Where this can go' })).toBeVisible();
   await expect(page.locator('.rung--current .rung__title')).toHaveText('Administrative Officer');
   await expect(page.getByText('No offers at the moment.', { exact: false })).toBeVisible();
@@ -136,6 +148,6 @@ test('the career screen shows the tree and what each way onward needs', async ({
   await expect(page.locator('.rung--open')).toHaveCount(2);
   await expect(page.locator('.panel', { hasText: 'To be offered' })).toHaveCount(2);
 
-  await page.getByRole('button', { name: 'Desk' }).click();
+  await tab(page, 'Desk').click();
   await expect(page.locator('.board')).toBeVisible();
 });

@@ -7,7 +7,7 @@
 
 import type { PlayerStats } from './types';
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 6;
 
 export const STAT_MIN = 0;
 export const STAT_MAX = 100;
@@ -130,6 +130,55 @@ export const COACHING_EFFORT_COST = 2;
 export const ONE_TO_ONE_EFFORT_COST = 1;
 export const RECRUITING_EFFORT_COST = 2;
 
+/**
+ * How many files one person can carry at once.
+ *
+ * A senior can hold two and a junior one, and a person's monthly output is *divided* between what
+ * they hold rather than paid in full to each. Both halves matter: without the cap you could put
+ * one senior on the whole board, and without the division doing so was free output.
+ *
+ * The trade is real either way — two files from one senior progress at half speed each, which is
+ * sometimes exactly what a pair of deadlines needs.
+ */
+export const DELEGATION_CAPACITY: Record<'junior' | 'officer' | 'senior', number> = {
+  junior: 1,
+  officer: 1,
+  senior: 2,
+};
+
+/**
+ * How many former colleagues a career remembers.
+ *
+ * Twelve, and the oldest is dropped. Not a simulation limit — a save-size one, and roughly the
+ * number of people from a thirty-year career whose name a player could actually place.
+ */
+export const ALUMNI_LIMIT = 12;
+
+/** How many of your unit you may take with you when you take a new post. */
+export const KEEP_ON_MOVE_LIMIT = 2;
+
+/* ------------------------------------------------------------- initiatives */
+
+/**
+ * How many cycles an initiative survives with nothing put into it.
+ *
+ * Three, so a single month of firefighting never kills one, and forgetting about it for a year
+ * always does. This is the whole cost of starting something: not money, not effort, but having
+ * to keep coming back to it while the board keeps refilling.
+ */
+export const INITIATIVE_LAPSE_CYCLES = 3;
+
+/**
+ * How many may be in flight at once, by tier.
+ *
+ * One until you run a unit, two after. A second slot is the actual reward for seniority here —
+ * more effort points only buy more of the same month, whereas a second initiative buys a second
+ * thing you are trying to change.
+ */
+export const INITIATIVE_SLOTS_BASE = 1;
+export const INITIATIVE_SLOTS_SENIOR = 2;
+export const INITIATIVE_SLOTS_SENIOR_TIER = 3;
+
 /** Monthly output by grade, before skill and morale are applied. */
 export const STAFF_BASE_OUTPUT: Record<'junior' | 'officer' | 'senior', number> = {
   junior: 3,
@@ -155,6 +204,30 @@ export const STAFF_START_MORALE: [number, number] = [50, 75];
 export const STAFF_MORALE_DRIFT = -1;
 export const ONE_TO_ONE_MORALE_GAIN = 9;
 export const COACHING_SKILL_GAIN = 4;
+
+/**
+ * The skill at which somebody is plainly doing the next grade's job already.
+ *
+ * Promotion from within is free — it costs the budget the difference in salary and nothing else —
+ * because that is what it costs in reality, and because the alternative to noticing is the entry
+ * below.
+ */
+export const PROMOTION_SKILL: Record<'junior' | 'officer', number> = {
+  junior: 74,
+  officer: 88,
+};
+
+/**
+ * When somebody good starts looking, and how often it works.
+ *
+ * Deliberately keyed off high skill and *low* morale together: your best people are the ones with
+ * somewhere else to go, and the only thing keeping them is whether the job is worth having. This
+ * is the departure reason `TeamReport` has declared since the office landed and nothing has ever
+ * produced.
+ */
+export const POACHING_SKILL = 74;
+export const POACHING_MORALE = 55;
+export const POACHING_CHANCE = 0.06;
 export const COACHING_MORALE_GAIN = 3;
 export const TRAINING_SKILL_GAIN = 6;
 export const TRAINING_COST = 1500;

@@ -71,10 +71,21 @@ describe('simulated careers', () => {
     expect(summary.meanReputation).toBeLessThan(85);
   });
 
-  it('makes the board tight enough that something has to give', () => {
+  it('makes the month tight enough that something has to give', () => {
     // A player who can finish everything is never choosing anything.
+    //
+    // This used to measure the board alone, and it sat exactly on its own bound the moment
+    // promotion-from-within landed and the bot started running a better unit. That is not the
+    // guardrail failing — it is the guardrail having been written when the board was the only
+    // place pressure could show. There are two channels now, so it asks the real question:
+    // across a whole career, is there anything the player did not get to?
     expect(summary.completionRate).toBeGreaterThan(0.7);
-    expect(summary.completionRate).toBeLessThan(0.98);
+    expect(summary.completionRate).toBeLessThan(0.995);
+
+    const gaveSomethingUp = results.filter(
+      (r) => r.tasksFailed > 0 || r.initiativesLapsed > 0,
+    ).length;
+    expect(gaveSomethingUp / results.length).toBeGreaterThan(0.9);
   });
 
   it('pays more the higher you climb', () => {
@@ -117,13 +128,64 @@ describe('simulated careers', () => {
   });
 });
 
+/**
+ * Initiatives, measured against the same careers played without them.
+ *
+ * A/B on identical seeds rather than absolute bands, because this commit changes several things at
+ * once and an absolute number could not tell them apart. The A side is literally the game as it
+ * was before initiatives existed.
+ */
+describe('the initiatives the player chooses', () => {
+  const withInitiatives = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS));
+  const without = summarise(
+    playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useInitiatives: false }),
+  );
+
+  it('gets used at all, which is the thing a guardrail most easily fails to check', () => {
+    // The documented failure mode of this whole harness: a bound that measures nothing reads as
+    // green. If the bot never starts one, every other assertion below is vacuous.
+    expect(withInitiatives.meanInitiativesStarted).toBeGreaterThan(1);
+    expect(withInitiatives.meanInitiativesCompleted).toBeGreaterThan(1);
+    expect(without.meanInitiativesStarted).toBe(0);
+  });
+
+  it('can also be dropped — commitment that cannot fail is not commitment', () => {
+    expect(withInitiatives.totalInitiativesLapsed).toBeGreaterThan(0);
+  });
+
+  /**
+   * The direction that matters. Offers key off reputation, so an initiative paying a lump of it
+   * would convert hoarded effort into promotion velocity and become the dominant strategy. These
+   * pay in the country instead, so the career effect should be small — and slightly negative,
+   * because the months went somewhere other than the files.
+   */
+  it('does not become the way to get promoted', () => {
+    expect(withInitiatives.meanLevel - without.meanLevel).toBeLessThan(0.4);
+  });
+
+  it('costs something, but not a career', () => {
+    expect(without.meanLevel - withInitiatives.meanLevel).toBeLessThan(0.6);
+    expect(without.meanYears - withInitiatives.meanYears).toBeLessThan(3);
+  });
+
+  it('is startable by every kind of career, not only the one the bot happens to play', () => {
+    for (const track of TRACK_IDS) {
+      const runs = playMany(seeds.slice(0, 4), DEPARTMENT_IDS, { preferredTrack: track });
+      expect(
+        runs.some((r) => r.initiativesStarted > 0),
+        `nobody on ${track} ever starts an initiative`,
+      ).toBe(true);
+    }
+  });
+});
+
 describe('every track is a real career', () => {
   // Played deliberately, one branch at a time. A branch nobody can climb is dead content, and a
   // branch that is strictly better than the others makes the choice meaningless.
   const byTrack = new Map<TrackId, ReturnType<typeof summarise>>(
     TRACK_IDS.map((track) => [
       track,
-      summarise(playMany(seeds.slice(0, 8), DEPARTMENT_IDS, 'balanced', track)),
+      summarise(playMany(seeds.slice(0, 8), DEPARTMENT_IDS, { preferredTrack: track })),
     ]),
   );
 
@@ -149,7 +211,7 @@ describe('every track is a real career', () => {
     // The first per-track run looked healthy and was measuring nothing: only one offer exists per
     // cycle, so preferring a track among simultaneous offers never changed a decision.
     for (const track of TRACK_IDS) {
-      const runs = playMany(seeds.slice(0, 8), DEPARTMENT_IDS, 'balanced', track);
+      const runs = playMany(seeds.slice(0, 8), DEPARTMENT_IDS, { preferredTrack: track });
       const ended = runs.filter((r) => r.track === track).length;
       expect(ended / runs.length, `nobody ends up on ${track}`).toBeGreaterThan(0.5);
     }
@@ -203,7 +265,7 @@ describe('decisions come back', () => {
   });
 
   it('reaches them through the corrupt path too, where most of the flags are set', () => {
-    const ruthless = playMany(seeds.slice(0, 6), DEPARTMENT_IDS, 'ruthless');
+    const ruthless = playMany(seeds.slice(0, 6), DEPARTMENT_IDS, { strategy: 'ruthless' });
     const anyFlags = ruthless.some((r) =>
       Object.keys(r.finalState.flags).some((f) => f !== 'minister_track'),
     );
@@ -221,12 +283,12 @@ describe('every ending is reachable', () => {
   });
 
   it('reaches disgrace when every corrupt option is taken', () => {
-    const ruthless = playMany(seeds.slice(0, 6), DEPARTMENT_IDS, 'ruthless');
+    const ruthless = playMany(seeds.slice(0, 6), DEPARTMENT_IDS, { strategy: 'ruthless' });
     expect(ruthless.some((r) => r.ending === 'disgrace')).toBe(true);
   });
 
   it('reaches burnout when the player never rests', () => {
-    const reckless = playMany(seeds.slice(0, 6), DEPARTMENT_IDS, 'reckless');
+    const reckless = playMany(seeds.slice(0, 6), DEPARTMENT_IDS, { strategy: 'reckless' });
     expect(reckless.every((r) => r.ending === 'burnout')).toBe(true);
     // Overtime every month with no recovery should take roughly a year, not a decade.
     expect(summarise(reckless).meanTurns).toBeLessThan(20);
@@ -243,14 +305,14 @@ describe('every ending is reachable', () => {
 
 describe('determinism', () => {
   it('replays a career identically from the same seed', () => {
-    const first = playCareer(4242, 'legal');
-    const second = playCareer(4242, 'legal');
+    const first = playCareer({ seed: 4242, department: 'legal' });
+    const second = playCareer({ seed: 4242, department: 'legal' });
     expect(second).toEqual(first);
   });
 
   it('produces different careers from different seeds', () => {
-    const a = playCareer(1, 'policy');
-    const b = playCareer(2, 'policy');
+    const a = playCareer({ seed: 1, department: 'policy' });
+    const b = playCareer({ seed: 2, department: 'policy' });
     expect(a).not.toEqual(b);
   });
 });

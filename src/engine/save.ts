@@ -64,6 +64,43 @@ const MIGRATIONS: Record<number, (raw: RawSave) => RawSave> = {
       }),
     };
   },
+
+  /**
+   * 3 -> 4: the budget year became a year.
+   *
+   * `Budget.yearStartTurn` counted turns, which stopped meaning twelve months the moment a cycle
+   * became six of them — a Director-General's budget year was six real years. It is now
+   * `yearStartMonth`, against `calendarMonth`.
+   *
+   * There is no way to recover the calendar month an old budget year began, because the save never
+   * recorded it. So the year restarts now: the player loses at most one verdict and never gets a
+   * spurious one, which is the right way round.
+   */
+  3: (raw) => {
+    if (!raw.budget || typeof raw.budget !== 'object') return raw;
+    const { yearStartTurn: _dropped, ...budget } = raw.budget as Record<string, unknown>;
+    const calendarMonth = typeof raw.calendarMonth === 'number' ? raw.calendarMonth : 0;
+    return { ...raw, budget: { ...budget, yearStartMonth: calendarMonth } };
+  },
+
+  /**
+   * 4 -> 5: initiatives.
+   *
+   * A new array on the state, so an old save has nothing to convert — but it does need the field
+   * to exist, because the engine iterates it unconditionally. An empty list is exactly right: a
+   * career that predates initiatives has not started any, and every one on the menu is still open
+   * to it.
+   */
+  4: (raw) => ({ ...raw, initiatives: [] }),
+
+  /**
+   * 5 -> 6: the people who used to work for you.
+   *
+   * Same shape of change as initiatives, and the same answer: an old career has no recorded
+   * alumni, and inventing some would be putting words in its mouth. The people it actually lost
+   * are gone, which is a small loss and an honest one.
+   */
+  5: (raw) => ({ ...raw, alumni: [] }),
 };
 
 /**
@@ -128,6 +165,8 @@ function hasRequiredShape(raw: RawSave): boolean {
     typeof raw.stats === 'object' &&
     raw.stats !== null &&
     Array.isArray(raw.tasks) &&
+    Array.isArray(raw.initiatives) &&
+    Array.isArray(raw.alumni) &&
     typeof player === 'object' &&
     player !== null &&
     typeof player.department === 'string' &&
@@ -157,6 +196,11 @@ function pruneUnknownContent(state: GameState, registry: ContentRegistry): GameS
       : state.player,
     offers: state.offers.filter((o) => registry.posts.some((p) => p.id === o.toPost)),
     tasks: state.tasks.filter((t) => registry.tasks[t.templateId] !== undefined),
+    // A dropped initiative would throw nothing but would sit on the screen forever with no prose
+    // and no way to finish it, which is worse than losing the progress.
+    initiatives: state.initiatives.filter((i) =>
+      registry.initiatives.some((t) => t.id === i.templateId),
+    ),
     pendingEvents: state.pendingEvents.filter((p) => registry.events[p.eventId] !== undefined),
     scheduledEvents: state.scheduledEvents.filter(
       (s) => registry.events[s.eventId] !== undefined,

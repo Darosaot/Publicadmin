@@ -1676,3 +1676,304 @@ input {
   font-size: var(--fs-sm);
   line-height: 1.5;
 }
+
+
+/* ----------------------------------------------------------------- country */
+
+.bodies {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: var(--s-3);
+}
+
+.bodycard {
+  padding: var(--s-4);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  background: var(--c-surface);
+}
+
+.bodycard__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-2);
+  margin-bottom: var(--s-1);
+}
+
+.bodycard__name {
+  font-size: var(--fs-base);
+  font-weight: 700;
+}
+
+.bodycard__state {
+  white-space: nowrap;
+  color: var(--c-text-muted);
+}
+
+.bodycard--strong .bodycard__state { color: var(--c-good); }
+.bodycard--failing .bodycard__state,
+.bodycard--collapsing .bodycard__state { color: var(--c-bad); }
+
+.bodycard__kind {
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+  margin-bottom: var(--s-3);
+}
+
+/* Same reasoning as `.person__track`: a described band and a bar, never the figure. The player
+   needs to know a place is in trouble, not that it is at 34. */
+.bodycard__track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--c-border);
+  overflow: hidden;
+  margin-bottom: var(--s-3);
+}
+
+.bodycard__fill {
+  height: 100%;
+  background: var(--c-text-faint);
+  transition: width 200ms ease;
+}
+
+.bodycard--strong .bodycard__fill,
+.bodycard--sound .bodycard__fill { background: var(--c-good); }
+.bodycard--failing .bodycard__fill,
+.bodycard--collapsing .bodycard__fill { background: var(--c-bad); }
+
+.bodycard__movement {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+/* The row collapses when a body has neither drifted nor formed an opinion of you, which is the
+   ordinary case early on — an empty gap there would read as something missing. */
+.bodycard__movement:empty {
+  display: none;
+}
+
+.bodycard__movement:not(:empty) {
+  margin-bottom: var(--s-3);
+}
+
+.bodycard__blurb {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+
+/* ------------------------------------------------------------- initiatives */
+
+.initiative {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.initiative--landing {
+  border-color: var(--c-good);
+}
+
+/* Nothing has been committed to these yet, so they sit back from the ones that have. */
+.initiative--offered {
+  box-shadow: none;
+  background: transparent;
+  border-style: dashed;
+}
+
+.initiative__name {
+  font-size: var(--fs-base);
+  font-weight: 700;
+}
+
+.initiative__desc {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+/* Two bars in one groove: what is actually done, and where this cycle would leave it. Same idea
+   as the task card's projection — the player is choosing where a month goes, so the screen has to
+   show the consequence before they commit it. */
+.initiative__track {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--c-border);
+  overflow: hidden;
+}
+
+.initiative__fill,
+.initiative__projection {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 999px;
+  transition: width 200ms ease;
+}
+
+.initiative__fill {
+  background: var(--c-accent);
+  z-index: 1;
+}
+
+.initiative__projection {
+  background: var(--c-accent);
+  opacity: 0.35;
+}
+
+.initiative__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-sm);
+}
+
+.initiative__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.btn--small {
+  padding: var(--s-1) var(--s-3);
+  font-size: var(--fs-sm);
+}
+
+/* -------------------------------------------------------------- directives */
+
+.directive__intro {
+  font-size: var(--fs-sm);
+  margin-bottom: var(--s-4);
+}
+
+.directives {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.directive__name {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+.directive__blurb {
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  margin-bottom: var(--s-2);
+}
+
+/* Both poles side by side and the same size. A directive whose options are laid out unevenly is
+   telling the player which one to pick, and none of these has a right answer. */
+.directive__poles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-2);
+}
+
+.directive__pole {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  padding: var(--s-2);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  background: var(--c-surface);
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+
+.directive__pole:hover {
+  border-color: var(--c-brand);
+}
+
+.directive__pole--active {
+  border-color: var(--c-brand);
+  background: var(--c-brand-soft);
+}
+
+.directive__label {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+
+.directive__effect {
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+  color: var(--c-text-muted);
+}
+
+/* --------------------------------------------------------- leaving a post */
+
+.keep {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.keep__row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  padding: var(--s-2);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+
+.keep__row:hover {
+  background: var(--c-surface-2);
+}
+
+/* Dimmed rather than hidden once the two places are taken: the people you cannot bring are as
+   much a part of the decision as the ones you can. */
+.keep__row--full {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.keep__name {
+  font-weight: 600;
+}
+
+.keep__grade {
+  font-size: var(--fs-sm);
+}
+
+/* ---------------------------------------------------------------- epilogue */
+
+.epilogue__block + .epilogue__block {
+  margin-top: var(--s-4);
+}
+
+.epilogue__title {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  margin-bottom: var(--s-2);
+}
+
+.epilogue__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.epilogue__name {
+  font-weight: 600;
+}
+
+.epilogue__up { color: var(--c-good); }
+.epilogue__down { color: var(--c-bad); }

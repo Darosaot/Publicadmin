@@ -144,9 +144,78 @@ export interface ActiveTask {
   assignedTo?: string;
 }
 
+/* ------------------------------------------------------------- initiatives */
+
+/**
+ * Something the player decided to do, rather than something that landed on the desk.
+ *
+ * Files arrive by weight and have to be dealt with. An initiative is the opposite: nothing
+ * produces one, nothing chases it, and it finishes years after it starts or not at all. It is the
+ * only thing in the game the player picks rather than receives.
+ */
+export interface InitiativeTemplate {
+  id: string;
+  titleKey: string;
+  descKey: string;
+  /** What the player is told when it lands. */
+  completeKey: string;
+  /** And when it is quietly dropped. */
+  lapseKey: string;
+  /** Total effort points to finish. */
+  required: number;
+  /**
+   * The fewest cycles it can possibly take.
+   *
+   * Institutions do not move faster because you had a slack month. This caps how much progress a
+   * single cycle can absorb at `ceil(required / minCycles)`, which is what stops an initiative
+   * being a way to bank one quiet month into a payoff.
+   */
+  minCycles: number;
+  /** Who may start it, and when. */
+  available: Condition;
+  /** The payoff. Pays in kind — body condition, flags, tasks — rarely in reputation. */
+  onComplete: Effect[];
+  /** What it costs to have started something and let it die. */
+  onLapse: Effect[];
+}
+
+/** One the player has actually started. */
+export interface ActiveInitiative {
+  /**
+   * The template id doubles as the identity: the same undertaking never runs twice, so there is
+   * no uid to allocate and no way for two copies to disagree.
+   */
+  templateId: string;
+  progress: number;
+  required: number;
+  startedTurn: number;
+  /** Consecutive cycles with nothing put in. Past `INITIATIVE_LAPSE_CYCLES` it collapses. */
+  idleCycles: number;
+  /** Who is carrying it this cycle, if you handed it to someone. */
+  assignedTo?: string;
+}
+
 /* ------------------------------------------------------------------- staff */
 
 export type Seniority = 'junior' | 'officer' | 'senior';
+
+/**
+ * Somebody who used to work for you.
+ *
+ * Kept because a career is largely the people who passed through it, and because an office you
+ * built should be able to turn up again years later in somebody else's building. `regard` is what
+ * they thought of you when they left; it is the only thing here the player can affect after the
+ * fact, and they cannot.
+ */
+export interface DepartedStaff {
+  name: string;
+  seniority: Seniority;
+  skill: number;
+  regard: number;
+  leftOnTurn: number;
+  /** Where they went, as a body id, once they have turned up somewhere. */
+  nowAt?: string;
+}
 
 export const SENIORITIES: readonly Seniority[] = ['junior', 'officer', 'senior'];
 
@@ -186,7 +255,13 @@ export interface Budget {
   monthly: number;
   balance: number;
   /** Turn on which the current budget year began. */
-  yearStartTurn: number;
+  /**
+   * Calendar month in which the current budget year began.
+   *
+   * Months, not turns. A budget year is a year — but a cycle is one month at a junior desk and six
+   * in a directorate, so counting turns made a Director-General's "year" six real ones.
+   */
+  yearStartMonth: number;
   /** Discretionary commitments made this month, cleared at resolution. */
   spentThisMonth: number;
 }
@@ -315,6 +390,27 @@ export interface Department {
   startingAdjustments: Partial<PlayerStats>;
 }
 
+/**
+ * A public body, as the engine needs to see it.
+ *
+ * Deliberately the smallest possible view. The content side carries the name, the prose and the
+ * authoring helpers; all the engine does is drift these places month by month, for which it needs
+ * to know only where each one started and which way it is going.
+ *
+ * The scores themselves live in `flags` — `body.<id>.cond` and `body.<id>.stand` — holding the
+ * *deviation* from `baselineCondition`, so an unset flag reads as a body nobody has touched. That
+ * is what lets the country exist without a save migration.
+ */
+export interface WorldBody {
+  id: string;
+  /** Where this place sits when the career starts, 0–100. */
+  baselineCondition: number;
+  /** Change per calendar month with nobody intervening. Negative places are quietly rotting. */
+  drift: number;
+  /** The department that deals with this place, and so already knows what state it is in. */
+  beat: DepartmentId;
+}
+
 /** How the player spent their effort points this turn. */
 export interface Allocation {
   /** Task uid -> points. */
@@ -322,6 +418,8 @@ export interface Allocation {
   rest: number;
   networking: number;
   overtime: boolean;
+  /** Initiative template id -> points. Desk work, so it competes with the board directly. */
+  initiativeEffort: Record<string, number>;
 
   /* ---- management, available once you have a unit ---- */
 
@@ -337,6 +435,8 @@ export interface Allocation {
   agencyTemps: number;
   /** Staff ids sent on a training course, paid from the budget rather than your time. */
   training: string[];
+  /** Initiative template id -> staff id. Shares the same carrying capacity as files do. */
+  initiativeDelegations: Record<string, string>;
 }
 
 export interface CompletedTaskReport {
@@ -362,6 +462,8 @@ export interface TeamReport {
   /** Progress delivered by staff on files you handed over. */
   delegatedProgress: { staffName: string; taskTemplateId: string; progress: number }[];
   departures: { name: string; reason: 'morale' | 'promoted_away' }[];
+  /** People who moved up a grade without leaving. */
+  promotions?: { name: string; to: Seniority }[];
   arrivals: { name: string; seniority: Seniority }[];
   /** Spend against the monthly allocation: negative means over. */
   budgetDelta?: number;
@@ -379,6 +481,9 @@ export interface TurnReport {
   newOffers: JobOffer[];
   promotedTo?: number;
   team?: TeamReport;
+  /** Undertakings that landed or died this cycle. Template ids; the UI looks up the prose. */
+  initiativesCompleted?: string[];
+  initiativesLapsed?: string[];
 }
 
 export interface LogEntry {
@@ -432,6 +537,24 @@ export interface GameState {
 
   tasks: ActiveTask[];
   nextTaskUid: number;
+
+  /**
+   * Undertakings in flight.
+   *
+   * Deliberately transient: an initiative leaves `init.done.<id>` or `init.lapsed.<id>` behind in
+   * `flags` and is then removed from this list. The live record is first-class because it has a
+   * progress bar and a delegate; the permanent memory is a flag, because a thirty-year career
+   * would otherwise carry an archive of forty finished projects in every save.
+   */
+  initiatives: ActiveInitiative[];
+
+  /**
+   * People who have worked for you and moved on, newest last, capped at `ALUMNI_LIMIT`.
+   *
+   * Bounded on purpose: a thirty-year career would otherwise accumulate an unbounded roster in
+   * every save, and the twelve most recent are the ones a player might plausibly remember.
+   */
+  alumni: DepartedStaff[];
 
   /** Empty until you reach a post that has a unit under it. */
   staff: StaffMember[];

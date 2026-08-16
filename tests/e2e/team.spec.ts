@@ -1,7 +1,21 @@
 import { expect, test, type Page } from '@playwright/test';
 import { SAVE_KEY, serialize } from '../../src/engine/save';
 import type { DepartmentId, GameState, TrackId } from '../../src/engine/types';
+import { registry } from '../../src/content';
+import { postsFrom } from '../../src/engine/registry';
 import { playCareer } from '../engine/autoplay';
+
+/**
+ * A top-level tab, by its label.
+ *
+ * Scoped to the nav rather than the page because `getByRole`'s name matching is a substring: once
+ * the desk grew a panel whose prose contains the word "people", a bare page-level lookup for the
+ * People tab started matching a directive button and the tab-visibility tests began passing for
+ * the wrong reason.
+ */
+function tab(page: Page, label: string) {
+  return page.locator('.tabs').getByRole('button', { name: label });
+}
 
 /**
  * The Team screen, reached the way a player reaches it.
@@ -13,7 +27,7 @@ import { playCareer } from '../engine/autoplay';
  */
 function careerAtLevel(level: number, department: DepartmentId, track: TrackId): GameState {
   for (let attempt = 1; attempt <= 200; attempt += 1) {
-    const run = playCareer(attempt * 7919 + 13, department, 'balanced', 200, level, track);
+    const run = playCareer({ seed: attempt * 7919 + 13, department, stopAtLevel: level, preferredTrack: track });
     if (run.finalState.player.level >= level && run.finalState.player.track === track && !run.finalState.ending) {
       return run.finalState;
     }
@@ -24,6 +38,36 @@ function careerAtLevel(level: number, department: DepartmentId, track: TrackId):
 // The line track, explicitly: left to chase salary the bot ends up in a private office, and this
 // file is about running a unit.
 const managing = careerAtLevel(4, 'procurement', 'line');
+
+/**
+ * The same manager, with an offer on the table.
+ *
+ * The offer is constructed rather than played to, because `playCareer` only hands back a finished
+ * career and an offer in flight is by definition mid-career. It points at a post the tree really
+ * does reach from here, so everything downstream of accepting it is the production path.
+ *
+ * Constructed rather than skipped: a `test.skip` on a missing fixture is a test that reports green
+ * for having measured nothing.
+ */
+function withAnOffer(state: GameState): GameState {
+  const onward = postsFrom(registry, state.player.postId);
+  const target = onward.find((p) => (p.headcount ?? 0) > 0) ?? onward[0];
+  if (!target) throw new Error(`Nothing leads on from ${state.player.postId}`);
+
+  return {
+    ...state,
+    offers: [
+      {
+        id: 'e2e-offer',
+        toPost: target.id,
+        toTier: target.tier,
+        salary: target.baseSalary,
+        createdTurn: state.turn,
+        expiresTurn: state.turn + 6,
+      },
+    ],
+  };
+}
 
 // And one career that took the branch with no unit at all, to prove the office half really does
 // disappear rather than merely being hidden.
@@ -45,7 +89,7 @@ test('a manager gets a unit, a budget and a way to spend a month on people', asy
 
   await expect(page.locator('.statsbar__post')).toContainText('Head of Department');
 
-  await page.getByRole('button', { name: 'Team' }).click();
+  await tab(page, 'Team').click();
 
   // Everyone the bot ended up with is on the roster, with both bars rendered.
   await expect(page.locator('.staff')).toHaveCount(managing.staff.length);
@@ -66,7 +110,7 @@ test('a manager gets a unit, a budget and a way to spend a month on people', asy
 
 test('the budget adds up and warns about both ways of getting it wrong', async ({ page }) => {
   await resume(page, managing);
-  await page.getByRole('button', { name: 'Team' }).click();
+  await tab(page, 'Team').click();
 
   const budget = page.locator('.budget');
   await expect(budget).toBeVisible();
@@ -97,7 +141,7 @@ test('a file can be handed to someone, and the desk says who has it', async ({ p
   await picker.selectOption({ label: staffName });
 
   // The Team screen shows the same assignment from the other side.
-  await page.getByRole('button', { name: 'Team' }).click();
+  await tab(page, 'Team').click();
   await expect(page.locator('.staff__carrying').first()).toBeVisible();
 });
 
@@ -132,7 +176,7 @@ test('the specialist branch has no office at all, not merely a hidden one', asyn
   await resume(page, specialist);
 
   await expect(page.locator('.statsbar__post')).toContainText('Principal Specialist');
-  await expect(page.getByRole('button', { name: 'Team' })).toHaveCount(0);
+  await expect(tab(page, 'Team')).toHaveCount(0);
 
   // No unit means no delegation: the files are yours to the end.
   await expect(page.locator('.task').first().getByRole('combobox')).toHaveCount(0);
@@ -140,7 +184,7 @@ test('the specialist branch has no office at all, not merely a hidden one', asyn
 
 test('the career screen shows the branch not taken', async ({ page }) => {
   await resume(page, managing);
-  await page.getByRole('button', { name: 'Career' }).click();
+  await tab(page, 'Career').click();
 
   // Every post in the tree is on screen, and exactly one of them is where the player is.
   await expect(page.locator('.rung')).toHaveCount(15);
@@ -159,7 +203,7 @@ test('the career screen shows the branch not taken', async ({ page }) => {
 test('the people you know are on their own screen, and it remembers', async ({ page }) => {
   await resume(page, managing);
 
-  await page.getByRole('button', { name: 'People' }).click();
+  await tab(page, 'People').click();
   await expect(page.getByRole('heading', { name: 'People you know' })).toBeVisible();
 
   // Anyone met has a card; nobody unmet does.
@@ -183,7 +227,7 @@ test('the People tab stays hidden until somebody has been met', async ({ page })
   await page.getByRole('button', { name: /^Legal/ }).click();
   await page.getByRole('button', { name: 'Take the job' }).click();
 
-  await expect(page.getByRole('button', { name: 'People' })).toHaveCount(0);
+  await expect(tab(page, 'People')).toHaveCount(0);
 });
 
 test('the Team tab only exists once there is a team', async ({ page }) => {
@@ -196,6 +240,173 @@ test('the Team tab only exists once there is a team', async ({ page }) => {
   await page.getByRole('button', { name: /^Procurement/ }).click();
   await page.getByRole('button', { name: 'Take the job' }).click();
 
-  await expect(page.getByRole('button', { name: 'Desk' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Team' })).toHaveCount(0);
+  await expect(tab(page, 'Desk')).toBeVisible();
+  await expect(tab(page, 'Team')).toHaveCount(0);
+});
+
+test('the country is on screen from the first month, described rather than scored', async ({ page }) => {
+  await page.goto('/?seed=42');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+
+  await page.getByRole('button', { name: 'New game' }).click();
+  await page.getByLabel('Your name').fill('Renata Vos');
+  await page.getByRole('button', { name: /^Legal/ }).click();
+  await page.getByRole('button', { name: 'Take the job' }).click();
+
+  // Unlike People, the Country tab is there immediately: the institutions your own department
+  // deals with are ones you already know the state of.
+  await tab(page, 'Country').click();
+  await expect(page.getByRole('heading', { name: 'The country you work in' })).toBeVisible();
+
+  const cards = page.locator('.bodycard');
+  expect(await cards.count()).toBeGreaterThan(0);
+
+  // A band and a bar, never the figure — the same rule the People screen follows for standing.
+  await expect(cards.first().locator('.bodycard__state')).not.toBeEmpty();
+  await expect(cards.first().locator('.bodycard__track')).toBeVisible();
+  await expect(cards.first()).not.toContainText(/\b\d{1,3}\s*\/\s*100\b/);
+
+  // And the rest of the country is counted, not listed.
+  await expect(page.getByRole('heading', { name: 'Elsewhere' })).toBeVisible();
+});
+
+test('a long career has watched places move', async ({ page }) => {
+  await resume(page, managing);
+
+  await tab(page, 'Country').click();
+
+  // Twenty-odd years of drift cannot leave every institution exactly where it was founded.
+  const moved = page.locator('.bodycard .pill');
+  expect(await moved.count()).toBeGreaterThan(0);
+});
+
+test('an initiative can be taken on, funded, and moves after a month', async ({ page }) => {
+  await page.goto('/?seed=42');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+
+  await page.getByRole('button', { name: 'New game' }).click();
+  await page.getByLabel('Your name').fill('Renata Vos');
+  await page.getByRole('button', { name: /^Legal/ }).click();
+  await page.getByRole('button', { name: 'Take the job' }).click();
+
+  await tab(page, 'Initiatives').click();
+  await expect(page.getByRole('heading', { name: 'What you could take on' })).toBeVisible();
+
+  // Nothing of your own yet: everything on the desk arrived there.
+  await expect(page.locator('.initiative--offered').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Take it on' }).first().click();
+
+  const live = page.locator('.initiative:not(.initiative--offered)').first();
+  await expect(live).toBeVisible();
+  await expect(live).toContainText('0 of');
+
+  // Effort comes out of the same monthly budget as the files, so the counter has to move.
+  await expect(page.getByTestId('effort-remaining')).toContainText('10 of 10');
+  await live.getByRole('button', { name: /^Add a point/ }).click();
+  await live.getByRole('button', { name: /^Add a point/ }).click();
+  await expect(page.getByTestId('effort-remaining')).toContainText('8 of 10');
+
+  // Ending the month is the desk's business, so go back for it.
+  await tab(page, 'Desk').click();
+  await page.getByRole('button', { name: 'End the month' }).click();
+  // Decide whatever the month threw up, then close the report. Same shape as `playMonth` in
+  // smoke.spec.ts: an event may or may not fire on a given seed, and the report always does.
+  const dialog = page.getByRole('dialog');
+  for (let guard = 0; guard < 8; guard += 1) {
+    if (!(await dialog.isVisible().catch(() => false))) break;
+    const heading = await dialog.getByRole('heading').first().textContent();
+    if (heading?.startsWith('Month')) {
+      await dialog.getByRole('button', { name: 'Next month' }).click();
+      break;
+    }
+    const choice = dialog.locator('.choice:not(:disabled)').first();
+    if (await choice.isVisible().catch(() => false)) await choice.click();
+    await dialog.getByRole('button', { name: 'Continue' }).click();
+  }
+
+  await tab(page, 'Initiatives').click();
+  await expect(page.locator('.initiative:not(.initiative--offered)').first()).toContainText(
+    '2 of',
+  );
+});
+
+test('a house rule can be set, and unset', async ({ page }) => {
+  await page.goto('/?seed=42');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+
+  await page.getByRole('button', { name: 'New game' }).click();
+  await page.getByLabel('Your name').fill('Renata Vos');
+  await page.getByRole('button', { name: /^Legal/ }).click();
+  await page.getByRole('button', { name: 'Take the job' }).click();
+
+  const poles = page.locator('.directive').first().locator('.directive__pole');
+  await expect(poles).toHaveCount(2);
+
+  // Both sides state their cost as flatly as their benefit — neither is the right answer.
+  await expect(poles.first()).toHaveAttribute('aria-pressed', 'false');
+  await poles.first().click();
+  await expect(poles.first()).toHaveAttribute('aria-pressed', 'true');
+  await expect(poles.last()).toHaveAttribute('aria-pressed', 'false');
+
+  // It holds across a reload, because it is a standing rule rather than this month's plan.
+  await page.reload();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(poles.first()).toHaveAttribute('aria-pressed', 'true');
+
+  // And pressing the pole you already hold releases it: "we have not decided" stays reachable.
+  await poles.first().click();
+  await expect(poles.first()).toHaveAttribute('aria-pressed', 'false');
+});
+
+test('taking a post warns you first, and lets you bring somebody', async ({ page }) => {
+  await resume(page, withAnOffer(managing));
+  await tab(page, 'Career').click();
+
+  await page.locator('.offer').first().getByRole('button', { name: 'Accept' }).click();
+
+  // The warning is a decision, not a confirmation: it says what is lost and offers the one
+  // choice the player actually has about it.
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: 'Before you go' })).toBeVisible();
+
+  const boxes = dialog.locator('.keep__row input');
+  const people = await boxes.count();
+  expect(people).toBeGreaterThan(0);
+
+  await boxes.first().check();
+  await boxes.nth(1).check();
+
+  // Two is the limit, so any third is closed off rather than silently ignored.
+  if (people > 2) await expect(boxes.nth(2)).toBeDisabled();
+
+  const broughtName = await dialog.locator('.keep__name').first().textContent();
+  await dialog.getByRole('button', { name: 'Take the post' }).click();
+
+  await tab(page, 'Team').click();
+  // They arrive with their skill, morale and tenure intact — the point of bringing them.
+  await expect(page.locator('.roster')).toContainText(broughtName!);
+});
+
+test('the ending says what the career left behind, not only what it earned', async ({ page }) => {
+  // A finished career, played out rather than stopped at a tier: the epilogue is about the whole
+  // of it. Reaching an ending is the only way to see this screen, so the fixture has to be one.
+  const finished = (() => {
+    for (let attempt = 1; attempt <= 200; attempt += 1) {
+      const run = playCareer({ seed: attempt * 3571 + 11, department: 'social' });
+      if (run.finalState.ending && run.finalState.alumni.length > 0) return run.finalState;
+    }
+    throw new Error('Could not reach an ending with anybody on the roster');
+  })();
+
+  await resume(page, finished);
+
+  await expect(page.getByRole('heading', { name: 'What is left behind' })).toBeVisible();
+
+  // The stats above say what the career was worth to the player. This says what it was worth to
+  // anybody else, which is the question the game is actually about.
+  await expect(page.locator('.epilogue')).toContainText('People who worked for you');
+  expect(await page.locator('.epilogue__list li').count()).toBeGreaterThan(0);
 });

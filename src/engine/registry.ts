@@ -6,7 +6,15 @@
  * grow without the engine noticing.
  */
 
-import type { Department, DepartmentId, GameEvent, Post, TaskTemplate } from './types';
+import type {
+  Department,
+  DepartmentId,
+  GameEvent,
+  InitiativeTemplate,
+  Post,
+  TaskTemplate,
+  WorldBody,
+} from './types';
 
 export interface ContentRegistry {
   departments: Record<DepartmentId, Department>;
@@ -16,6 +24,10 @@ export interface ContentRegistry {
   events: Record<string, GameEvent>;
   /** Names drawn on for new staff. Proper nouns, so literal strings rather than keys. */
   staffNames: string[];
+  /** The public bodies that make up the country, which drift with or without the player. */
+  bodies: WorldBody[];
+  /** Undertakings the player may start, in menu order. */
+  initiatives: InitiativeTemplate[];
 }
 
 export function getPost(registry: ContentRegistry, id: string): Post {
