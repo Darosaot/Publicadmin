@@ -37,6 +37,7 @@ import {
   TRAINING_SKILL_GAIN,
 } from './constants';
 import { remember } from './alumni';
+import { knownBodies } from './world';
 import { hiringMoraleDelta, hiringSkillDelta, hoursMoraleDelta } from './directives';
 import { getPost, type ContentRegistry } from './registry';
 import { nextChance, nextInt, pick } from './rng';
@@ -150,11 +151,20 @@ export function setupTeamForPost(
         : [];
 
     // A post with no unit cannot keep anyone, however much you wanted to.
+    //
+    // The flag is the engine stating a fact and leaving content to decide what it means, the same
+    // arrangement `minister_track` uses. Handing over eight people you spent nine years building
+    // is a scene, and the engine has no business writing it.
+    const remembered = remember(state, state.staff);
     return {
-      ...remember(state, state.staff),
+      ...remembered,
       staff: [],
       hiring: undefined,
       budget: undefined,
+      flags:
+        state.staff.length > 0
+          ? { ...remembered.flags, handed_over_unit: true }
+          : remembered.flags,
       log: [...state.log, ...handover].slice(-LOG_LIMIT),
     };
   }
@@ -335,9 +345,15 @@ export function resolveStaffMonth(
   }
 
   if (poached.length > 0) {
+    // Somebody good does not vanish, they go somewhere — and where they went should be a place
+    // the player has heard of, or the sentence "they are at Eastmoor now" means nothing. Picking
+    // the worst-run body the player knows is not arbitrary: struggling institutions are the ones
+    // recruiting, and it puts your best former officer where the trouble is.
+    const known = knownBodies(next, registry);
     next = remember(
       next,
       next.staff.filter((s) => poached.includes(s.id)),
+      known[0]?.id,
     );
     next = {
       ...next,

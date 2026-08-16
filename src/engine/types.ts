@@ -299,6 +299,20 @@ export interface GameEvent {
   once?: boolean;
   /** Turns before this event may be drawn again. Defaults to RANDOM_EVENT_COOLDOWN. */
   cooldown?: number;
+  /**
+   * This event's prose names a former colleague through `{alum}`.
+   *
+   * One declaration doing two jobs. It makes the event ineligible when there is nobody on the
+   * roster to name — prose reading "…and then said nothing" is worse than an event that does not
+   * fire — and it tells `drawEvents` which way to point `alum.spotlight`: at whoever thought best
+   * of you, or whoever thought worst.
+   *
+   * `validate.ts` checks this in both directions. Prose using `{alum}` without the declaration
+   * fails the build; the declaration without `{alum}` in the prose fails it too. The second
+   * direction is the one that matters: it is what stops the interpolation channel being built and
+   * then quietly used by nothing, which is exactly what happened the first time.
+   */
+  namesAlumnus?: 'warm' | 'cold';
   choices: Choice[];
 }
 

@@ -147,6 +147,21 @@ export const DELEGATION_CAPACITY: Record<'junior' | 'officer' | 'senior', number
 };
 
 /**
+ * How far an entirely neglected institution can fall on its own.
+ *
+ * Drift was calibrated per month and never checked against a career. At -0.09 a month Eastmoor
+ * went from 34 to 4 over twenty-eight years — total collapse, arriving whatever the player did —
+ * while the three-stage chain written to rescue it tops out at +23. The content and the numbers
+ * were telling opposite stories.
+ *
+ * The fix is not mean reversion, which was considered and rejected for good reasons: a mark that
+ * fades is a mark you did not make. Decay instead *decelerates* as a body approaches this floor,
+ * because a place that is already badly run has less left to lose. Neglect still ruins somewhere;
+ * it no longer annihilates it, and a player's work stays visible against it.
+ */
+export const DRIFT_FLOOR = 20;
+
+/**
  * How many former colleagues a career remembers.
  *
  * Twelve, and the oldest is dropped. Not a simulation limit — a save-size one, and roughly the

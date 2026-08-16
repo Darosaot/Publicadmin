@@ -16,6 +16,26 @@ export function TurnReportModal({ game }: { game: GameState }) {
 
   const moved = STAT_IDS.filter((stat) => (report.statDeltas[stat] ?? 0) !== 0);
 
+  const landed = report.initiativesCompleted ?? [];
+  const dropped = report.initiativesLapsed ?? [];
+  const promotions = report.team?.promotions ?? [];
+
+  /**
+   * Whether the month is genuinely empty.
+   *
+   * This used to ask only about tasks, which meant a month in which a nine-year initiative
+   * finally landed announced itself as "nothing finished". Anything the report can show has to be
+   * counted here, or the headline contradicts the body.
+   */
+  const nothingHappened =
+    report.completed.length === 0 &&
+    report.failed.length === 0 &&
+    landed.length === 0 &&
+    dropped.length === 0;
+
+  const initiativeName = (id: string) =>
+    t(registry.initiatives.find((template) => template.id === id)?.titleKey ?? id);
+
   return (
     <Modal
       title={t('report.heading', { turn: report.turn })}
@@ -30,8 +50,36 @@ export function TurnReportModal({ game }: { game: GameState }) {
         </button>
       }
     >
-      {report.completed.length === 0 && report.failed.length === 0 && (
-        <p className="muted">{t('report.nothing_finished')}</p>
+      {nothingHappened && <p className="muted">{t('report.nothing_finished')}</p>}
+
+      {/*
+        First, and above the files, because it is the largest thing that can happen in a month.
+        A file is four weeks of work; an initiative landing is the end of something the player
+        chose years ago and has been paying for ever since.
+      */}
+      {(landed.length > 0 || dropped.length > 0) && (
+        <section className="report__section">
+          <h3 className="report__heading">{t('report.initiatives_heading')}</h3>
+          <ul className="report__list">
+            {landed.map((id) => (
+              <li key={`i${id}`}>
+                <span>{initiativeName(id)}</span>
+                <span className="tag tag--excellent">{t('report.initiative_done')}</span>
+              </li>
+            ))}
+            {dropped.map((id) => (
+              <li key={`l${id}`}>
+                <span>{initiativeName(id)}</span>
+                <span className="tag tag--poor">{t('report.initiative_lapsed')}</span>
+              </li>
+            ))}
+          </ul>
+          {landed.map((id) => (
+            <p key={`p${id}`} className="report__initiative">
+              {t(registry.initiatives.find((template) => template.id === id)?.completeKey ?? '')}
+            </p>
+          ))}
+        </section>
       )}
 
       {report.completed.length > 0 && (
@@ -95,6 +143,7 @@ export function TurnReportModal({ game }: { game: GameState }) {
       {report.team && (report.team.delegatedProgress.length > 0 ||
         report.team.departures.length > 0 ||
         report.team.arrivals.length > 0 ||
+        promotions.length > 0 ||
         report.team.budgetVerdict) && (
         <section className="report__section">
           <h3 className="report__heading">{t('report.team_heading')}</h3>
@@ -116,10 +165,28 @@ export function TurnReportModal({ game }: { game: GameState }) {
                 <span className="tag tag--excellent">{t('team.grade.' + item.seniority)}</span>
               </li>
             ))}
+            {promotions.map((item, index) => (
+              <li key={`p${index}`}>
+                <span>{t('report.staff_promoted', { name: item.name })}</span>
+                <span className="tag tag--excellent">{t('team.grade.' + item.to)}</span>
+              </li>
+            ))}
             {report.team.departures.map((item, index) => (
               <li key={`x${index}`}>
-                <span>{t('report.staff_left', { name: item.name })}</span>
-                <span className="tag tag--poor">{t('report.failed')}</span>
+                {/*
+                  The engine has always distinguished these and the report has always shown them
+                  identically. Somebody leaving because you did not look after them and somebody
+                  leaving because they were good enough to be wanted elsewhere are different
+                  months, and the second one is not a failure.
+                */}
+                <span>
+                  {item.reason === 'promoted_away'
+                    ? t('report.staff_poached', { name: item.name })
+                    : t('report.staff_left', { name: item.name })}
+                </span>
+                <span className={`tag tag--${item.reason === 'promoted_away' ? 'good' : 'poor'}`}>
+                  {t(`report.departure_${item.reason}`)}
+                </span>
               </li>
             ))}
           </ul>

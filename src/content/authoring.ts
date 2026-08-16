@@ -65,6 +65,8 @@ export interface EventSpec {
   once?: boolean;
   cooldown?: number;
   conditions?: Condition;
+  /** See `GameEvent.namesAlumnus`. Prose using `{alum}` must declare this, and vice versa. */
+  namesAlumnus?: 'warm' | 'cold';
   choices: ChoiceSpec[];
 }
 
@@ -104,6 +106,7 @@ export function defineEvent(id: string, spec: EventSpec): GameEvent {
     weight: spec.weight ?? 10,
     once: spec.once,
     cooldown: spec.cooldown,
+    namesAlumnus: spec.namesAlumnus,
     choices,
   };
 }

@@ -9,6 +9,7 @@
  *   3. random events drawn by weight from the pool matching this department and level
  */
 
+import { coldestAlumnus, spotlight, warmestAlumnus } from './alumni';
 import { MAX_EVENTS_PER_TURN, RANDOM_EVENT_COOLDOWN, SECOND_EVENT_CHANCE } from './constants';
 import { applyEffects, conditionMet } from './effects';
 import type { ContentRegistry } from './registry';
@@ -24,11 +25,30 @@ export function hasFired(state: GameState, eventId: string): boolean {
   return state.firedEvents.includes(eventId);
 }
 
+/**
+ * Whether there is anybody for this event's prose to be about.
+ *
+ * An event that names a former colleague cannot fire before there is one. Prose with an empty
+ * `{alum}` in it reads as a sentence with a hole, which is worse than an event that waits.
+ */
+function hasSomebodyToName(state: GameState, event: GameEvent): boolean {
+  if (event.namesAlumnus === undefined) return true;
+  return aimAt(state, event) !== undefined;
+}
+
+/** Which alumnus this event is about, if any. */
+function aimAt(state: GameState, event: GameEvent): number | undefined {
+  if (event.namesAlumnus === 'cold') return coldestAlumnus(state);
+  if (event.namesAlumnus === 'warm') return warmestAlumnus(state);
+  return undefined;
+}
+
 export function eligibleRandomEvents(state: GameState, registry: ContentRegistry): GameEvent[] {
   return Object.values(registry.events).filter((event) => {
     if (event.kind !== 'random') return false;
     if (event.once && hasFired(state, event.id)) return false;
     if (isOnCooldown(state, event)) return false;
+    if (!hasSomebodyToName(state, event)) return false;
     return conditionMet(state, event.conditions);
   });
 }
@@ -37,6 +57,7 @@ export function eligibleMilestones(state: GameState, registry: ContentRegistry):
   return Object.values(registry.events).filter((event) => {
     if (event.kind !== 'milestone') return false;
     if (hasFired(state, event.id)) return false;
+    if (!hasSomebodyToName(state, event)) return false;
     return conditionMet(state, event.conditions);
   });
 }
@@ -89,6 +110,12 @@ export function drawEvents(state: GameState, registry: ContentRegistry): GameSta
       cooldowns[event.id] = next.turn + (event.cooldown ?? RANDOM_EVENT_COOLDOWN);
     }
   }
+
+  // Point the spotlight before the prose is rendered. Only one event a month may name somebody —
+  // two would be pointing at the same person or fighting over the flag — so the first that asks
+  // for one gets it, and the rest were made ineligible above if there was nobody to ask for.
+  const naming = chosen.find((event) => event.namesAlumnus !== undefined);
+  next = spotlight(next, naming ? aimAt(next, naming) : undefined);
 
   const pendingEvents: PendingEvent[] = chosen.map((event) => ({ eventId: event.id }));
 

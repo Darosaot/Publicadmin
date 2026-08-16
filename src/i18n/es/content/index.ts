@@ -13,6 +13,7 @@ import { strings as castPeople } from './cast';
 import { strings as departments } from './departments';
 import { strings as directives } from './directives';
 import { strings as endings } from './endings';
+import { strings as eventsAlumni } from './events/alumni';
 import { strings as eventsCast } from './events/cast';
 import { strings as eventsCommon } from './events/common';
 import { strings as eventsCommonExtra } from './events/common-extra';
@@ -49,6 +50,7 @@ const dictionaries = [
   departments,
   directives,
   endings,
+  eventsAlumni,
   eventsCast,
   eventsCommon,
   eventsCommonExtra,

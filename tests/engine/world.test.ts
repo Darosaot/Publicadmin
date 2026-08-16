@@ -13,6 +13,7 @@ import {
   standingFlag,
 } from '../../src/engine/world';
 import type { GameState } from '../../src/engine/types';
+import { DRIFT_FLOOR } from '../../src/engine/constants';
 import { makeQuietRegistry } from './fixtures';
 
 const registry = makeQuietRegistry();
@@ -91,9 +92,28 @@ describe('drift', () => {
     expect(driftWorld(game(), registry, 9).flags).toEqual(driftWorld(game(), registry, 9).flags);
   });
 
-  it('will not rot a place past nothing', () => {
+  /**
+   * This used to assert a neglected body bottomed out at zero. It did, and that was the bug: at
+   * -0.09 a month the district council in the shipped content fell from 34 to 4 across a career,
+   * so no amount of player work could ever show against it. Decay now decelerates toward
+   * `DRIFT_FLOOR` — not mean reversion, which would make the player's own gains fade too, but the
+   * observation that a place with almost nothing left has almost nothing left to lose.
+   */
+  it('lets neglect ruin a place but not annihilate it', () => {
     const after = driftWorld(game(), registry, 10_000);
-    expect(bodyCondition(after, sinking)).toBe(0);
+    const settled = bodyCondition(after, sinking);
+
+    expect(settled).toBeGreaterThan(DRIFT_FLOOR - 1);
+    expect(settled).toBeLessThan(DRIFT_FLOOR + 1);
+    // And it is still a wreck: nothing here pulls it back toward where it started.
+    expect(settled).toBeLessThan(sinking.baselineCondition);
+  });
+
+  it('does not slow a place that somebody else is improving', () => {
+    // Deceleration is about having less left to lose. A body drifting upward is one being worked
+    // on, and there is no reason for that to tail off as it gets better.
+    const after = driftWorld(game(), registry, 40);
+    expect(bodyCondition(after, rising)).toBeCloseTo(rising.baselineCondition + 0.25 * 40, 5);
   });
 
   /**

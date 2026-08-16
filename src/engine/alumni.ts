@@ -86,7 +86,19 @@ export function spotlight(state: GameState, index: number | undefined): GameStat
  * comparison the tie would fall to whoever happened to be first in the roster. Falling through to
  * array position instead keeps "most recent" meaningful, because `remember` appends in order.
  */
+export function coldestAlumnus(state: GameState): number | undefined {
+  return pickAlumnus(state, (candidate, incumbent) => candidate.regard < incumbent.regard);
+}
+
 export function warmestAlumnus(state: GameState): number | undefined {
+  return pickAlumnus(state, (candidate, incumbent) => candidate.regard > incumbent.regard);
+}
+
+/** Whichever end of the roster `better` asks for, with ties falling to whoever left most recently. */
+function pickAlumnus(
+  state: GameState,
+  better: (candidate: DepartedStaff, incumbent: DepartedStaff) => boolean,
+): number | undefined {
   if (state.alumni.length === 0) return undefined;
 
   let best = 0;
@@ -94,7 +106,7 @@ export function warmestAlumnus(state: GameState): number | undefined {
     const candidate = state.alumni[i]!;
     const incumbent = state.alumni[best]!;
     if (
-      candidate.regard > incumbent.regard ||
+      better(candidate, incumbent) ||
       (candidate.regard === incumbent.regard && candidate.leftOnTurn >= incumbent.leftOnTurn)
     ) {
       best = i;
