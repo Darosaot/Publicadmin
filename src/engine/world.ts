@@ -25,7 +25,7 @@
  * they get better only because somebody did something.
  */
 
-import { STAT_MAX, STAT_MIN } from './constants';
+import { DRIFT_FLOOR, STAT_MAX, STAT_MIN } from './constants';
 import { flagValue } from './effects';
 import type { ContentRegistry } from './registry';
 import type { GameState, WorldBody } from './types';
@@ -42,10 +42,13 @@ export function knownFlag(bodyId: string): string {
   return `body.${bodyId}.known`;
 }
 
+function clampCondition(value: number): number {
+  return Math.max(STAT_MIN, Math.min(STAT_MAX, value));
+}
+
 /** How well this place is actually run, 0–100. */
 export function bodyCondition(state: GameState, body: WorldBody): number {
-  const moved = body.baselineCondition + flagValue(state, conditionFlag(body.id));
-  return Math.max(STAT_MIN, Math.min(STAT_MAX, moved));
+  return clampCondition(body.baselineCondition + flagValue(state, conditionFlag(body.id)));
 }
 
 /**
@@ -87,13 +90,25 @@ export function driftWorld(
     if (body.drift === 0) continue;
 
     const flag = conditionFlag(body.id);
-    const moved = flagValue(state, flag) + body.drift * months;
 
     // Deviation is clamped so that the condition it implies stays inside 0–100, rather than
     // letting a body rot to -400 and need four hundred points of work to show any change.
     const floor = STAT_MIN - body.baselineCondition;
     const ceiling = STAT_MAX - body.baselineCondition;
-    flags[flag] = Math.max(floor, Math.min(ceiling, moved));
+
+    // A month at a time, because decay decelerates and so is path-dependent. Applying six months
+    // in one step would use the deceleration as it stood at the start of a Director-General's
+    // cycle and decay the country faster than the same six months seen from a junior desk — the
+    // clock would change the world rather than only the player's view of it. `monthsPerTurn` is
+    // at most six, so this costs nothing.
+    let deviation = flagValue(state, flag);
+    for (let month = 0; month < months; month += 1) {
+      const condition = clampCondition(body.baselineCondition + deviation);
+      deviation += body.drift * decay(body, condition);
+      deviation = Math.max(floor, Math.min(ceiling, deviation));
+    }
+
+    flags[flag] = deviation;
   }
 
   return { ...state, flags };
@@ -119,6 +134,26 @@ export function learnLocalBodies(state: GameState, registry: ContentRegistry): G
   const flags = { ...state.flags };
   for (const body of local) flags[knownFlag(body.id)] = true;
   return { ...state, flags };
+}
+
+/**
+ * How much of a body's decay still applies, from 1 at its founding condition to 0 at `DRIFT_FLOOR`.
+ *
+ * Only decay decelerates. A body drifting *upward* is one somebody else is actively improving, and
+ * there is no reason for that to slow down as it gets better.
+ *
+ * This is not mean reversion — nothing pulls a body back toward where it started, and a player's
+ * improvement is permanent. It is the observation that an institution which has already lost most
+ * of what it had has less left to lose, and the reason a thirty-year career can still leave a mark
+ * on somewhere that was falling when it arrived.
+ */
+function decay(body: WorldBody, condition: number): number {
+  if (body.drift >= 0) return 1;
+
+  const room = body.baselineCondition - DRIFT_FLOOR;
+  if (room <= 0) return 0;
+
+  return Math.max(0, Math.min(1, (condition - DRIFT_FLOOR) / room));
 }
 
 /** Bodies the player has looked at, worst first — the order a Country screen wants. */

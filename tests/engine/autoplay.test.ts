@@ -8,6 +8,9 @@ import {
   type DepartmentId,
   type TrackId,
 } from '../../src/engine/types';
+import { bodies } from '../../src/content';
+import { DRIFT_FLOOR } from '../../src/engine/constants';
+import { bodyCondition } from '../../src/engine/world';
 import { playCareer, playMany, summarise } from './autoplay';
 
 /**
@@ -176,6 +179,73 @@ describe('the initiatives the player chooses', () => {
         `nobody on ${track} ever starts an initiative`,
       ).toBe(true);
     }
+  });
+});
+
+/**
+ * The country, measured rather than asserted.
+ *
+ * These were declared in the plan as guardrails and then not written, which is how the drift
+ * numbers went unexamined: at -0.09 a month Eastmoor fell from 34 to 4 over a career, so nothing
+ * the player did to it could ever show. The first version of the both-directions test failed on
+ * its first run and was right to.
+ */
+describe('the country moves, and not only downhill', () => {
+  const runs = playMany(seeds.slice(0, 10), DEPARTMENT_IDS);
+
+  const movement = runs.flatMap((run) =>
+    bodies.map((body) => bodyCondition(run.finalState, body) - body.baselineCondition),
+  );
+
+  it('is mostly falling, because that is what neglect looks like', () => {
+    expect(movement.filter((m) => m <= -2).length).toBeGreaterThan(movement.length / 4);
+  });
+
+  it('but somewhere ends better than it was founded', () => {
+    // The half that was silently impossible before the decay floor existed.
+    expect(movement.filter((m) => m >= 2).length).toBeGreaterThan(0);
+  });
+
+  it('leaves a mark on a decent share of careers rather than a lucky few', () => {
+    const marked = runs.filter((run) =>
+      bodies.some((body) => bodyCondition(run.finalState, body) - body.baselineCondition >= 2),
+    );
+    expect(marked.length / runs.length).toBeGreaterThan(0.1);
+  });
+
+  it('never lets an unattended place fall through the floor', () => {
+    // `DRIFT_FLOOR` is what stops decay annihilating a body over three hundred months. A career
+    // ending below it means the deceleration is not working.
+    expect(Math.min(...runs.flatMap((run) => bodies.map((b) => bodyCondition(run.finalState, b)))))
+      .toBeGreaterThanOrEqual(DRIFT_FLOOR - 1);
+  });
+});
+
+/**
+ * Directives, A/B on identical seeds.
+ *
+ * `useDirectives` was plumbed through `playCareer` and then never passed by any test — a
+ * write-only option, which is the same failure as a write-only flag and just as invisible.
+ */
+describe('the house rules change the career', () => {
+  const withRules = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS));
+  const without = summarise(
+    playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useDirectives: false }),
+  );
+
+  it('costs stress when the office takes the pressure itself', () => {
+    // The bot holds `hours: take it yourself`, so it should be carrying more than a bot with no
+    // house rule at all. A directive that changed nothing measurable would be decoration.
+    expect(withRules.meanStress).toBeGreaterThan(without.meanStress);
+  });
+
+  it('buys speed when the office moves fast', () => {
+    // And `rigour: move fast`, which takes a point off every file.
+    expect(withRules.completionRate).toBeGreaterThan(without.completionRate);
+  });
+
+  it('does not add up to a free win', () => {
+    expect(Math.abs(withRules.meanLevel - without.meanLevel)).toBeLessThan(0.5);
   });
 });
 
