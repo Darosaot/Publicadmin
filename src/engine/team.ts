@@ -151,11 +151,20 @@ export function setupTeamForPost(
         : [];
 
     // A post with no unit cannot keep anyone, however much you wanted to.
+    //
+    // The flag is the engine stating a fact and leaving content to decide what it means, the same
+    // arrangement `minister_track` uses. Handing over eight people you spent nine years building
+    // is a scene, and the engine has no business writing it.
+    const remembered = remember(state, state.staff);
     return {
-      ...remember(state, state.staff),
+      ...remembered,
       staff: [],
       hiring: undefined,
       budget: undefined,
+      flags:
+        state.staff.length > 0
+          ? { ...remembered.flags, handed_over_unit: true }
+          : remembered.flags,
       log: [...state.log, ...handover].slice(-LOG_LIMIT),
     };
   }

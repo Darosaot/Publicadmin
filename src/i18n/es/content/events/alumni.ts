@@ -1,4 +1,19 @@
 export const strings: Record<string, string> = {
+  /* ------------------------------------------------------------- traspaso */
+
+  'evt.handover.title': 'La presentación',
+  'evt.handover.body':
+    'Las once, y presentas a tu gente a la persona que va a hacer tu trabajo. Dos de tus técnicos hacen buenas preguntas. Uno no levanta la vista. El resto entendió lo que significaba esto hace quince días y está siendo educado al respecto, que es peor que si no lo fueran.',
+  'evt.handover.choice.true': 'Decir algo verdadero',
+  'evt.handover.choice.true.out.0':
+    'Les dices en qué es bueno cada uno, por su nombre, delante de quien te sustituye, que es lo único útil que te queda por darles y lleva cuatro minutos. Alguien lo apunta. Años después te enteras de que esa fue la recomendación que sirvió.',
+  'evt.handover.choice.usual': 'Decir lo de siempre',
+  'evt.handover.choice.usual.out.0':
+    'Dices lo de siempre sobre un gran equipo y una etapa nueva y apasionante. Se acaba en noventa segundos y todos lo agradecen, y le das vueltas en el coche y otra vez unos seis años después.',
+  'evt.handover.choice.protect': 'Dedicarles tu última hora',
+  'evt.handover.choice.protect.out.0':
+    'No vas a tu propio pote de despedida. Pasas la hora con quien te sustituye repasando a cuál de ellos están a punto de gestionar mal y de qué manera, y te escucha, y cuaja más o menos la mitad.',
+
   /* -------------------------------------------------------------- cordiales */
 
   'evt.alum.other_side.title': 'Al otro lado de la mesa',

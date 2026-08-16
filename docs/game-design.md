@@ -632,6 +632,11 @@ notice.
   having: skill gives them the option, morale decides whether they use it.
 - **`previewPostChange`** is pure and separate from `acceptOffer`, because the player is entitled
   to know before they decide.
+- **The expert fork gets a scene.** Taking a post with no unit hands your whole office to somebody
+  else; that used to be one log line after the fact. `setupTeamForPost` now sets
+  `handed_over_unit` and content owns the meeting where you introduce your people to your
+  successor — the engine states a fact, content decides what it means, the same arrangement
+  `minister_track` has always used.
 
 Event prose can name one of them, via `alum.spotlight` — a **1-based** index into `alumni`. The
 1-based part is load-bearing: an unset flag reads as 0, so a 0-based index would make "the first

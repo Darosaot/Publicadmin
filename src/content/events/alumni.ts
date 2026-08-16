@@ -24,6 +24,54 @@ import { defineEvent } from '../authoring';
  * enough time has passed for somebody to have gone somewhere and become somebody.
  */
 export const alumniEvents = [
+  /* ------------------------------------------------------------- hand-over */
+
+  /**
+   * The expert fork hands your whole unit to somebody else.
+   *
+   * `handed_over_unit` is set by `setupTeamForPost` and read only here — the engine states the
+   * fact, content decides what it means, the same arrangement `minister_track` uses. It fires
+   * once, on the cycle after the move, because it is the meeting rather than the decision.
+   *
+   * Not gated on `namesAlumnus`: the whole unit went at once, so pointing at one of them would be
+   * arbitrary. The scene is about all of them.
+   */
+  defineEvent('evt.handover', {
+    kind: 'milestone',
+    title: 'The introduction',
+    body: 'Eleven o’clock, and you introduce your people to the person who will be doing your job. Two of your officers ask good questions. One does not look up. The rest worked out what this meant a fortnight ago and are being polite about it, which is worse than if they were not.',
+    weight: 30,
+    once: true,
+    conditions: { requiredFlags: ['handed_over_unit'] },
+    choices: [
+      {
+        id: 'true',
+        label: 'Say something true',
+        text: 'You tell them what each of them is good at, by name, in front of the person taking over, which is the only useful thing you have left to give them and takes four minutes. Somebody writes it down. You find out years later that it was the reference that mattered.',
+        effects: [
+          { kind: 'stat', stat: 'integrity', delta: 4 },
+          { kind: 'stat', stat: 'stress', delta: -4 },
+        ],
+      },
+      {
+        id: 'usual',
+        label: 'Say the usual thing',
+        text: 'You say the usual thing about a strong team and an exciting new chapter. It is over in ninety seconds and everybody is grateful, and you think about it in the car and again about six years later.',
+        effects: [{ kind: 'stat', stat: 'stress', delta: 4 }],
+      },
+      {
+        id: 'protect',
+        label: 'Spend your last hour on them',
+        text: 'You do not go to your own leaving drinks. You spend the hour with your successor going through which of them is about to be badly managed and how, and they listen, and about half of it takes.',
+        effects: [
+          { kind: 'stat', stat: 'politicalCapital', delta: -4 },
+          { kind: 'stat', stat: 'integrity', delta: 5 },
+          { kind: 'stat', stat: 'reputation', delta: 2 },
+        ],
+      },
+    ],
+  }),
+
   /* ------------------------------------------------------------------ warm */
 
   defineEvent('evt.alum.other_side', {

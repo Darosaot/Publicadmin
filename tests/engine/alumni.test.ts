@@ -215,3 +215,36 @@ describe('resigning', () => {
     expect(state.alumni[0]?.regard).toBe(regardFrom(doomed));
   });
 });
+
+describe('handing the whole unit over', () => {
+  /**
+   * The expert fork destroys an office it took years to build. That used to be a log line; it is
+   * now a scene, reached the way every other scene is — the engine states a fact and content
+   * decides what it means, exactly as `minister_track` has always worked.
+   */
+  it('leaves the engine a fact for content to make something of', () => {
+    const managed = setupTeamForPost(
+      { ...game(), player: { ...game().player, postId: 'post.test.head', level: 3 } },
+      registry,
+    );
+    expect(managed.staff.length).toBeGreaterThan(0);
+
+    const specialist = setupTeamForPost(
+      { ...managed, player: { ...managed.player, postId: 'post.test.specialist', track: 'expert' } },
+      registry,
+    );
+
+    expect(specialist.flags.handed_over_unit).toBe(true);
+  });
+
+  it('says nothing when there was no unit to hand over', () => {
+    // Arriving at a specialist post from a desk with nobody on it is not a hand-over, and firing
+    // a scene about introducing your people to your successor would be absurd.
+    const soloist = setupTeamForPost(
+      { ...game(), player: { ...game().player, postId: 'post.test.specialist', track: 'expert' } },
+      registry,
+    );
+
+    expect(soloist.flags.handed_over_unit).toBeUndefined();
+  });
+});
