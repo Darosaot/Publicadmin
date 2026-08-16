@@ -1,6 +1,6 @@
 import { bodies, registry } from '../../content';
 import { doneFlag } from '../../engine/initiatives';
-import { bodyCondition, bodyKnown } from '../../engine/world';
+import { bodyCondition, bodyKnown, contributionTo } from '../../engine/world';
 import type { GameState } from '../../engine/types';
 import { useT } from '../../i18n';
 
@@ -13,21 +13,23 @@ import { useT } from '../../i18n';
  *
  * Only places the player actually touched appear. A list of institutions that drifted on their own
  * while you were busy elsewhere is not an epilogue, it is a weather report — so a body qualifies
- * only if it moved by more than its own drift could explain, or if the player finished something
- * aimed at it.
+ * only if the player finished something aimed at it.
  */
-
-/** Movement smaller than this is drift, and drift is not an achievement. */
-const MEANINGFUL = 5;
 
 export function Epilogue({ game }: { game: GameState }) {
   const t = useT();
 
+  // Only places the player actually worked on. A body that drifted while they were busy elsewhere
+  // is not part of anybody's record.
   const touched = bodies
     .filter((body) => bodyKnown(game, body))
-    .map((body) => ({ body, moved: bodyCondition(game, body) - body.baselineCondition }))
-    .filter(({ moved }) => Math.abs(moved) >= MEANINGFUL)
-    .sort((a, b) => b.moved - a.moved);
+    .map((body) => ({
+      body,
+      contributed: contributionTo(game, registry, body.id),
+      net: bodyCondition(game, body) - body.baselineCondition,
+    }))
+    .filter(({ contributed }) => contributed !== 0)
+    .sort((a, b) => b.contributed - a.contributed);
 
   const finished = registry.initiatives.filter((template) => game.flags[doneFlag(template.id)]);
 
@@ -64,15 +66,27 @@ export function Epilogue({ game }: { game: GameState }) {
       )}
 
       {touched.length > 0 && (
-        <div className="epilogue__block">
+        <div className="epilogue__block epilogue__block--country">
           <h3 className="epilogue__title">{t('epilogue.country_heading')}</h3>
           <ul className="epilogue__list">
-            {touched.map(({ body, moved }) => (
+            {touched.map(({ body, contributed, net }) => (
               <li key={body.id}>
                 <span className="epilogue__name">{body.name}</span>{' '}
-                <span className={moved > 0 ? 'epilogue__up' : 'epilogue__down'}>
-                  {moved > 0 ? t('epilogue.left_better') : t('epilogue.left_worse')}
-                </span>
+                {/*
+                  Three outcomes, and the middle one is the honest and most common: the work
+                  landed and the place still ended lower than it started, because thirty years of
+                  neglect outruns one person. Reporting that as failure would be a lie in the
+                  other direction — it fell less far than it would have.
+                */}
+                {contributed < 0 ? (
+                  <span className="epilogue__down">{t('epilogue.left_worse')}</span>
+                ) : net >= 0 ? (
+                  <span className="epilogue__up">{t('epilogue.left_better')}</span>
+                ) : (
+                  <span className="epilogue__slowed">
+                    {t('epilogue.slowed', { points: contributed })}
+                  </span>
+                )}
               </li>
             ))}
           </ul>

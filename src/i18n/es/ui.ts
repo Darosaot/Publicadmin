@@ -92,6 +92,7 @@ export const uiStrings: Record<string, string> = {
   'epilogue.now_at': '— ahora en {body}',
   'report.budget_delta': 'Frente a la asignación: {amount}',
   'team.average_skill': 'Capacidad media: {value}',
+  'epilogue.slowed': 'sigue cayendo, {points} puntos más despacio gracias a ti',
   'action.career': 'Carrera',
   'action.team': 'Equipo',
   'action.dashboard': 'Mesa',

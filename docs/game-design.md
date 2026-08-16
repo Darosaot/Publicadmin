@@ -585,6 +585,43 @@ Two deliberate omissions:
 Drift runs in `beginNextTurn` scaled by `monthsPerTurn`, so a Director-General's cycle moves the
 country half a year and a junior's moves it one month.
 
+**Decay decelerates; improvement does not.** A place falling at −0.5 a month loses seventeen points
+a decade, and over a forty-three-year career that outruns every rescue chain in the game — the
+first version had Eastmoor fall 34 → 4 while the initiatives aimed at it topped out at +23, so the
+content was unwinnable by construction and nothing said so. `decay()` therefore scales a body's
+drift from 1 at its founding condition to 0 at `DRIFT_FLOOR`: an institution that has already lost
+most of what it had has less left to lose. Upward drift is somebody else actively improving the
+place and has no reason to slow down, so it is left alone.
+
+Because deceleration is path-dependent, `driftWorld` steps **one month at a time** rather than
+multiplying by `monthsPerTurn`. Otherwise a Director-General's six-month cycle would decay a place
+further than six junior months, and the country would move at a speed that depended on the player's
+rank.
+
+### Attribution, not net movement
+
+`contributionTo(state, registry, bodyId)` counts only what the player's **finished initiatives**
+paid into a body's condition flag. The epilogue's "places you changed" is built on it.
+
+The obvious implementation — list every body more than five points from its baseline — is wrong,
+and shipped once. After forty-three years of drift that is most of the country, so a career that
+had worked on two institutions was shown eight, six of them labelled "worse than you found it" for
+decaying on their own while the player was somewhere else. It blamed people for entropy and called
+it their record. It also *dropped* a place the player had genuinely rescued, because the rescue and
+the drift had very nearly cancelled out.
+
+The three outcomes the screen can report, and why the middle one matters most:
+
+| Condition | Reads |
+| --- | --- |
+| contributed < 0 | left it worse than you found it |
+| net ≥ 0 | left it better |
+| contributed > 0, net < 0 | *still falling — N points slower for your work* |
+
+The third is the honest and most common outcome of one career against thirty years of neglect. The
+work landed and the place still ended below where it started. Reporting that as failure would be a
+lie in the other direction.
+
 **Discovery.** Bodies on your own department's beat are known from month one — dealing with them is
 the job. Everything else has to be gone and looked at, which is what the `look → fix → finish`
 initiative chains are for: you cannot work on somewhere you have never been, and you cannot finish

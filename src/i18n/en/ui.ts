@@ -92,6 +92,7 @@ export const uiStrings: Record<string, string> = {
   'epilogue.now_at': '— now at {body}',
   'report.budget_delta': 'Against the allocation: {amount}',
   'team.average_skill': 'Average skill: {value}',
+  'epilogue.slowed': 'still falling — {points} points slower for your work',
   'action.career': 'Career',
   'action.team': 'Team',
   'action.dashboard': 'Desk',

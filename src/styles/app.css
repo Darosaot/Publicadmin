@@ -1988,3 +1988,7 @@ input {
   padding-left: var(--s-3);
   border-left: 2px solid var(--c-good);
 }
+
+/* Neither a win nor a loss: the work landed and the place still fell. The commonest honest
+   outcome in the game, and it gets its own colour rather than borrowing one of the other two. */
+.epilogue__slowed { color: var(--c-text-muted); }
