@@ -109,7 +109,10 @@ export const alderford = body(
   'alderford',
   'Alderford City Council',
   'City council, eighteen thousand people',
-  'Where you started. Small enough that one competent person changes it and one bad appointment breaks it, and it has had both since you left.',
+  // Written in the present, because Alderford is on the legal beat and so is on screen from the
+  // player's first month — when they are sitting in it. An earlier draft said "since you left",
+  // which the header directly above it contradicted in January of year one.
+  'Where every career in this country starts. Small enough that one competent person changes it and one bad appointment breaks it, and it has had plenty of both.',
   52,
   -0.04,
   'legal',
