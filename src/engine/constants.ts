@@ -49,9 +49,27 @@ export const BASELINE_STRESS_PER_TURN = 2;
  * fades, and a terrible one recovers rather than spiralling.
  *
  * Integrity is deliberately exempt. A record does not fade.
+ *
+ * ### Re-derived in v3, and why these are not round numbers
+ *
+ * Both stats settle at **monthly gain ÷ decay rate**, so the rate is not a free parameter: it is
+ * a function of how generous the corpus is on average. v3 added twenty-eight events and three
+ * systems, and the sweep came out at mean level 4.34 and reputation 75.3 against a tuned baseline
+ * of 4.0 and 67.2 — with careers reaching the top tier rising from 26% to 45%, which makes the
+ * top of the ladder ordinary.
+ *
+ * Measured, the drift split almost evenly: with all three new systems switched off the corpus
+ * alone still gave 4.11 and 70.6, so half of it was the new events diluting the pool in a
+ * favourable direction and half was the systems. That is the same effect the design document
+ * records from the other side — 71 events once dropped careers reaching the top from 57% to 26%
+ * because the new ones were slightly *less* generous than the ones they diluted.
+ *
+ * So the rates were re-derived rather than the content re-priced: 0.046 → 0.0497 and 0.044 →
+ * 0.047 put the sweep back at level 3.99, reputation 66.0 and 25% reaching tier 5. The awkward
+ * third digit is the point. A round number here would mean somebody guessed.
  */
-export const REPUTATION_DECAY_RATE = 0.046;
-export const POLITICAL_CAPITAL_DECAY_RATE = 0.044;
+export const REPUTATION_DECAY_RATE = 0.0497;
+export const POLITICAL_CAPITAL_DECAY_RATE = 0.047;
 export const PERFORMANCE_REVERSION_RATE = 0.05;
 export const PERFORMANCE_BASELINE = 50;
 
