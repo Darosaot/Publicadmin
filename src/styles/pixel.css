@@ -369,3 +369,92 @@ canvas {
   vertical-align: middle;
   margin-right: var(--s-1);
 }
+
+/* ---------- The character sheet ---------- */
+
+.tree--perks .tree__tier {
+  margin-bottom: var(--s-5);
+}
+
+.tree--perks .tree__posts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-3);
+  align-items: stretch;
+}
+
+.perk {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  background: var(--c-surface);
+  border: var(--px) solid var(--c-border-strong);
+  box-shadow:
+    inset var(--px) var(--px) 0 var(--c-bevel-light),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--c-bevel-dark),
+    var(--shadow-sm);
+}
+
+/* Three states, three materials. A perk you hold is lit; one you could take is outlined in the
+   colour that means "spend here" everywhere else in the game; one you cannot is dimmed but still
+   fully readable, because the whole point of showing it is that you can plan toward it. */
+.perk--taken {
+  background: var(--c-accent-soft);
+  border-color: var(--c-accent);
+}
+
+.perk--open {
+  border-color: var(--c-brand);
+}
+
+.perk--shut {
+  opacity: 0.62;
+}
+
+.perk__name {
+  font-family: var(--f-display);
+  font-size: var(--fd-sm);
+  line-height: 1.7;
+}
+
+.perk__desc {
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+  color: var(--c-text-muted);
+  flex: 1 1 auto;
+}
+
+.perk__state {
+  font-size: var(--fd-xs);
+  color: var(--c-text-faint);
+}
+
+.perk--taken .perk__state {
+  color: var(--c-accent);
+}
+
+/* Branches are columns, so each one gets a colour that runs the height of the tree and makes
+   "I went down the corridor branch" legible at a glance. */
+.perk--people { border-left: calc(var(--px) * 2) solid var(--c-performance); }
+.perk--craft { border-left: calc(var(--px) * 2) solid var(--c-reputation); }
+.perk--politics { border-left: calc(var(--px) * 2) solid var(--c-political); }
+
+.self__who {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.self__points {
+  font-family: var(--f-display);
+  font-size: var(--fd-md);
+  line-height: 1.6;
+  color: var(--c-accent);
+}
+
+@media (max-width: 720px) {
+  .tree--perks .tree__posts {
+    grid-template-columns: 1fr;
+  }
+}

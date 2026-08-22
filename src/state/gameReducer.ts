@@ -12,6 +12,7 @@ import { createGame, type NewGameOptions } from '../engine/newGame';
 import { AGENCY_TEMP_MAX } from '../engine/constants';
 import { declineOffer } from '../engine/career';
 import { directiveFlag } from '../engine/directives';
+import { takePerk } from '../engine/perks';
 import { startInitiative } from '../engine/initiatives';
 import { cancelHiring, startHiring } from '../engine/team';
 import { clearSave, loadGame } from '../engine/save';
@@ -25,7 +26,14 @@ import {
 } from '../engine/turn';
 import type { Allocation, GameState, Seniority } from '../engine/types';
 
-export type GameView = 'desk' | 'team' | 'people' | 'country' | 'initiatives' | 'career';
+export type GameView =
+  | 'desk'
+  | 'team'
+  | 'people'
+  | 'country'
+  | 'initiatives'
+  | 'self'
+  | 'career';
 
 export interface AppState {
   /** Null means the title screen. */
@@ -44,6 +52,7 @@ export type GameAction =
   | { type: 'SET_INITIATIVE_EFFORT'; templateId: string; points: number }
   | { type: 'SET_INITIATIVE_DELEGATION'; templateId: string; staffId: string | null }
   | { type: 'START_INITIATIVE'; templateId: string }
+  | { type: 'TAKE_PERK'; perkId: string }
   | { type: 'SET_DIRECTIVE'; directiveId: string; stance: 0 | 1 | 2 }
   | { type: 'SET_REST'; points: number }
   | { type: 'SET_NETWORKING'; points: number }
@@ -126,6 +135,13 @@ export function gameReducer(state: AppState, action: GameAction): AppState {
     case 'START_INITIATIVE': {
       if (!state.game) return state;
       return { ...state, game: startInitiative(state.game, registry, action.templateId) };
+    }
+
+    case 'TAKE_PERK': {
+      if (!state.game) return state;
+      // `takePerk` refuses anything unaffordable or ungated and returns the state unchanged, so
+      // the reducer does not need its own copy of the rules to duplicate and get wrong.
+      return { ...state, game: takePerk(state.game, registry, action.perkId) };
     }
 
     case 'SET_DIRECTIVE': {

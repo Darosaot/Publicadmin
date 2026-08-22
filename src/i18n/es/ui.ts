@@ -315,4 +315,28 @@ export const uiStrings: Record<string, string> = {
   'log.staff_promoted': '{name} ha ascendido a {grade}.',
   'log.staff_poached': '{name} se ha ido a otro sitio.',
   'log.budget_underspent': 'El año presupuestario cerró con infragasto — recortan la asignación del año siguiente.',
+
+  /* ---------------------------------------------------------- ficha personal */
+
+  'action.self': 'Tú',
+  'self.tree_heading': 'En qué te convirtió el oficio',
+  'self.tier': 'Fila {tier} · cuesta {cost}',
+  'self.years': '{years} años de servicio',
+  'self.points_heading': 'Puntos',
+  'self.points_available': '{points} por gastar',
+  'self.points_earned': '{earned} ganados, {spent} gastados.',
+  'self.points_help':
+    'Un punto cada cuatro años, y uno por cada ascenso. El árbol cuesta treinta; una carrera entera da unos once. No vas a terminarlo, y en eso consiste la decisión.',
+  'self.branches_heading': 'Tres maneras de ser bueno en esto',
+  'self.branch.people': 'La unidad',
+  'self.branch.people.blurb': 'Lo que sacas de los demás, y lo que ellos sacan de ti.',
+  'self.branch.craft': 'El trabajo',
+  'self.branch.craft.blurb': 'Lo que sale de verdad de tu mesa, y si dura.',
+  'self.branch.politics': 'El pasillo',
+  'self.branch.politics.blurb': 'Quién te coge el teléfono, y qué te pasa cuando algo sale mal.',
+  'self.perk_taken': 'Tuyo',
+  'self.perk_take': 'Cogerlo — {cost}',
+  'self.perk_needs': 'Requiere {name}',
+  'self.perk_needs_rank': 'Requiere nivel {tier}',
+  'self.perk_needs_points': 'Requiere {cost} puntos',
 };

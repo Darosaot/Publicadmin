@@ -49,6 +49,13 @@ import type {
   StaffMember,
   TeamReport,
 } from './types';
+import {
+  arrivalMoraleBonus,
+  budgetBonus,
+  coachingSkillBonus,
+  hiringMonthsReduction,
+  moraleDriftReduction,
+} from './perks';
 
 /** Clamps a staff attribute to the same 0–100 range the player's stats use. */
 function clamp(value: number): number {
@@ -98,7 +105,7 @@ export function createStaff(
     seniority,
     // Potential arrives cheaper and keener; experience arrives able and settled.
     skill: clamp(skillRoll.value + hiringSkillDelta(state)),
-    morale: clamp(moraleRoll.value + hiringMoraleDelta(state)),
+    morale: clamp(moraleRoll.value + hiringMoraleDelta(state) + arrivalMoraleBonus(state)),
     salary: STAFF_SALARY[seniority],
     monthsInPost: 0,
   };
@@ -207,7 +214,8 @@ export function setupTeamForPost(
       : [];
 
   const budget: Budget = {
-    monthly: post.monthlyBudget ?? 0,
+    // A budget hawk's post is funded better than the establishment says it should be.
+    monthly: post.monthlyBudget === undefined ? 0 : post.monthlyBudget + budgetBonus(state),
     balance: 0,
     yearStartMonth: next.calendarMonth,
     spentThisMonth: 0,
@@ -224,7 +232,9 @@ export function setupTeamForPost(
 
 export function startHiring(state: GameState, seniority: Seniority): GameState {
   if (state.hiring) return state;
-  return { ...state, hiring: { seniority, monthsRemaining: HIRING_MONTHS[seniority] } };
+  // Somewhere worth joining fills a vacancy faster, but never instantly.
+  const months = Math.max(1, HIRING_MONTHS[seniority] - hiringMonthsReduction(state));
+  return { ...state, hiring: { seniority, monthsRemaining: months } };
 }
 
 export function cancelHiring(state: GameState): GameState {
@@ -285,9 +295,9 @@ export function resolveStaffMonth(
 
       // Whichever way the office has decided pressure flows, it lands on them every month — in
       // the opposite direction to the way it lands on you.
-      morale += STAFF_MORALE_DRIFT + hoursMoraleDelta(state);
+      morale += STAFF_MORALE_DRIFT + moraleDriftReduction(state) + hoursMoraleDelta(state);
       if (coached.has(member.id)) {
-        skill += COACHING_SKILL_GAIN;
+        skill += COACHING_SKILL_GAIN + coachingSkillBonus(state);
         morale += COACHING_MORALE_GAIN;
       }
       if (seen.has(member.id)) morale += ONE_TO_ONE_MORALE_GAIN;

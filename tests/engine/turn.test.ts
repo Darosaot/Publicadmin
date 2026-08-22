@@ -36,7 +36,7 @@ describe('effort budget', () => {
   });
 
   it('sums an allocation across tasks and personal time', () => {
-    const total = allocationTotal(allocate({ tasks: { a: 3, b: 2 }, rest: 1, networking: 4 }));
+    const total = allocationTotal(game(), allocate({ tasks: { a: 3, b: 2 }, rest: 1, networking: 4 }));
     expect(total).toBe(10);
   });
 
@@ -48,7 +48,7 @@ describe('effort budget', () => {
       networking: 5,
     });
     const normalized = normalizeAllocation(state, registry, greedy);
-    expect(allocationTotal(normalized)).toBe(10);
+    expect(allocationTotal(state, normalized)).toBe(10);
   });
 
   it('ignores negative and fractional points', () => {

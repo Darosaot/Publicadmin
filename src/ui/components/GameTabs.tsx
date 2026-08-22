@@ -4,6 +4,7 @@ import { startableInitiatives } from '../../engine/initiatives';
 import { bodyKnown } from '../../engine/world';
 import { useT } from '../../i18n';
 import { useActiveGame, useGame } from '../../state/GameProvider';
+import { perkPointsAvailable, perkPointsEarned } from '../../engine/perks';
 import type { GameView } from '../../state/gameReducer';
 
 /**
@@ -48,6 +49,17 @@ export function GameTabs({ current }: { current: GameView }) {
       label: t('action.initiatives'),
       // Something you started is about to be dropped for want of a single point.
       dot: game.initiatives.some((i) => i.idleCycles > 0),
+    });
+  }
+
+  // The character sheet appears once there is a point to spend. Before that it is a screen
+  // showing twelve things you cannot have, which is a worse introduction than no tab at all —
+  // the same rule People and Country already follow.
+  if (perkPointsEarned(game) > 0) {
+    tabs.push({
+      view: 'self',
+      label: t('action.self'),
+      dot: perkPointsAvailable(game, registry) > 0,
     });
   }
 

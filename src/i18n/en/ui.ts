@@ -318,4 +318,28 @@ export const uiStrings: Record<string, string> = {
   'log.staff_promoted': '{name} was promoted to {grade}.',
   'log.staff_poached': '{name} took a job elsewhere.',
   'log.budget_underspent': 'The budget year closed underspent — next year’s allocation is cut.',
+
+  /* ---------------------------------------------------------- character sheet */
+
+  'action.self': 'Yourself',
+  'self.tree_heading': 'What the job made of you',
+  'self.tier': 'Row {tier} · costs {cost}',
+  'self.years': '{years} years in the service',
+  'self.points_heading': 'Points',
+  'self.points_available': '{points} to spend',
+  'self.points_earned': '{earned} earned, {spent} spent.',
+  'self.points_help':
+    'One point every four years, and one for every promotion. The tree costs thirty; a whole career earns about eleven. You will not finish it, and that is the decision.',
+  'self.branches_heading': 'Three ways to be good at this',
+  'self.branch.people': 'The unit',
+  'self.branch.people.blurb': 'What you can get out of other people, and what they get out of you.',
+  'self.branch.craft': 'The work',
+  'self.branch.craft.blurb': 'What actually leaves your desk, and whether it lasts.',
+  'self.branch.politics': 'The corridor',
+  'self.branch.politics.blurb': 'Who takes your call, and what happens to you when it goes wrong.',
+  'self.perk_taken': 'Yours',
+  'self.perk_take': 'Take it — {cost}',
+  'self.perk_needs': 'Needs {name}',
+  'self.perk_needs_rank': 'Needs tier {tier}',
+  'self.perk_needs_points': 'Needs {cost} points',
 };

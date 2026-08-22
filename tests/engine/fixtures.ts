@@ -12,6 +12,7 @@ import type {
   DepartmentId,
   GameEvent,
   InitiativeTemplate,
+  PerkTemplate,
   TaskTemplate,
   WorldBody,
 } from '../../src/engine/types';
@@ -384,6 +385,39 @@ const testInitiatives: InitiativeTemplate[] = [
   },
 ];
 
+
+/**
+ * A miniature tree with the shapes that matter: a free root, a child that needs it, and a
+ * capstone gated on rank as well as lineage.
+ */
+const testPerks: PerkTemplate[] = [
+  {
+    id: 'root',
+    nameKey: 'perk.root.name',
+    descKey: 'perk.root.desc',
+    branch: 'people',
+    tier: 1,
+    minLevel: 1,
+  },
+  {
+    id: 'child',
+    nameKey: 'perk.child.name',
+    descKey: 'perk.child.desc',
+    branch: 'people',
+    tier: 2,
+    requires: 'root',
+    minLevel: 1,
+  },
+  {
+    id: 'capstone',
+    nameKey: 'perk.capstone.name',
+    descKey: 'perk.capstone.desc',
+    branch: 'craft',
+    tier: 4,
+    minLevel: 4,
+  },
+];
+
 export function makeTestRegistry(): ContentRegistry {
   const departments = Object.fromEntries(
     DEPARTMENT_IDS.map((id) => [id, department(id)]),
@@ -397,6 +431,7 @@ export function makeTestRegistry(): ContentRegistry {
     staffNames: ['Ada Fixture', 'Bo Sample', 'Cato Stub', 'Dita Mock', 'Enzo Proxy'],
     bodies: testBodies,
     initiatives: testInitiatives,
+    perks: testPerks,
   };
 }
 

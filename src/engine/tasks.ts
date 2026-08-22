@@ -24,6 +24,7 @@ import {
   REFERENCE_TASK_SLOTS,
 } from './constants';
 import { rigourEffortDelta, rigourQualityDelta } from './directives';
+import { taskQualityBonus } from './perks';
 import { getPost, type ContentRegistry } from './registry';
 import { nextInt, nextRange, weightedPick } from './rng';
 import type { ActiveTask, GameState, QualityTier, TaskTemplate } from './types';
@@ -150,6 +151,7 @@ export function rollQuality(
     // An office that writes things down produces better work than one that does not, and pays
     // for it in the effort every file costs — see `spawnTask`.
     rigourQualityDelta(state) +
+    taskQualityBonus(state) +
     earlyBonus +
     overinvestBonus +
     formBonus -

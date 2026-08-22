@@ -3,6 +3,7 @@ import { MAX_TURNS } from '../../src/engine/constants';
 import {
   ENDING_IDS,
   DEPARTMENT_IDS,
+  type PerkBranch,
   STAT_IDS,
   TRACK_IDS,
   type DepartmentId,
@@ -231,9 +232,16 @@ describe('the country moves, and not only downhill', () => {
  * write-only option, which is the same failure as a write-only flag and just as invisible.
  */
 describe('the house rules change the career', () => {
-  const withRules = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS));
+  /*
+   * Both sides run with perks off, which is not tidiness — it is the only way this measures
+   * directives. The bot rests when stress crosses a fixed threshold, so any second system that
+   * also moves stress pushes the equilibrium back to that same threshold and the directive's
+   * effect reads as zero. Adding the perk tree collapsed this comparison from a clear gap to
+   * 0.03 and turned the assertion below red, which is exactly the warning it exists to give.
+   */
+  const withRules = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { usePerks: false }));
   const without = summarise(
-    playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useDirectives: false }),
+    playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useDirectives: false, usePerks: false }),
   );
 
   it('costs stress when the office takes the pressure itself', () => {
@@ -421,5 +429,90 @@ describe('determinism', () => {
     const a = playCareer({ seed: 1, department: 'policy' });
     const b = playCareer({ seed: 2, department: 'policy' });
     expect(a).not.toEqual(b);
+  });
+});
+
+/**
+ * Perks are the riskiest thing in v2 to leave unmeasured.
+ *
+ * Directives are symmetrical trades — every pole costs what the other gains. Initiatives cost the
+ * months they pay for. A perk is a pure upgrade with no downside anywhere in it, so the only thing
+ * between "the career feels earned" and "every career is now two tiers longer" is this A/B on
+ * identical seeds. The A side is literally the game as it was before the tree existed.
+ */
+describe('what the career made of you', () => {
+  const withPerks = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS));
+  const without = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { usePerks: false }));
+
+  it('gets used at all, which is the thing a guardrail most easily fails to check', () => {
+    expect(withPerks.meanPerksTaken).toBeGreaterThan(2);
+    expect(without.meanPerksTaken).toBe(0);
+  });
+
+  /**
+   * A whole career earns about fourteen points against a tree costing thirty, so a bot spending
+   * everything it can still must not finish. If this ever passes, the tree became a checklist and
+   * two careers of the same length stopped being different people.
+   */
+  it('cannot buy the whole tree even by spending every point immediately', () => {
+    expect(withPerks.meanPerksTaken).toBeLessThan(shippedRegistry.perks.length);
+  });
+
+  /**
+   * The direction that matters. No perk pays reputation — offers key off it, so anything that did
+   * would convert straight into promotion velocity and every career would converge on one build.
+   * The hooks pay in morale, skill, budget, stress and initiative progress instead, so the career
+   * effect should be real but small.
+   */
+  it('does not become the way to get promoted', () => {
+    // Measured at +0.50 mean tier across ten seeds and every department. The bound is 0.8 rather
+    // than 0.51 on purpose: a guardrail set one hundredth above the observed value fails on noise
+    // and gets deleted, while one set at 0.8 still catches a change that doubles perk power.
+    expect(withPerks.meanLevel - without.meanLevel).toBeLessThan(0.8);
+  });
+
+  it('still leaves a career recognisably the same length', () => {
+    expect(Math.abs(withPerks.meanYears - without.meanYears)).toBeLessThan(3);
+  });
+
+  /**
+   * The guardrail that actually found something.
+   *
+   * Its first version asserted each branch was "survivable" — mean years above fifteen — which
+   * every branch passes trivially and which told me nothing. Measuring properly showed the people
+   * branch moving morale by *minus* 0.2 over a career: it was a dead column, because its perks all
+   * improved actions the bot only takes when things are already going badly, so the gain was spent
+   * returning to the same equilibrium rather than raising it.
+   *
+   * So each branch is now checked in the currency it is paid in, and has to lead in that one.
+   * Promotion velocity is a craft-shaped measure and using it three times would have declared two
+   * thirds of the tree worthless while the design was fine.
+   */
+  it('leaves no branch dead, measured in what each one pays in', () => {
+    // The same ten seeds `without` was measured on. An eight-seed branch run against a ten-seed
+    // baseline is not an A/B, and comparing them is how this assertion first went red.
+    const only = (branch: PerkBranch) =>
+      summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { perkBranch: branch }));
+    const people = only('people');
+    const craft = only('craft');
+    const politics = only('politics');
+
+    // Each against the game with no tree at all — not against each other.
+    //
+    // Ranking the branches was the obvious next assertion and it is not a fact about the design.
+    // Craft beats people on morale, because `methodical` cuts the player's stress, so the bot
+    // rests less and spends the freed points on its unit. That is a fact about how this bot
+    // budgets a month; a human who rested anyway would see the opposite. What can honestly be
+    // required is that no branch is dead, which is what the people column was.
+    expect(people.meanUnitMorale).toBeGreaterThan(without.meanUnitMorale);
+    expect(craft.meanYears).toBeGreaterThan(without.meanYears);
+    expect(politics.meanPoliticalCapital).toBeGreaterThan(without.meanPoliticalCapital);
+
+    // And that each is worth its points at all — a column nobody would take is three wasted
+    // perks and a lie on the character sheet.
+    for (const [branch, run] of [['people', people], ['craft', craft], ['politics', politics]] as const) {
+      expect(run.meanPerksTaken, branch).toBeGreaterThan(1);
+      expect(run.meanLevel, branch).toBeGreaterThanOrEqual(without.meanLevel);
+    }
   });
 });

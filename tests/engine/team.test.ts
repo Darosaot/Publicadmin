@@ -163,10 +163,10 @@ describe('the cost of managing', () => {
       recruiting: true,
     });
 
-    expect(managementCost(allocation)).toBe(
+    expect(managementCost(state, allocation)).toBe(
       DELEGATION_EFFORT_COST + COACHING_EFFORT_COST + ONE_TO_ONE_EFFORT_COST + 2,
     );
-    expect(allocationTotal(allocation)).toBe(managementCost(allocation));
+    expect(allocationTotal(state, allocation)).toBe(managementCost(state, allocation));
   });
 
   it('drops delegations to people who do not work here', () => {

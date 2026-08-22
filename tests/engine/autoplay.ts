@@ -43,12 +43,14 @@ import {
   emptyAllocation,
   resolveTurn,
 } from '../../src/engine/turn';
+import { canTakePerk, perkCost, takePerk, takenPerks } from '../../src/engine/perks';
 import type {
   Allocation,
   Choice,
   DepartmentId,
   EndingId,
   GameState,
+  PerkBranch,
   TrackId,
 } from '../../src/engine/types';
 
@@ -72,6 +74,16 @@ export interface RunResult {
   tasksFailed: number;
   /** The new verb, counted so a guardrail can tell whether the bot ever actually used it. */
   initiativesStarted: number;
+  perksTaken: number;
+  /**
+   * Average unit morale across every month the career had a unit.
+   *
+   * Recorded because the people branch of the perk tree pays in morale and retention, and none of
+   * the other metrics can see it — a career's final morale is often zero simply because the last
+   * post had no unit. Without this the "is every branch worth taking?" guardrail would have been
+   * measuring promotion velocity three times and reporting the people branch as worthless.
+   */
+  meanUnitMorale: number;
   initiativesCompleted: number;
   initiativesLapsed: number;
 }
@@ -83,6 +95,31 @@ export interface RunResult {
  * immediate reason is `useInitiatives`: the balance guardrail has to run the *same seeds* with the
  * feature on and off, and a boolean in seventh position is unreadable at every call site.
  */
+
+/**
+ * Spend whatever points are in hand, cheapest affordable perk first.
+ *
+ * Cheapest-first rather than deepest-first on purpose. A bot that saves for capstones spends most
+ * of a career holding unspent points, which measures patience rather than the perk tree — and the
+ * A/B would then report that perks barely matter because the bot never had any.
+ */
+function spendPerkPoints(state: GameState, branch?: PerkBranch): GameState {
+  let game = state;
+
+  for (let guard = 0; guard < registry.perks.length; guard += 1) {
+    const affordable = registry.perks
+      .filter((perk) => branch === undefined || perk.branch === branch)
+      .filter((perk) => canTakePerk(game, registry, perk.id))
+      .sort((a, b) => perkCost(a) - perkCost(b));
+
+    const next = affordable[0];
+    if (!next) break;
+    game = takePerk(game, registry, next.id);
+  }
+
+  return game;
+}
+
 export interface CareerOptions {
   seed: number;
   department: DepartmentId;
@@ -102,6 +139,16 @@ export interface CareerOptions {
   useInitiatives?: boolean;
   /** Likewise for the house rules. */
   useDirectives?: boolean;
+  /**
+   * And for perks, which are the riskiest of the three to measure.
+   *
+   * Directives are symmetrical trades and initiatives cost the months they pay for. A perk is a
+   * pure upgrade with no downside at all, so the A/B on identical seeds is the only thing
+   * standing between "the career feels better" and "every career is now two tiers longer".
+   */
+  usePerks?: boolean;
+  /** Which column the bot spends down. Left undefined it takes the cheapest thing available. */
+  perkBranch?: PerkBranch;
 }
 
 const REST_THRESHOLD = 62;
@@ -333,6 +380,8 @@ export function playCareer(options: CareerOptions): RunResult {
     preferredTrack,
     useInitiatives = true,
     useDirectives = true,
+    usePerks = true,
+    perkBranch,
   } = options;
 
   let game = createGame({ name: 'Bot', department, seed }, registry);
@@ -363,6 +412,9 @@ export function playCareer(options: CareerOptions): RunResult {
   let tasksCompleted = 0;
   let tasksFailed = 0;
   let initiativesStarted = 0;
+  let perksTaken = 0;
+  let moraleSum = 0;
+  let moraleMonths = 0;
   let initiativesCompleted = 0;
   let initiativesLapsed = 0;
   let guard = 0;
@@ -436,7 +488,19 @@ export function playCareer(options: CareerOptions): RunResult {
           }
         }
 
+        // Spent before the month resolves, so a perk taken this cycle is felt in this cycle —
+        // which is what a player clicking the button would see, and therefore what the A/B has
+        // to measure.
+        if (usePerks) {
+          game = spendPerkPoints(game, perkBranch);
+          perksTaken = takenPerks(game, registry).length;
+        }
+
         game = resolveTurn(game, registry, planAllocation(game, strategy, useInitiatives));
+        if (game.staff.length > 0) {
+          moraleSum += averageMorale(game);
+          moraleMonths += 1;
+        }
         tasksCompleted += game.lastReport?.completed.length ?? 0;
         tasksFailed += game.lastReport?.failed.length ?? 0;
         initiativesCompleted += game.lastReport?.initiativesCompleted?.length ?? 0;
@@ -491,6 +555,8 @@ export function playCareer(options: CareerOptions): RunResult {
     tasksCompleted,
     tasksFailed,
     initiativesStarted,
+    perksTaken,
+    meanUnitMorale: moraleMonths > 0 ? moraleSum / moraleMonths : 0,
     initiativesCompleted,
     initiativesLapsed,
   };
@@ -536,6 +602,8 @@ export function summarise(results: RunResult[]) {
     meanPoliticalCapital: mean((r) => r.stats.politicalCapital),
     meanSalary: mean((r) => r.salary),
     meanInitiativesStarted: mean((r) => r.initiativesStarted),
+    meanPerksTaken: mean((r) => r.perksTaken),
+    meanUnitMorale: mean((r) => r.meanUnitMorale),
     meanInitiativesCompleted: mean((r) => r.initiativesCompleted),
     totalInitiativesLapsed: results.reduce((n, r) => n + r.initiativesLapsed, 0),
     completionRate: mean((r) =>

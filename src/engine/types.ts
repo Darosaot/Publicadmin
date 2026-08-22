@@ -517,6 +517,29 @@ export interface PendingEvent {
   };
 }
 
+/**
+ * Something the career taught you, taken from a tree and kept for good.
+ *
+ * `tier` is both the row in the tree and the price, so a deep perk is expensive by construction
+ * and no separate cost field can drift out of step with the layout.
+ */
+export interface PerkTemplate {
+  id: string;
+  nameKey: string;
+  descKey: string;
+  /** Which of the three columns this sits in. */
+  branch: PerkBranch;
+  /** Row in the tree, 1-4, and also what it costs in points. */
+  tier: number;
+  /** The perk directly above it in the same branch, if any. */
+  requires?: string;
+  /** No amount of saved points buys a capstone at a junior desk. */
+  minLevel: number;
+}
+
+export const PERK_BRANCHES = ['people', 'craft', 'politics'] as const;
+export type PerkBranch = (typeof PERK_BRANCHES)[number];
+
 export interface GameState {
   saveVersion: number;
   seed: number;

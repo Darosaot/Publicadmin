@@ -33,6 +33,7 @@ import { strings as eventsReckonings } from './events/reckonings';
 import { strings as eventsSocial } from './events/social';
 import { strings as eventsTracks } from './events/tracks';
 import { strings as initiatives } from './initiatives';
+import { strings as perks } from './perks';
 import { strings as tasksFinance } from './tasks/finance';
 import { strings as tasksInspection } from './tasks/inspection';
 import { strings as tasksLegal } from './tasks/legal';
@@ -70,6 +71,7 @@ const dictionaries = [
   eventsSocial,
   eventsTracks,
   initiatives,
+  perks,
   tasksFinance,
   tasksInspection,
   tasksLegal,
