@@ -253,10 +253,6 @@ function hasRequiredShape(raw: RawSave): boolean {
     Array.isArray(raw.tasks) &&
     Array.isArray(raw.initiatives) &&
     Array.isArray(raw.alumni) &&
-    // Required rather than optional on the state, so a save that reaches here without one has
-    // not been through the v8 migration and is not safe to hand to the engine.
-    typeof raw.climate === 'object' &&
-    raw.climate !== null &&
     typeof player === 'object' &&
     player !== null &&
     typeof player.department === 'string' &&

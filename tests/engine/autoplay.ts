@@ -20,6 +20,7 @@ import {
   MINISTER_MIN_POLITICAL_CAPITAL,
   ONE_TO_ONE_EFFORT_COST,
   RECRUITING_EFFORT_COST,
+  STARTING_SAVINGS,
   TRAINING_COST,
 } from '../../src/engine/constants';
 import { directiveFlag } from '../../src/engine/directives';
@@ -190,6 +191,32 @@ export interface CareerOptions {
    * before v2.4 worked.
    */
   useNegotiation?: boolean;
+  /**
+   * Whether Elena Vásquez's career runs alongside the bot's.
+   *
+   * Off is the A side, and it is not a switch bolted onto the engine for the harness: `rival` is
+   * optional on the state, so "off" is a career with no rival on it — literally the game as it
+   * was before she was simulated. She costs the player posts by taking offers they let lapse, so
+   * this A/B is the one that says whether that cost is a texture or a tax.
+   */
+  useRival?: boolean;
+  /**
+   * Whether the country has weather.
+   *
+   * Off the same way and for the same reason: `climate` is optional, every hook reads neutral
+   * without one, and neutral is a real reading rather than a placeholder. This is the riskiest
+   * A/B of the three, because the climate sits on the decay rates and the unit budget — the two
+   * numbers the whole game is tuned against.
+   */
+  useClimate?: boolean;
+  /**
+   * Whether savings accumulate and hardship bites.
+   *
+   * Unlike the other two this cannot be switched off by dropping a field, because salary has
+   * always been on the state. Off freezes savings at their starting figure, so nobody is ever
+   * comfortable and nobody is ever short, which is exactly how money behaved for six versions.
+   */
+  useMoney?: boolean;
 }
 
 const REST_THRESHOLD = 62;
@@ -449,9 +476,18 @@ export function playCareer(options: CareerOptions): RunResult {
     matchSpecialisms = true,
     useDeputy = true,
     useNegotiation = true,
+    useRival = true,
+    useClimate = true,
+    useMoney = true,
   } = options;
 
   let game = createGame({ name: 'Bot', department, seed }, registry);
+
+  // The A sides. Both world systems are optional on the state, so switching one off is not a
+  // special path through the engine — it is a career that simply does not have one, which is the
+  // only baseline worth comparing against.
+  if (!useRival) game = { ...game, rival: undefined };
+  if (!useClimate) game = { ...game, climate: undefined };
 
   // The bot picks its house rules on day one and never revisits them, which is roughly what
   // happens in life. It takes the pressure itself, because a bot that empties its own unit
@@ -651,6 +687,14 @@ export function playCareer(options: CareerOptions): RunResult {
 
       case 'report':
         game = beginNextTurn(game, registry);
+        // The A side for money. Savings are the only one of the three new systems that cannot be
+        // switched off by dropping a field, because salary has always been on the state. Holding
+        // them at the starting figure reproduces the old behaviour exactly: that figure sits
+        // between hardship and comfort, so `moneyStressDelta` reads zero every month and nothing
+        // else in the engine looks at the number at all.
+        if (!useMoney) {
+          game = { ...game, player: { ...game.player, savings: STARTING_SAVINGS } };
+        }
         break;
 
       default:

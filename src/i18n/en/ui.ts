@@ -221,6 +221,10 @@ export const uiStrings: Record<string, string> = {
   'event.locked.stat_max': 'needs {stat} of at most {required}',
   'event.locked.level': 'needs a more senior post',
   'event.locked.other': 'not available to you',
+  'event.locked.savings_min': 'you could not afford it',
+  'event.locked.savings_max': 'you are not short enough to consider it',
+  'event.locked.rival_min': 'Elena is not far enough ahead of you',
+  'event.locked.rival_max': 'Elena is too far ahead of you',
 
   /* -------------------------------------------------------------- report */
   'report.heading': 'Month {turn}',
@@ -305,6 +309,8 @@ export const uiStrings: Record<string, string> = {
   'log.review_adequate': 'Performance review: adequate.',
   'log.review_concerning': 'Performance review: concerning.',
   'log.offer_received': 'An offer arrived from {org}.',
+  'log.rival_took_post': 'Elena Vásquez took the {post} you were offered.',
+  'log.post_filled': 'The {post} you were offered has been filled.',
   'log.unit_handed_over': 'You handed over your unit — {count} people — on leaving the post.',
   'log.took_post': 'Took the post of {title} at {org}.',
   'log.staff_left': '{name} resigned.',

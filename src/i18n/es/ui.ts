@@ -221,6 +221,10 @@ export const uiStrings: Record<string, string> = {
   'event.locked.stat_max': 'necesita {stat} de como máximo {required}',
   'event.locked.level': 'necesita un puesto más alto',
   'event.locked.other': 'no disponible para ti',
+  'event.locked.savings_min': 'no podrías permitírtelo',
+  'event.locked.savings_max': 'no estás lo bastante apurado como para planteártelo',
+  'event.locked.rival_min': 'Elena no te saca suficiente ventaja',
+  'event.locked.rival_max': 'Elena te saca demasiada ventaja',
 
   /* -------------------------------------------------------------- report */
   'report.heading': 'Mes {turn}',
@@ -302,6 +306,8 @@ export const uiStrings: Record<string, string> = {
   'log.review_adequate': 'Evaluación de desempeño: adecuada.',
   'log.review_concerning': 'Evaluación de desempeño: preocupante.',
   'log.offer_received': 'Llegó una oferta de {org}.',
+  'log.rival_took_post': 'Elena Vásquez ocupó el puesto de {post} que te ofrecieron.',
+  'log.post_filled': 'El puesto de {post} que te ofrecieron ya está cubierto.',
   'log.unit_handed_over': 'Entregaste tu unidad — {count} personas — al dejar el puesto.',
   'log.took_post': 'Tomaste posesión del puesto de {title} en {org}.',
   'log.staff_left': '{name} dimitió.',

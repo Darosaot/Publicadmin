@@ -44,7 +44,7 @@ import {
   CLIMATE_TRUST_DECAY_SWING,
   ELECTION_FISCAL_SWING,
   ELECTION_TERM_MONTHS,
-  ELECTION_TRUST_BOUNCE,
+  ELECTION_TRUST_RESET,
   STANCE_FISCAL_LEAN,
   STANCE_TRUST_LEAN,
 } from './constants';
@@ -53,6 +53,26 @@ import { STANCES, type ClimateState, type GameState, type Stance } from './types
 
 /** The milestone a change of government fires. `validate.ts` insists the corpus defines it. */
 export const ELECTION_EVENT_ID = 'evt.milestone.election';
+
+/**
+ * What every hook reads when a career has no weather.
+ *
+ * Zero on both dials is not a placeholder: the dials are centred on zero precisely so that "an
+ * ordinary year under an ordinary government" is a real reading rather than an arbitrary number
+ * in the middle. A career without a climate therefore behaves exactly as it did before the
+ * climate existed, with no branch anywhere except this one.
+ */
+const NEUTRAL: ClimateState = {
+  fiscal: 0,
+  trust: 0,
+  administration: 1,
+  stance: 'consolidating',
+  monthsToElection: ELECTION_TERM_MONTHS,
+};
+
+export function climateOf(state: GameState): ClimateState {
+  return state.climate ?? NEUTRAL;
+}
 
 export function clampClimate(value: number): number {
   return Math.max(CLIMATE_MIN, Math.min(CLIMATE_MAX, value));
@@ -95,7 +115,7 @@ export function createClimate(rngState: number): { climate: ClimateState; rngSta
  * changing is a scene rather than a number quietly moving on the stats bar.
  */
 export function driftClimate(state: GameState, months: number): GameState {
-  if (months <= 0) return state;
+  if (months <= 0 || !state.climate) return state;
 
   let climate = { ...state.climate };
   let rngState = state.rngState;
@@ -128,7 +148,10 @@ export function driftClimate(state: GameState, months: number): GameState {
 
     climate = {
       fiscal: clampClimate(climate.fiscal + swingRoll.value),
-      trust: clampClimate(climate.trust + ELECTION_TRUST_BOUNCE),
+      // Toward nothing, not upward. A government that has just arrived has not been believed or
+      // disbelieved yet, and crediting it with goodwill it has not earned put a permanent
+      // discount on reputation decay for every career in the game.
+      trust: clampClimate(climate.trust * (1 - ELECTION_TRUST_RESET)),
       administration: climate.administration + 1,
       stance: stanceRoll.value ?? climate.stance,
       monthsToElection: ELECTION_TERM_MONTHS,
@@ -154,7 +177,7 @@ export function driftClimate(state: GameState, months: number): GameState {
 
 /** What a unit's monthly allocation is actually worth this year. */
 export function budgetFactor(state: GameState): number {
-  return 1 + (state.climate.fiscal / CLIMATE_MAX) * CLIMATE_BUDGET_SWING;
+  return 1 + (climateOf(state).fiscal / CLIMATE_MAX) * CLIMATE_BUDGET_SWING;
 }
 
 /**
@@ -165,12 +188,12 @@ export function budgetFactor(state: GameState): number {
  * denominated in; when the currency is weak, so is the holding.
  */
 export function reputationDecayDelta(state: GameState): number {
-  return -(state.climate.trust / CLIMATE_MAX) * CLIMATE_TRUST_DECAY_SWING;
+  return -(climateOf(state).trust / CLIMATE_MAX) * CLIMATE_TRUST_DECAY_SWING;
 }
 
 /** What an undertaking costs to move: more, in a year when nothing is being funded. */
 export function initiativeEffortFactor(state: GameState): number {
-  return 1 - (state.climate.fiscal / CLIMATE_MAX) * CLIMATE_INITIATIVE_EFFORT_SWING;
+  return 1 - (climateOf(state).fiscal / CLIMATE_MAX) * CLIMATE_INITIATIVE_EFFORT_SWING;
 }
 
 /**
@@ -181,7 +204,7 @@ export function initiativeEffortFactor(state: GameState): number {
  * still get better only because somebody did something.
  */
 export function bodyDriftFactor(state: GameState): number {
-  return 1 - (state.climate.fiscal / CLIMATE_MAX) * CLIMATE_BODY_DRIFT_SWING;
+  return 1 - (climateOf(state).fiscal / CLIMATE_MAX) * CLIMATE_BODY_DRIFT_SWING;
 }
 
 /** The band a dial is currently in, for a screen that describes rather than scores. */
@@ -194,5 +217,5 @@ export function climateBand(value: number): 'low' | 'below' | 'level' | 'above' 
 }
 
 export function stanceOf(state: GameState): Stance {
-  return state.climate.stance;
+  return climateOf(state).stance;
 }

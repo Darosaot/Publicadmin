@@ -362,14 +362,22 @@ export const RIVAL_STARTING_STANDING = 20;
  * are about what that does to somebody; on a high roll she is your director and they are about
  * what that does to you. Both are worth playing and neither should be the only one you ever see.
  */
-export const RIVAL_CEILING_MIN = 52;
-export const RIVAL_CEILING_MAX = 94;
+export const RIVAL_CEILING_MIN = 48;
+export const RIVAL_CEILING_MAX = 81;
+
+/**
+ * How long she has to have been somewhere before she is a plausible appointment elsewhere.
+ *
+ * Only used when she picks up a post the player let go. Her ordinary progression is held to the
+ * `minTurnsAtLevel` written on the edge, like everyone else's.
+ */
+export const RIVAL_MIN_MONTHS_TO_MOVE = 10;
 
 /** Fraction of the distance to her ceiling that she closes each cycle. */
-export const RIVAL_STANDING_DRIFT = 0.08;
+export const RIVAL_STANDING_DRIFT = 0.055;
 
 /** A new post knocks anybody back. You arrive one post short; so does she. */
-export const RIVAL_STANDING_ON_PROMOTION = -7;
+export const RIVAL_STANDING_ON_PROMOTION = -14;
 
 /**
  * Her chance of taking any one edge she qualifies for, per cycle.
@@ -390,9 +398,20 @@ export const RIVAL_OFFER_CHANCE = 0.26;
  */
 export const RIVAL_HOLDS_POST_TURNS = 10;
 
-/** Standing below which she starts thinking about leaving, and the per-cycle chance she does. */
-export const RIVAL_RESIGN_STANDING = 24;
+/**
+ * Standing below which she starts thinking about leaving, the per-cycle chance she does, and the
+ * service she has to have behind her before any of it applies.
+ *
+ * The threshold sits *below* `RIVAL_STARTING_STANDING`, and the minimum service exists, because
+ * the first version had neither: she started at 20 against a threshold of 24, so every rival
+ * spent her first two or three cycles rolling to quit and eighteen per cent of them did. Elena
+ * leaving in year one is not a story about a career, it is a bug that reads as one.
+ *
+ * She can still go. It takes a career that went wrong first, which is the version worth having.
+ */
+export const RIVAL_RESIGN_STANDING = 18;
 export const RIVAL_RESIGN_CHANCE = 0.04;
+export const RIVAL_RESIGN_MIN_MONTHS = 36;
 
 /* ------------------------------------------------------------------ money */
 
@@ -422,9 +441,21 @@ export const OUTGOINGS_OF_BASE_SALARY = 0.72;
 export const HARDSHIP_SAVINGS = 0;
 export const HARDSHIP_STRESS_PER_CYCLE = 2;
 
-/** Above this you have a cushion, and the ordinary weight of the job sits a little lighter. */
+/**
+ * Above this you have a cushion — and it buys you nothing on the stats bar, deliberately.
+ *
+ * The first version gave comfort a permanent point of stress relief, which the sweep caught
+ * immediately: a competent career clears this threshold by its second post and then holds it for
+ * twenty-five years, so the "relief" was a flat upgrade with no downside. Worse, it laundered
+ * itself into promotion velocity through the sink documented in §8j — less stress means less
+ * resting, the freed points go on the board, and the career came out five points of reputation
+ * ahead. That is money buying standing by another route, which is the one thing money may never
+ * do.
+ *
+ * So comfort is a **state content can gate on**, not a bonus. It decides which choices are open
+ * to you. What it must never do is quietly make you better at the job.
+ */
 export const COMFORT_SAVINGS = 45_000;
-export const COMFORT_STRESS_RELIEF = 1;
 
 /* ---------------------------------------------------------------- climate */
 
@@ -447,23 +478,41 @@ export const CLIMATE_SHOCK_MAX = 4;
 /** A term of government, in calendar months, and how much of it the campaign occupies. */
 export const ELECTION_TERM_MONTHS = 48;
 
-/** What a change of government does to the dials, before its own stance starts telling. */
+/**
+ * What a change of government does to the dials.
+ *
+ * The fiscal swing is symmetric, so a new government is as likely to open the taps as to close
+ * them. Trust is **reset toward nothing rather than bounced upward**, and that is a correction
+ * rather than a preference: the first version gave every new administration +12 and, at 7.6
+ * elections a career, that made mean trust +4.00 for thirty years running. Trust suppresses
+ * reputation decay, so a permanently positive dial was a permanent discount on the single number
+ * every promotion keys off — every career in the sweep came out four points of reputation and a
+ * tenth of a tier ahead, for no reason anybody had chosen.
+ *
+ * Resetting is also the truer reading. A new government has not yet been believed or disbelieved;
+ * it has no record. That is zero, not a credit.
+ */
 export const ELECTION_FISCAL_SWING = 18;
-export const ELECTION_TRUST_BOUNCE = 12;
+export const ELECTION_TRUST_RESET = 0.65;
 
 /**
  * What each stance leans the dials toward while it is in.
  *
  * A reforming government spends and is believed until it isn't; a consolidating one cuts and is
  * trusted for it; a drifting one does neither and is credited with nothing.
+ *
+ * **Each column sums to zero across the three stances**, and it has to. Stances are drawn
+ * uniformly, so the mean of a column is the dial's resting point over a long career — and a
+ * resting point that is not zero is not weather, it is a difficulty setting applied to every
+ * guardrail at once. The first version leaned fiscal to −2 and trust to −0.67 by accident.
  */
 export const STANCE_FISCAL_LEAN: Record<string, number> = {
-  reforming: 14,
+  reforming: 16,
   consolidating: -16,
-  drifting: -4,
+  drifting: 0,
 };
 export const STANCE_TRUST_LEAN: Record<string, number> = {
-  reforming: 8,
+  reforming: 10,
   consolidating: 2,
   drifting: -12,
 };
@@ -479,7 +528,7 @@ export const STANCE_TRUST_LEAN: Record<string, number> = {
 /** Unit budget moves this fraction of itself at full fiscal deflection. */
 export const CLIMATE_BUDGET_SWING = 0.18;
 /** Reputation decays faster when nobody believes the administration. */
-export const CLIMATE_TRUST_DECAY_SWING = 0.012;
+export const CLIMATE_TRUST_DECAY_SWING = 0.006;
 /** An undertaking costs more effort to move in an austere year. */
 export const CLIMATE_INITIATIVE_EFFORT_SWING = 0.2;
 /** Austerity accelerates the country's own decline, which is what makes the bodies responsive. */

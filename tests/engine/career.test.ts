@@ -185,13 +185,13 @@ describe('offers', () => {
 
   it('expires offers once their window closes', () => {
     const offer: JobOffer = { id: 'o', toPost: SENIOR, toTier: 2, salary: 2900, createdTurn: 1, expiresTurn: 4 };
-    expect(expireOffers(game({ turn: 4, offers: [offer] })).offers).toHaveLength(1);
-    expect(expireOffers(game({ turn: 5, offers: [offer] })).offers).toHaveLength(0);
+    expect(expireOffers(game({ turn: 4, offers: [offer] }), registry).offers).toHaveLength(1);
+    expect(expireOffers(game({ turn: 5, offers: [offer] }), registry).offers).toHaveLength(0);
   });
 
   it('drops an offer that is declined', () => {
     const offer: JobOffer = { id: 'o', toPost: SENIOR, toTier: 2, salary: 2900, createdTurn: 1, expiresTurn: 4 };
-    expect(declineOffer(game({ offers: [offer] }), 'o').offers).toHaveLength(0);
+    expect(declineOffer(game({ offers: [offer] }), registry, 'o').offers).toHaveLength(0);
   });
 });
 

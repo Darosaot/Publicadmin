@@ -38,8 +38,10 @@ import {
   RIVAL_CEILING_MAX,
   RIVAL_CEILING_MIN,
   RIVAL_HOLDS_POST_TURNS,
+  RIVAL_MIN_MONTHS_TO_MOVE,
   RIVAL_OFFER_CHANCE,
   RIVAL_RESIGN_CHANCE,
+  RIVAL_RESIGN_MIN_MONTHS,
   RIVAL_RESIGN_STANDING,
   RIVAL_STANDING_DRIFT,
   RIVAL_STANDING_ON_PROMOTION,
@@ -49,7 +51,7 @@ import {
 } from './constants';
 import { nextChance, nextInt } from './rng';
 import { getPost, postsFrom, startingPost, type ContentRegistry } from './registry';
-import type { GameState, JobOffer, Post, RivalState } from './types';
+import type { GameState, JobOffer, Post, PostEdge, RivalState } from './types';
 
 /** Where the engine records that somebody else is sitting in a post. */
 export function heldFlag(postId: string): string {
@@ -104,26 +106,57 @@ export function createRival(
 }
 
 /**
- * Whether she could take this move, on the terms written on the edge.
+ * What one edge asks of somebody, read against her single number.
  *
- * The same `PromotionRequirement` the player is held to, read against her one number. Political
- * capital is asked of it too: she has allies in proportion to how well she is thought of, and
- * inventing a second hidden stat to say so would be two numbers that could only ever drift apart.
+ * The same `PromotionRequirement` the player is held to. Political capital is asked of it too:
+ * she has allies in proportion to how well she is thought of, and inventing a second hidden stat
+ * to say so would be two numbers that could only ever drift apart.
  */
-function qualifies(rival: RivalState, target: Post, fromPost: Post): boolean {
-  const edge = target.from.find((e) => e.from === rival.postId);
-  if (!edge) return false;
-
-  const bar = Math.max(
+function barFor(edge: PostEdge): number {
+  return Math.max(
     edge.requires.minReputation,
     edge.requires.minPerformance,
     edge.requires.minPoliticalCapital ?? 0,
   );
-  if (rival.standing < bar) return false;
+}
+
+/**
+ * Whether she could make this move from where she actually is, on the terms written on the edge.
+ *
+ * This is her ordinary progression, and it is strict: she walks the graph exactly as the player
+ * does, one edge at a time, from her own post.
+ */
+function qualifies(rival: RivalState, target: Post, fromPost: Post): boolean {
+  const edge = target.from.find((e) => e.from === rival.postId);
+  if (!edge) return false;
+  if (rival.standing < barFor(edge)) return false;
 
   // Her time in post, measured in her own cycles — a private office turns over faster than a
   // directorate, and the requirement is written in cycles for both of them.
   return rival.monthsInPost >= edge.requires.minTurnsAtLevel * fromPost.monthsPerTurn;
+}
+
+/**
+ * Whether she is a plausible appointment to a post *you* were offered.
+ *
+ * Deliberately laxer than `qualifies`, and the first version's failure to be so is why the whole
+ * feature did nothing: it asked for an edge running from her own desk to the post you turned
+ * down, and she is almost never standing on the desk you are. Across two hundred and ten
+ * simulated careers she took exactly zero posts, which is machinery with no mechanic behind it —
+ * the same shape of failure as an `{alum}` channel no event names.
+ *
+ * A post being filled by somebody else does not require them to have come by your route. So she
+ * is judged on the *easiest* way into it, and held to two things only: she cannot leap more than
+ * one rung, and she has to have been somewhere long enough to be moving at all.
+ */
+function couldFill(rival: RivalState, target: Post): boolean {
+  if (target.id === rival.postId) return false;
+  // A step up or a step across, never down, and never a leap.
+  if (target.tier > rival.level + 1 || target.tier < rival.level) return false;
+  if (rival.monthsInPost < RIVAL_MIN_MONTHS_TO_MOVE) return false;
+  if (target.from.length === 0) return false;
+
+  return rival.standing >= Math.min(...target.from.map(barFor));
 }
 
 /**
@@ -149,7 +182,8 @@ export function advanceRival(state: GameState, registry: ContentRegistry): GameS
     next.standing + (next.ceiling - next.standing) * RIVAL_STANDING_DRIFT,
   );
 
-  if (next.standing < RIVAL_RESIGN_STANDING) {
+  // Nobody walks out in their first three years, and she started the week you did.
+  if (state.calendarMonth >= RIVAL_RESIGN_MIN_MONTHS && next.standing < RIVAL_RESIGN_STANDING) {
     const roll = nextChance(rngState, RIVAL_RESIGN_CHANCE);
     rngState = roll.rngState;
     if (roll.value) {
@@ -187,43 +221,51 @@ export function advanceRival(state: GameState, registry: ContentRegistry): GameS
 }
 
 /**
- * She takes a post you were offered and did not take.
+ * A post you were offered and did not take gets filled by somebody.
  *
- * Called from `expireOffers` and from declining one. The post is then hers for
- * `RIVAL_HOLDS_POST_TURNS`, recorded in `flags` under `post.<id>.held` — engine-owned state, the
- * same arrangement `minister_track` and `handed_over_unit` already use, and one that needed no
- * migration to exist.
+ * **The post being filled is the consequence; Elena is the story when it fits.** That separation
+ * is the correction that made this feature work at all. The first version only closed a post if
+ * Elena herself could take it, which made the cost of declining depend on where she happened to
+ * be standing that year — arbitrary from the player's side, and vanishingly rare in practice: she
+ * outpaces the player often enough that across three hundred and thirty-six simulated careers a
+ * declined post was filled six times.
  *
- * She only takes what she could actually have got. An offer she does not qualify for goes
- * nowhere, because the alternative is a game that punishes you for declining by inventing a
- * promotion for somebody who had not earned it.
+ * A post in a real administration does not stay warm because you are thinking about it. So it is
+ * always held for `RIVAL_HOLDS_POST_TURNS`, and `filledByRival` says whether the person who took
+ * it was somebody you know.
+ *
+ * Held in `flags` under `post.<id>.held` — engine-owned state, the same arrangement
+ * `minister_track` and `handed_over_unit` already use, and one that needed no migration.
  */
-export function rivalTakesOffer(
+export function fillLapsedPost(
   state: GameState,
   registry: ContentRegistry,
   offer: JobOffer,
-): GameState {
-  const rival = state.rival;
-  if (!rival || rival.left) return state;
-  if (offer.toPost === rival.postId) return state;
-
+): { state: GameState; byRival: boolean } {
   const target = registry.posts.find((p) => p.id === offer.toPost);
-  if (!target) return state;
+  if (!target) return { state, byRival: false };
 
-  const fromPost = getPost(registry, rival.postId);
-  if (!qualifies(rival, target, fromPost)) return state;
+  const held: GameState = {
+    ...state,
+    flags: { ...state.flags, [heldFlag(target.id)]: state.turn + RIVAL_HOLDS_POST_TURNS },
+  };
+
+  const rival = held.rival;
+  if (!rival || rival.left || !couldFill(rival, target)) return { state: held, byRival: false };
 
   return {
-    ...state,
-    rival: {
-      ...rival,
-      postId: target.id,
-      level: target.tier,
-      track: target.track,
-      standing: clampStanding(rival.standing + RIVAL_STANDING_ON_PROMOTION),
-      monthsInPost: 0,
+    state: {
+      ...held,
+      rival: {
+        ...rival,
+        postId: target.id,
+        level: target.tier,
+        track: target.track,
+        standing: clampStanding(rival.standing + RIVAL_STANDING_ON_PROMOTION),
+        monthsInPost: 0,
+      },
     },
-    flags: { ...state.flags, [heldFlag(target.id)]: state.turn + RIVAL_HOLDS_POST_TURNS },
+    byRival: true,
   };
 }
 

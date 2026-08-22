@@ -26,7 +26,6 @@
 
 import {
   COMFORT_SAVINGS,
-  COMFORT_STRESS_RELIEF,
   HARDSHIP_SAVINGS,
   HARDSHIP_STRESS_PER_CYCLE,
   OUTGOINGS_OF_BASE_SALARY,
@@ -64,14 +63,17 @@ export function comfortable(state: GameState): boolean {
 /**
  * What your finances do to your stress this cycle.
  *
- * Deliberately small and deliberately two-sided. Money is not a stress mechanic wearing a hat: it
- * is a state you are in, which the work then happens inside. A player who is comfortable notices
- * nothing much; one who is short notices it every month, which is exactly right.
+ * One-directional on purpose, and that is the correction the balance sweep forced. Being short
+ * costs you; being comfortable pays nothing. A two-sided version reads better on paper and plays
+ * as a flat upgrade: a competent career is comfortable from its second post onward, so the
+ * "relief" side applied for twenty-five of thirty years and converted straight into standing
+ * through the stress sink described in §8j.
+ *
+ * Comfort still matters — it decides which choices content will open to you. It simply does not
+ * make you better at the job, because money is not allowed to do that.
  */
 export function moneyStressDelta(state: GameState): number {
-  if (inHardship(state)) return HARDSHIP_STRESS_PER_CYCLE;
-  if (comfortable(state)) return -COMFORT_STRESS_RELIEF;
-  return 0;
+  return inHardship(state) ? HARDSHIP_STRESS_PER_CYCLE : 0;
 }
 
 /** The band a screen describes rather than scores, the way the People screen already does. */

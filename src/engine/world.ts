@@ -26,6 +26,7 @@
  */
 
 import { DRIFT_FLOOR, STAT_MAX, STAT_MIN } from './constants';
+import { bodyDriftFactor } from './climate';
 import { flagValue } from './effects';
 import { doneFlag } from './initiatives';
 import type { ContentRegistry } from './registry';
@@ -102,10 +103,15 @@ export function driftWorld(
     // cycle and decay the country faster than the same six months seen from a junior desk — the
     // clock would change the world rather than only the player's view of it. `monthsPerTurn` is
     // at most six, so this costs nothing.
+    // Only the downward half is weather-sensitive. A place getting worse on its own gets worse
+    // faster when nothing is being funded; a place somebody else is actively improving has no
+    // reason to improve faster because the settlement was generous.
+    const austerity = body.drift < 0 ? bodyDriftFactor(state) : 1;
+
     let deviation = flagValue(state, flag);
     for (let month = 0; month < months; month += 1) {
       const condition = clampCondition(body.baselineCondition + deviation);
-      deviation += body.drift * decay(body, condition);
+      deviation += body.drift * decay(body, condition) * austerity;
       deviation = Math.max(floor, Math.min(ceiling, deviation));
     }
 

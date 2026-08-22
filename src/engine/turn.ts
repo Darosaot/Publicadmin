@@ -55,6 +55,9 @@ import {
   lapseAllInitiatives,
   resolveInitiatives,
 } from './initiatives';
+import { driftClimate, reputationDecayDelta } from './climate';
+import { moneyStressDelta, savingsDelta } from './money';
+import { advanceRival } from './rival';
 import { driftWorld, learnLocalBodies } from './world';
 import {
   baselineStressReduction,
@@ -470,7 +473,15 @@ export function resolveTurn(
     // Institutional memory slows the fade rather than paying reputation, so it cannot be farmed
     // and hands the bot no lump of promotion velocity in the month it is taken.
     -Math.round(
-      next.stats.reputation * Math.max(0, REPUTATION_DECAY_RATE - reputationDecayReduction(next)),
+      next.stats.reputation *
+        Math.max(
+          0,
+          REPUTATION_DECAY_RATE -
+            reputationDecayReduction(next) +
+            // Public trust is what a reputation inside the public service is denominated in.
+            // When the currency is weak, so is the holding.
+            reputationDecayDelta(next),
+        ),
     ),
   );
   adjustStat(
@@ -496,7 +507,10 @@ export function resolveTurn(
     deputyStressRelief(next) +
     // An office where nobody works late is one point a month easier to survive; one that pushes
     // is one point harder. Small, permanent, and compounding over three hundred months.
-    hoursStressDelta(next);
+    hoursStressDelta(next) +
+    // What your own finances do to you. Two-sided and small: a cushion makes the ordinary weight
+    // of the job sit lighter, and being short is felt every month until you are not.
+    moneyStressDelta(next);
   adjustStat(next.stats, 'stress', stressDelta);
 
   if (allocation.networking > 0) {
@@ -689,14 +703,28 @@ export function beginNextTurn(state: GameState, registry: ContentRegistry): Game
     ...state,
     turn: state.turn + 1,
     calendarMonth: state.calendarMonth + worked,
-    player: { ...state.player, turnsAtLevel: state.player.turnsAtLevel + 1 },
+    player: {
+      ...state.player,
+      turnsAtLevel: state.player.turnsAtLevel + 1,
+      // What the months just worked left over, which for most of a career is not much. Accrued
+      // with the calendar rather than in `resolveTurn` because it is a fact about elapsed time
+      // and not about any decision taken inside it.
+      savings: state.player.savings + savingsDelta(state, worked),
+    },
   };
 
-  next = expireOffers(next);
+  next = expireOffers(next, registry);
   next = refillBoard(next, registry);
   // The rest of the country moved while you were working. By the same months, so a directorate's
   // cycle takes half a year off every other institution too.
   next = driftWorld(next, registry, worked);
+  // And the weather over all of it, a month at a time for the same reason the bodies move a
+  // month at a time: mean reversion is path-dependent, and the player's clock must not decide
+  // how fast the country moves.
+  next = driftClimate(next, worked);
+  // And so did Elena, who is not waiting for you. Same months, same graph, same entry terms on
+  // the same edges — she runs on the calendar, and your clock only decides how often you look.
+  next = advanceRival(next, registry);
   // A post change may have moved the player to a different beat, and the institutions on it are
   // ones you deal with rather than ones you have to go and find.
   next = learnLocalBodies(next, registry);

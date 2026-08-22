@@ -8,6 +8,7 @@
 
 import {
   KEEP_ON_MOVE_LIMIT,
+  LOG_LIMIT,
   MINISTER_MIN_POLITICAL_CAPITAL,
   MINISTER_MIN_REPUTATION,
   OFFER_BASE_CHANCE,
@@ -20,6 +21,8 @@ import {
   REVIEW_OUTCOMES,
 } from './constants';
 import { adjustStat } from './effects';
+import { outgoingsFor } from './money';
+import { fillLapsedPost, postHeld } from './rival';
 import { edgeBetween, getPost, maxTier, postsFrom, type ContentRegistry } from './registry';
 import { nextChance, nextRange } from './rng';
 import { refillBoard } from './tasks';
@@ -27,6 +30,7 @@ import { setupTeamForPost } from './team';
 import type {
   GameState,
   JobOffer,
+  LogEntry,
   ReviewRating,
   ReviewReport,
   StaffMember,
@@ -128,6 +132,9 @@ export function checkForOffer(
 
   for (const candidate of postsFrom(registry, state.player.postId)) {
     if (next.offers.some((o) => o.toPost === candidate.id)) continue;
+    // Somebody is already sitting there, because you were offered it and let it lapse. It comes
+    // back when they move on, which is the whole of what declining now costs.
+    if (postHeld(next, candidate.id)) continue;
     if (!meetsRequirements(next, registry, candidate.id)) continue;
 
     const roll = nextChance(next.rngState, offerChance(next, registry, candidate.id));
@@ -154,10 +161,28 @@ export function checkForOffer(
   return { state: next };
 }
 
-export function expireOffers(state: GameState): GameState {
+/**
+ * Offers you did not take, and what happens to them now.
+ *
+ * For six versions this dropped them from the array and that was the whole of it: a post you were
+ * offered stayed on the tree, available forever, and declining cost you exactly nothing. That is
+ * the one place in this game where a decision had no consequence at all.
+ *
+ * Now somebody else may take it — but only somebody who could actually have got it. `rivalTakesOffer`
+ * checks her against the same edge you were checked against, so a post lapses into her hands only
+ * when she had the standing and the time in post for it. The alternative would be a game that
+ * punishes you for declining by inventing a promotion for somebody who had not earned one.
+ */
+export function expireOffers(state: GameState, registry: ContentRegistry): GameState {
   const live = state.offers.filter((o) => o.expiresTurn >= state.turn);
   if (live.length === state.offers.length) return state;
-  return { ...state, offers: live };
+
+  const lapsed = state.offers.filter((o) => o.expiresTurn < state.turn);
+  let next: GameState = { ...state, offers: live };
+
+  for (const offer of lapsed) next = fillIt(next, registry, offer);
+
+  return next;
 }
 
 /**
@@ -217,6 +242,10 @@ export function acceptOffer(
       track: target.track,
       turnsAtLevel: 0,
       salary: offer.salary,
+      // The rent moves with the post. Alderford is not the Ministry, and a career that took the
+      // bigger job and kept the smaller life would turn seniority into a money printer — which
+      // is exactly what the first draft of this did.
+      outgoings: outgoingsFor(target),
     },
     tasks: [],
     offers: [],
@@ -235,8 +264,37 @@ export function acceptOffer(
   return refillBoard(setupTeamForPost(promoted, registry, keep), registry);
 }
 
-export function declineOffer(state: GameState, offerId: string): GameState {
-  return { ...state, offers: state.offers.filter((o) => o.id !== offerId) };
+/**
+ * Turning a post down, which now means somebody else may be doing it.
+ *
+ * Deliberately the same consequence as letting the offer lapse. A player who declines explicitly
+ * and one who lets the three months run out have made the same decision about the same post, and
+ * a game that charged only the second would be teaching them to avoid the button rather than the
+ * choice.
+ */
+export function declineOffer(
+  state: GameState,
+  registry: ContentRegistry,
+  offerId: string,
+): GameState {
+  const offer = state.offers.find((o) => o.id === offerId);
+  const without: GameState = { ...state, offers: state.offers.filter((o) => o.id !== offerId) };
+  if (!offer) return without;
+
+  return fillIt(without, registry, offer);
+}
+
+/** Fills one lapsed or declined post, and names the person if it is somebody you know. */
+function fillIt(state: GameState, registry: ContentRegistry, offer: JobOffer): GameState {
+  const { state: next, byRival } = fillLapsedPost(state, registry, offer);
+
+  const line: LogEntry = {
+    turn: next.turn,
+    messageKey: byRival ? 'log.rival_took_post' : 'log.post_filled',
+    params: { post: getPost(registry, offer.toPost).titleKey },
+    tone: 'bad',
+  };
+  return { ...next, log: [...next.log, line].slice(-LOG_LIMIT) };
 }
 
 /* ---------------------------------------------------------------- minister */

@@ -252,7 +252,7 @@ export function gameReducer(state: AppState, action: GameAction): AppState {
 
     case 'DECLINE_OFFER': {
       if (!state.game) return state;
-      return { ...state, game: declineOffer(state.game, action.offerId) };
+      return { ...state, game: declineOffer(state.game, registry, action.offerId) };
     }
 
     case 'SET_DELEGATION': {

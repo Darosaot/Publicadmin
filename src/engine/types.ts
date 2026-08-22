@@ -85,6 +85,32 @@ export interface Condition {
   minFlag?: Record<string, number>;
   /** Numeric flags at or below a value. */
   maxFlag?: Record<string, number>;
+  /**
+   * Where Elena is, relative to you: her tier minus yours, so positive means she is ahead.
+   *
+   * Relative rather than absolute because every scene worth writing about the two of you is about
+   * the gap and not about her rank. "She is your director now" is `minRivalGap: 1` whether that
+   * happened at tier two or tier five. Reads 0 once she has left the service.
+   */
+  minRivalGap?: number;
+  maxRivalGap?: number;
+
+  /**
+   * What you have put by, in euros.
+   *
+   * `maxSavings` is the interesting one and the reason this exists: it is how an outcome says
+   * "you needed the money", which is a sentence this corpus has been full of offers for and has
+   * never once been able to speak.
+   */
+  minSavings?: number;
+  maxSavings?: number;
+
+  /** The conditions the country is working in. Centred on zero: an ordinary year reads 0. */
+  minClimate?: Partial<Record<ClimateId, number>>;
+  maxClimate?: Partial<Record<ClimateId, number>>;
+  /** Only under a government of this character. */
+  stances?: Stance[];
+
   /** True: only with a unit under you. False: only before you have one. */
   requiresTeam?: boolean;
   /** Gates on the state of the unit itself. */
@@ -728,8 +754,15 @@ export interface GameState {
    */
   rival?: RivalState;
 
-  /** The conditions the whole country is working in this month. */
-  climate: ClimateState;
+  /**
+   * The conditions the whole country is working in this month.
+   *
+   * Optional for the same reason `rival` is, and it buys the same two things. A save written
+   * before the weather existed was played in ordinary conditions and reads as neutral through
+   * every hook below; and the balance harness gets its A side for free, because "no climate" is
+   * not a switch bolted onto the engine for testing — it is literally the game as it was.
+   */
+  climate?: ClimateState;
 
   /**
    * The person running the routine board for you, if you have named one.
