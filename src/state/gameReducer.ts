@@ -12,6 +12,7 @@ import { createGame, type NewGameOptions } from '../engine/newGame';
 import { AGENCY_TEMP_MAX } from '../engine/constants';
 import { declineOffer } from '../engine/career';
 import { directiveFlag } from '../engine/directives';
+import { appointDeputy, dismissDeputy } from '../engine/org';
 import { takePerk } from '../engine/perks';
 import { startInitiative } from '../engine/initiatives';
 import { cancelHiring, startHiring } from '../engine/team';
@@ -53,6 +54,7 @@ export type GameAction =
   | { type: 'SET_INITIATIVE_DELEGATION'; templateId: string; staffId: string | null }
   | { type: 'START_INITIATIVE'; templateId: string }
   | { type: 'TAKE_PERK'; perkId: string }
+  | { type: 'APPOINT_DEPUTY'; staffId: string | null }
   | { type: 'SET_DIRECTIVE'; directiveId: string; stance: 0 | 1 | 2 }
   | { type: 'SET_REST'; points: number }
   | { type: 'SET_NETWORKING'; points: number }
@@ -142,6 +144,18 @@ export function gameReducer(state: AppState, action: GameAction): AppState {
       // `takePerk` refuses anything unaffordable or ungated and returns the state unchanged, so
       // the reducer does not need its own copy of the rules to duplicate and get wrong.
       return { ...state, game: takePerk(state.game, registry, action.perkId) };
+    }
+
+    case 'APPOINT_DEPUTY': {
+      if (!state.game) return state;
+      // Structure, not this month's plan: it holds until it is changed, like a house rule.
+      return {
+        ...state,
+        game:
+          action.staffId === null
+            ? dismissDeputy(state.game)
+            : appointDeputy(state.game, action.staffId),
+      };
     }
 
     case 'SET_DIRECTIVE': {

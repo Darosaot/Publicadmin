@@ -591,3 +591,38 @@ describe('people are good at particular things', () => {
     expect(sweep.meanPeakStaffLevel).toBeGreaterThan(1.5);
   });
 });
+
+/**
+ * Structure: the difference between managing eight people and managing three.
+ *
+ * A/B on identical seeds, with the A side being every file handed over individually — which is
+ * how the whole senior half of the career played before v2.3.
+ */
+describe('naming a second', () => {
+  const withDeputy = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS));
+  const without = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useDeputy: false }));
+
+  it('gets used at all once a unit is big enough to want one', () => {
+    expect(withDeputy.meanMonthsWithDeputy).toBeGreaterThan(0);
+    expect(without.meanMonthsWithDeputy).toBe(0);
+  });
+
+  /**
+   * The guardrail that mattered, and that this feature failed twice.
+   *
+   * A deputy trades your best officer's *judgement* — they run the board by deadline rather than
+   * by who is best at each file — for their *availability*. Paid only in effort points that a
+   * senior manager already has spare, that trade lost: completion fell and rank came out below
+   * never appointing anybody, so the feature was a button you were punished for pressing. It pays
+   * in stress and in being better at the job now that it is the job.
+   */
+  it('is not a trap: naming one never leaves the career worse off', () => {
+    expect(without.meanLevel - withDeputy.meanLevel).toBeLessThan(0.1);
+    expect(without.completionRate - withDeputy.completionRate).toBeLessThan(0.01);
+  });
+
+  /** What it is actually for: the month stops being yours alone to hold. */
+  it('takes some of the weight off the person holding it', () => {
+    expect(withDeputy.meanStress).toBeLessThan(without.meanStress);
+  });
+});

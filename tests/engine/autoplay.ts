@@ -43,6 +43,7 @@ import {
   emptyAllocation,
   resolveTurn,
 } from '../../src/engine/turn';
+import { appointDeputy, canBeDeputy, deputyOf } from '../../src/engine/org';
 import { specialismFactor, staffLevel } from '../../src/engine/people';
 import { canTakePerk, perkCost, takePerk, takenPerks } from '../../src/engine/perks';
 import type {
@@ -97,6 +98,8 @@ export interface RunResult {
    * version of these guardrails did.
    */
   peakStaffLevel: number;
+  /** Months of the career spent with somebody running the board. */
+  monthsWithDeputy: number;
   specialistMatches: number;
   delegationsMade: number;
   initiativesCompleted: number;
@@ -170,6 +173,13 @@ export interface CareerOptions {
    * the only honest baseline for "does matching actually match".
    */
   matchSpecialisms?: boolean;
+  /**
+   * Whether the bot names a second once its unit is big enough to want one.
+   *
+   * Off is the A side: every file handed over individually, which is how the whole senior half of
+   * the career played before v2.3.
+   */
+  useDeputy?: boolean;
 }
 
 const REST_THRESHOLD = 62;
@@ -424,6 +434,7 @@ export function playCareer(options: CareerOptions): RunResult {
     usePerks = true,
     perkBranch,
     matchSpecialisms = true,
+    useDeputy = true,
   } = options;
 
   let game = createGame({ name: 'Bot', department, seed }, registry);
@@ -458,6 +469,7 @@ export function playCareer(options: CareerOptions): RunResult {
   let moraleSum = 0;
   let moraleMonths = 0;
   let peakStaffLevel = 1;
+  let monthsWithDeputy = 0;
   let specialistMatches = 0;
   let delegationsMade = 0;
   let initiativesCompleted = 0;
@@ -536,6 +548,21 @@ export function playCareer(options: CareerOptions): RunResult {
         // Spent before the month resolves, so a perk taken this cycle is felt in this cycle —
         // which is what a player clicking the button would see, and therefore what the A/B has
         // to measure.
+        /*
+         * Name a second once there are enough people to be worth it.
+         *
+         * Below four the arithmetic is against you: you lose that person's own output to save a
+         * handover or two, and a small unit needs the output more than it needs the structure.
+         * That threshold is the whole decision the feature offers, so the bot has to make it the
+         * way a player would rather than appointing somebody the moment it can.
+         */
+        if (useDeputy && !deputyOf(game) && game.staff.length >= 4) {
+          const best = [...game.staff]
+            .filter(canBeDeputy)
+            .sort((a, b) => b.skill - a.skill)[0];
+          if (best) game = appointDeputy(game, best.id);
+        }
+
         if (usePerks) {
           game = spendPerkPoints(game, perkBranch);
           perksTaken = takenPerks(game, registry).length;
@@ -552,6 +579,7 @@ export function playCareer(options: CareerOptions): RunResult {
         }
 
         game = resolveTurn(game, registry, plan);
+        if (deputyOf(game)) monthsWithDeputy += 1;
         for (const member of game.staff) {
           peakStaffLevel = Math.max(peakStaffLevel, staffLevel(member));
         }
@@ -616,6 +644,7 @@ export function playCareer(options: CareerOptions): RunResult {
     perksTaken,
     meanUnitMorale: moraleMonths > 0 ? moraleSum / moraleMonths : 0,
     peakStaffLevel,
+    monthsWithDeputy,
     specialistMatches,
     delegationsMade,
     initiativesCompleted,
@@ -666,6 +695,7 @@ export function summarise(results: RunResult[]) {
     meanPerksTaken: mean((r) => r.perksTaken),
     meanUnitMorale: mean((r) => r.meanUnitMorale),
     meanPeakStaffLevel: mean((r) => r.peakStaffLevel),
+    meanMonthsWithDeputy: mean((r) => r.monthsWithDeputy),
     totalSpecialistMatches: results.reduce((n, r) => n + r.specialistMatches, 0),
     totalDelegations: results.reduce((n, r) => n + r.delegationsMade, 0),
     meanInitiativesCompleted: mean((r) => r.initiativesCompleted),

@@ -587,6 +587,15 @@ export interface GameState {
 
   stats: PlayerStats;
 
+  /**
+   * The person running the routine board for you, if you have named one.
+   *
+   * Optional and therefore migration-free: absent means "no deputy", which is exactly what every
+   * save written before v2.3 should say. Kept as an id rather than a copy so it cannot go stale,
+   * and cleared by `settleDeputy` on every path that removes somebody from the unit.
+   */
+  deputyId?: string;
+
   tasks: ActiveTask[];
   nextTaskUid: number;
 

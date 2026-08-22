@@ -360,4 +360,17 @@ export const uiStrings: Record<string, string> = {
   'staff.trait.organiser.help': 'Can hold one more file than the grade says.',
   'staff.trait.diplomat': 'Diplomat',
   'staff.trait.diplomat.help': 'Everyone else in the room is easier to manage.',
+
+  /* ---------------------------------------------------------------- structure */
+
+  'org.heading': 'Who runs the board',
+  'org.none': 'Nobody. Every file on the desk is handed out by you, one at a time.',
+  'org.about':
+    'A second stops carrying files and starts running the routine ones: a few a month are handled without a point of your time. What it costs is their own output, and the best person in the unit doing your job instead of theirs.',
+  'org.appoint': 'Make them your second',
+  'org.dismiss': 'Take the job back',
+  'org.current': '{name} runs the board',
+  'org.capacity': 'Handles {count} files a month for you',
+  'org.too_junior': 'Too junior to run the board',
+  'report.deputy_ran': '{name} ran {count} of the board.',
 };

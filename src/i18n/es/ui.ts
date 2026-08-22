@@ -357,4 +357,17 @@ export const uiStrings: Record<string, string> = {
   'staff.trait.organiser.help': 'Puede llevar un expediente más de lo que dice su categoría.',
   'staff.trait.diplomat': 'Diplomática',
   'staff.trait.diplomat.help': 'Con ella en la sala, los demás se llevan mejor.',
+
+  /* ---------------------------------------------------------------- estructura */
+
+  'org.heading': 'Quién lleva la mesa',
+  'org.none': 'Nadie. Todos los expedientes los repartes tú, uno a uno.',
+  'org.about':
+    'Un segundo deja de llevar expedientes y pasa a llevar los de trámite: unos cuantos al mes salen sin gastarte un punto. Lo que cuesta es lo que esa persona producía, y que la mejor de la unidad haga tu trabajo en vez del suyo.',
+  'org.appoint': 'Nombrar segundo',
+  'org.dismiss': 'Recuperar el puesto',
+  'org.current': '{name} lleva la mesa',
+  'org.capacity': 'Se ocupa de {count} expedientes al mes por ti',
+  'org.too_junior': 'Demasiado júnior para llevar la mesa',
+  'report.deputy_ran': '{name} se ocupó de {count} de la mesa.',
 };

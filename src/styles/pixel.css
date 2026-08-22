@@ -488,3 +488,23 @@ canvas {
 .staffbar__fill--xp {
   background: var(--c-accent);
 }
+
+/* ---------- The second ---------- */
+
+/* The one card in the roster with a different job gets a different frame, so "who is running
+   the board" is answerable at a glance rather than by reading the side panel. */
+.staff--second {
+  border-color: var(--c-accent);
+  box-shadow:
+    inset var(--px) var(--px) 0 var(--c-bevel-light),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--c-bevel-dark),
+    0 0 0 var(--px) var(--c-accent),
+    var(--shadow-sm);
+}
+
+.org__who {
+  font-family: var(--f-display);
+  font-size: var(--fd-sm);
+  line-height: 1.7;
+  color: var(--c-accent);
+}

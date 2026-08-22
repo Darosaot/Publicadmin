@@ -38,6 +38,7 @@ import {
   TRAINING_SKILL_GAIN,
 } from './constants';
 import { remember } from './alumni';
+import { dismissDeputy, settleDeputy } from './org';
 import { knownBodies } from './world';
 import { hiringMoraleDelta, hiringSkillDelta, hoursMoraleDelta } from './directives';
 import { getPost, type ContentRegistry } from './registry';
@@ -188,7 +189,7 @@ export function setupTeamForPost(
     // is a scene, and the engine has no business writing it.
     const remembered = remember(state, state.staff);
     return {
-      ...remembered,
+      ...dismissDeputy(remembered),
       staff: [],
       hiring: undefined,
       budget: undefined,
@@ -258,13 +259,13 @@ export function setupTeamForPost(
     spentThisMonth: 0,
   };
 
-  return {
+  return settleDeputy({
     ...next,
     staff,
     hiring: undefined,
     budget,
     log: [...next.log, ...brought].slice(-LOG_LIMIT),
-  };
+  });
 }
 
 export function startHiring(state: GameState, seniority: Seniority): GameState {
@@ -445,7 +446,7 @@ export function resolveStaffMonth(
     };
   }
 
-  return { state: next, report };
+  return { state: settleDeputy(next), report };
 }
 
 /**
@@ -476,7 +477,7 @@ export function resolveAttrition(
     }
   }
 
-  if (leaving.length === 0) return { state: next, report };
+  if (leaving.length === 0) return { state: settleDeputy(next), report };
 
   // Somebody who resigns is not gone from the career, only from the unit.
   next = remember(
@@ -485,7 +486,9 @@ export function resolveAttrition(
   );
 
   return {
-    state: {
+    // `settleDeputy` last, once the leavers are actually out of `staff` — it decides by looking
+    // for the person, so running it before the filter would always find them still there.
+    state: settleDeputy({
       ...next,
       staff: next.staff.filter((s) => !leaving.includes(s.id)),
       // Whatever they were holding lands back on your desk, unassigned.
@@ -494,7 +497,7 @@ export function resolveAttrition(
           ? { ...task, assignedTo: undefined }
           : task,
       ),
-    },
+    }),
     report,
   };
 }

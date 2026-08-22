@@ -13,6 +13,7 @@ import { discretionarySpend } from '../../engine/turn';
 import { SENIORITIES, type GameState, type Seniority, type StaffMember } from '../../engine/types';
 import { useT } from '../../i18n';
 import { useGame } from '../../state/GameProvider';
+import { canBeDeputy, deputyCapacity, deputyOf, isDeputy } from '../../engine/org';
 import { levelProgress, specialismOf, staffLevel, traitOf } from '../../engine/people';
 import { Portrait } from '../components/Portrait';
 import { StatsBar } from '../components/StatsBar';
@@ -25,6 +26,7 @@ export function TeamScreen({ game }: { game: GameState }) {
   const { state, dispatch, effortTotal, effortRemaining } = useGame();
   const { allocation } = state;
 
+  const deputy = deputyOf(game);
   const establishment = headcountFor(game, registry);
   const payroll = staffCost(game);
   const committed = discretionarySpend(allocation);
@@ -66,6 +68,8 @@ export function TeamScreen({ game }: { game: GameState }) {
                   training={allocation.training.includes(member.id)}
                   effortRemaining={effortRemaining}
                   budgetRemaining={slack}
+                  deputy={deputyOf(game) !== undefined}
+                  isSecond={isDeputy(game, member.id)}
                 />
               ))}
             </div>
@@ -211,6 +215,26 @@ export function TeamScreen({ game }: { game: GameState }) {
           </section>
 
           <section className="panel">
+            <h2 className="panel__title">{t('org.heading')}</h2>
+            {deputy ? (
+              <>
+                <p className="org__who">{t('org.current', { name: deputy.name })}</p>
+                <p className="muted">{t('org.capacity', { count: deputyCapacity(game) })}</p>
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--small"
+                  onClick={() => dispatch({ type: 'APPOINT_DEPUTY', staffId: null })}
+                >
+                  {t('org.dismiss')}
+                </button>
+              </>
+            ) : (
+              <p className="muted">{t('org.none')}</p>
+            )}
+            <p className="muted">{t('org.about')}</p>
+          </section>
+
+          <section className="panel">
             <h2 className="panel__title">{t('team.health_heading')}</h2>
             <p className="team__morale">
               {t('team.average_morale', { value: averageMorale(game) })}
@@ -236,6 +260,9 @@ interface StaffCardProps {
   training: boolean;
   effortRemaining: number;
   budgetRemaining: number;
+  /** Whether anybody at all holds the job — one second only, so the button hides once taken. */
+  deputy: boolean;
+  isSecond: boolean;
 }
 
 function StaffCard({
@@ -246,6 +273,8 @@ function StaffCard({
   training,
   effortRemaining,
   budgetRemaining,
+  deputy,
+  isSecond,
 }: StaffCardProps) {
   const t = useT();
   const { dispatch } = useGame();
@@ -257,7 +286,7 @@ function StaffCard({
   const progress = levelProgress(member);
 
   return (
-    <article className={`staff staff--${moraleTone}`}>
+    <article className={`staff staff--${moraleTone}${isSecond ? ' staff--second' : ''}`}>
       <div className="staff__head">
         <Portrait name={member.name} size={48} />
         <div className="staff__ident">
@@ -315,6 +344,17 @@ function StaffCard({
         >
           {t('team.coach')} <span className="chipbtn__cost">{COACHING_EFFORT_COST}</span>
         </button>
+        {/* Appointing is a decision about a person, so it sits on that person's card next to
+            the other things you can do with them. */}
+        {canBeDeputy(member) && !deputy && (
+          <button
+            type="button"
+            className="chipbtn"
+            onClick={() => dispatch({ type: 'APPOINT_DEPUTY', staffId: member.id })}
+          >
+            {t('org.appoint')}
+          </button>
+        )}
         <button
           type="button"
           className={`chipbtn${training ? ' chipbtn--on' : ''}`}

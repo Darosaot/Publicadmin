@@ -66,6 +66,12 @@ import {
 } from './perks';
 import { capacityOf, specialismFactor, traitOutputFactor } from './people';
 import {
+  DEPUTY_OUTPUT_BONUS,
+  deputyAssignments,
+  deputyStressRelief,
+  isDeputy,
+} from './org';
+import {
   adjustStaffMorale,
   applyAssignments,
   delegatedQualityBase,
@@ -214,6 +220,9 @@ export function normalizeAllocation(
 
     for (const [taskUid, staffId] of Object.entries(allocation.delegations)) {
       if (!taskIds.has(taskUid) || !staffIds.has(staffId)) continue;
+      // The other half of naming a deputy: they are running the board, not working it. Losing
+      // your best officer's own output is what the free handovers actually cost.
+      if (isDeputy(state, staffId)) continue;
       if ((carrying.get(staffId) ?? 0) >= capacityFor(staffId)) continue;
       if (remaining < delegationCost(state)) break;
       normalized.delegations[taskUid] = staffId;
@@ -303,6 +312,25 @@ export function resolveTurn(
 
   // Record who is carrying what before anyone does any work.
   next = applyAssignments(next, allocation);
+
+  /*
+   * And then the deputy picks up what is left.
+   *
+   * After your handovers, not instead of them: the files you chose to place go where you put
+   * them, and the deputy takes the next few by deadline with none of your month spent on it.
+   * That is the whole of what naming a second buys — the top of your month back — and it is why
+   * a directorate of eight now plays differently from a unit of three rather than just longer.
+   */
+  const deputyFiles = deputyAssignments(next, new Set(Object.keys(allocation.delegations)));
+  if (deputyFiles.length > 0 && next.deputyId) {
+    const runner = next.deputyId;
+    next = {
+      ...next,
+      tasks: next.tasks.map((task) =>
+        deputyFiles.includes(task.uid) ? { ...task, assignedTo: runner } : task,
+      ),
+    };
+  }
   next = applyInitiativeAssignments(next, allocation);
 
   // Your own effort onto the board.
@@ -337,9 +365,10 @@ export function resolveTurn(
       // than a meticulous one who is doing it better.
       const template = registry.tasks[task.templateId];
       const fit = template ? specialismFactor(member, template) : 1;
+      const running = isDeputy(next, member.id) ? DEPUTY_OUTPUT_BONUS : 1;
       const contribution = Math.max(
         1,
-        Math.round((staffOutput(member) * fit * traitOutputFactor(member)) / share),
+        Math.round((staffOutput(member) * fit * traitOutputFactor(member) * running) / share),
       );
       team.delegatedProgress.push({
         staffName: member.name,
@@ -463,7 +492,8 @@ export function resolveTurn(
     BASELINE_STRESS_PER_TURN +
     (allocation.overtime ? OVERTIME_STRESS : 0) -
     allocation.rest * (REST_STRESS_RELIEF + restReliefBonus(next)) -
-    baselineStressReduction(next) +
+    baselineStressReduction(next) -
+    deputyStressRelief(next) +
     // An office where nobody works late is one point a month easier to survive; one that pushes
     // is one point harder. Small, permanent, and compounding over three hundred months.
     hoursStressDelta(next);
