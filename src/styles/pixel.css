@@ -508,3 +508,29 @@ canvas {
   line-height: 1.7;
   color: var(--c-accent);
 }
+
+/* ---------- Pushing back ---------- */
+
+.negotiate {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+  margin-top: var(--s-2);
+}
+
+.negotiate__btn {
+  font-size: var(--fd-xs);
+  padding: var(--s-1) var(--s-2);
+}
+
+/* Saying no is the only one anybody outside the room hears about, so it is the only one that
+   looks like a decision rather than an adjustment. */
+.negotiate__btn--refuse {
+  border-color: var(--c-bad);
+  color: var(--c-bad);
+}
+
+.negotiate__btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

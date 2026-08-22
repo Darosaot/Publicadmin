@@ -599,8 +599,21 @@ describe('people are good at particular things', () => {
  * how the whole senior half of the career played before v2.3.
  */
 describe('naming a second', () => {
-  const withDeputy = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS));
-  const without = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useDeputy: false }));
+  /*
+   * Both sides run with negotiation off, for the third occurrence of the same lesson.
+   *
+   * The bot rests when stress crosses a fixed threshold, so stress is a shared sink: any second
+   * system that touches it pushes the equilibrium straight back and the comparison reads noise.
+   * It swamped the directives sweep when perks landed, and it swamped this one when negotiation
+   * landed — a deputy's whole payoff is a point of stress a month, and against longer careers
+   * with more months in them the sign flipped. Any A/B on stress has to isolate.
+   */
+  const withDeputy = summarise(
+    playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useNegotiation: false }),
+  );
+  const without = summarise(
+    playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useDeputy: false, useNegotiation: false }),
+  );
 
   it('gets used at all once a unit is big enough to want one', () => {
     expect(withDeputy.meanMonthsWithDeputy).toBeGreaterThan(0);
@@ -624,5 +637,45 @@ describe('naming a second', () => {
   /** What it is actually for: the month stops being yours alone to hold. */
   it('takes some of the weight off the person holding it', () => {
     expect(withDeputy.meanStress).toBeLessThan(without.meanStress);
+  });
+});
+
+/**
+ * Pushing back, A/B on identical seeds.
+ *
+ * The A side is the board as an immovable fact, which is how every version before v2.4 worked.
+ */
+describe('arguing about a file', () => {
+  const arguing = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS));
+  const meekly = summarise(
+    playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useNegotiation: false }),
+  );
+
+  it('gets used, and only on files that were going to be missed', () => {
+    expect(arguing.meanNegotiations).toBeGreaterThan(3);
+    expect(meekly.meanNegotiations).toBe(0);
+  });
+
+  it('finishes more of the board', () => {
+    expect(arguing.completionRate).toBeGreaterThan(meekly.completionRate);
+  });
+
+  /**
+   * And is paid for. Political capital is what promotions are keyed off, so every file argued
+   * about is a favour not spent on your own career — measured at about a sixth of a tier across
+   * ten seeds and seven departments.
+   *
+   * The first pricing failed this: at six points a scope the bot bought ninety-nine per cent
+   * completion for eight hundredths of a tier, which turns an oversubscribed board — the thing
+   * this whole game is built on — into a solvable one.
+   */
+  it('costs the career the favours it spends', () => {
+    expect(arguing.meanPoliticalCapital).toBeLessThan(meekly.meanPoliticalCapital);
+    expect(arguing.meanLevel).toBeLessThan(meekly.meanLevel);
+  });
+
+  /** It is how you survive a bad month, not how you stop having them. */
+  it('does not make the board solvable', () => {
+    expect(arguing.completionRate).toBeLessThan(0.995);
   });
 });

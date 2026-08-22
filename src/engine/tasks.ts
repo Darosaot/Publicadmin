@@ -24,6 +24,7 @@ import {
   REFERENCE_TASK_SLOTS,
 } from './constants';
 import { rigourEffortDelta, rigourQualityDelta } from './directives';
+import { SCOPED_QUALITY_CAP } from './negotiate';
 import { taskQualityBonus } from './perks';
 import { getPost, type ContentRegistry } from './registry';
 import { nextInt, nextRange, weightedPick } from './rng';
@@ -159,9 +160,18 @@ export function rollQuality(
     stressPenalty +
     jitterRoll.value;
 
+  /*
+   * A file cut back to what was actually needed cannot come back brilliant.
+   *
+   * Without this, scoping is free: the required effort falls, everything else is unchanged, and
+   * the shortened file scores *better* because the early-delivery bonus grows. Part of what would
+   * have made it excellent is precisely the part you agreed not to do.
+   */
+  const capped = task.scoped ? Math.min(score, SCOPED_QUALITY_CAP) : score;
+
   return {
-    score: Math.round(score),
-    tier: tierForScore(score),
+    score: Math.round(capped),
+    tier: tierForScore(capped),
     rngState: jitterRoll.rngState,
   };
 }

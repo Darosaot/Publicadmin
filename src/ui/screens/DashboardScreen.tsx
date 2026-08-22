@@ -66,6 +66,8 @@ export function DashboardScreen({ game }: { game: GameState }) {
                   staff={game.staff}
                   assignedTo={allocation.delegations[task.uid]}
                   delegatedProgress={delegatedProgressFor(task.uid)}
+                  politicalCapital={game.stats.politicalCapital}
+                  onNegotiate={(kind) => dispatch({ type: 'NEGOTIATE', taskUid: task.uid, kind })}
                   onDelegate={
                     game.staff.length > 0
                       ? (staffId) => dispatch({ type: 'SET_DELEGATION', taskUid: task.uid, staffId })

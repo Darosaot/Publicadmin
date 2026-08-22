@@ -373,4 +373,19 @@ export const uiStrings: Record<string, string> = {
   'org.capacity': 'Handles {count} files a month for you',
   'org.too_junior': 'Too junior to run the board',
   'report.deputy_ran': '{name} ran {count} of the board.',
+
+  /* ------------------------------------------------------------- pushing back */
+
+  'negotiate.extend': 'Move the date',
+  'negotiate.extend.help': 'Two more cycles. Somebody remembers you asked.',
+  'negotiate.extend.done': 'Date moved',
+  'negotiate.scope': 'Cut it back',
+  'negotiate.scope.help':
+    'Agree to do less of it. Smaller file, and it can no longer come back brilliant — part of what would have made it brilliant is the part you agreed not to do.',
+  'negotiate.scope.done': 'Cut back',
+  'negotiate.refuse': 'Say no',
+  'negotiate.refuse.help':
+    'It leaves the board and does not count as missed. You did not fail it, you declined it — and it is the only one of the three anybody outside the room hears about.',
+  'negotiate.refuse.done': 'Declined',
+  'log.refused_file': 'You declined a file rather than miss it.',
 };

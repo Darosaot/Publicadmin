@@ -12,6 +12,12 @@ import { createGame, type NewGameOptions } from '../engine/newGame';
 import { AGENCY_TEMP_MAX } from '../engine/constants';
 import { declineOffer } from '../engine/career';
 import { directiveFlag } from '../engine/directives';
+import {
+  extendDeadline,
+  refuseTask,
+  scopeDown,
+  type NegotiationKind,
+} from '../engine/negotiate';
 import { appointDeputy, dismissDeputy } from '../engine/org';
 import { takePerk } from '../engine/perks';
 import { startInitiative } from '../engine/initiatives';
@@ -55,6 +61,7 @@ export type GameAction =
   | { type: 'START_INITIATIVE'; templateId: string }
   | { type: 'TAKE_PERK'; perkId: string }
   | { type: 'APPOINT_DEPUTY'; staffId: string | null }
+  | { type: 'NEGOTIATE'; taskUid: string; kind: NegotiationKind }
   | { type: 'SET_DIRECTIVE'; directiveId: string; stance: 0 | 1 | 2 }
   | { type: 'SET_REST'; points: number }
   | { type: 'SET_NETWORKING'; points: number }
@@ -156,6 +163,23 @@ export function gameReducer(state: AppState, action: GameAction): AppState {
             ? dismissDeputy(state.game)
             : appointDeputy(state.game, action.staffId),
       };
+    }
+
+    case 'NEGOTIATE': {
+      if (!state.game) return state;
+      const { taskUid, kind } = action;
+      const game =
+        kind === 'extend'
+          ? extendDeadline(state.game, taskUid)
+          : kind === 'scope'
+            ? scopeDown(state.game, taskUid)
+            : refuseTask(state.game, registry, taskUid);
+
+      // A refused file must not keep its allocation, or the points stay committed to something
+      // that is no longer on the board and the month silently loses them.
+      const { [taskUid]: _dropped, ...tasks } = state.allocation.tasks;
+      const { [taskUid]: _undelegated, ...delegations } = state.allocation.delegations;
+      return { ...state, game, allocation: { ...state.allocation, tasks, delegations } };
     }
 
     case 'SET_DIRECTIVE': {

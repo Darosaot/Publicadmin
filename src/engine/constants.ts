@@ -179,6 +179,19 @@ export const ALUMNI_LIMIT = 12;
  */
 export const SPECIALIST_HIRE_CHANCE = 0.45;
 
+/* ---------------------------------------------------------------- pushing back */
+
+/**
+ * What it costs to argue about a file, in favours owed.
+ *
+ * Refusing is dearest and is the only one that also costs standing, because it is the only one
+ * anybody outside the conversation hears about. Moving a date is priced dynamically on how much
+ * of the file is left — see `negotiationCost`.
+ */
+export const SCOPE_PC_COST = 9;
+export const REFUSE_PC_COST = 14;
+export const REFUSE_REPUTATION_COST = 4;
+
 /** How many of your unit you may take with you when you take a new post. */
 export const KEEP_ON_MOVE_LIMIT = 2;
 

@@ -43,6 +43,7 @@ import {
   emptyAllocation,
   resolveTurn,
 } from '../../src/engine/turn';
+import { extendDeadline, scopeDown } from '../../src/engine/negotiate';
 import { appointDeputy, canBeDeputy, deputyOf } from '../../src/engine/org';
 import { specialismFactor, staffLevel } from '../../src/engine/people';
 import { canTakePerk, perkCost, takePerk, takenPerks } from '../../src/engine/perks';
@@ -100,6 +101,8 @@ export interface RunResult {
   peakStaffLevel: number;
   /** Months of the career spent with somebody running the board. */
   monthsWithDeputy: number;
+  /** How often the bot argued about a file rather than simply missing it. */
+  negotiations: number;
   specialistMatches: number;
   delegationsMade: number;
   initiativesCompleted: number;
@@ -180,9 +183,19 @@ export interface CareerOptions {
    * the career played before v2.3.
    */
   useDeputy?: boolean;
+  /**
+   * Whether the bot argues about files it is going to miss, rather than simply missing them.
+   *
+   * Off is the A side: the board as an immovable fact, which is how every version of this game
+   * before v2.4 worked.
+   */
+  useNegotiation?: boolean;
 }
 
 const REST_THRESHOLD = 62;
+
+/** Favours the bot will not spend on files, because promotions are keyed off the same stat. */
+const NEGOTIATION_RESERVE = 45;
 
 /**
  * How the bot plays.
@@ -435,6 +448,7 @@ export function playCareer(options: CareerOptions): RunResult {
     perkBranch,
     matchSpecialisms = true,
     useDeputy = true,
+    useNegotiation = true,
   } = options;
 
   let game = createGame({ name: 'Bot', department, seed }, registry);
@@ -470,6 +484,7 @@ export function playCareer(options: CareerOptions): RunResult {
   let moraleMonths = 0;
   let peakStaffLevel = 1;
   let monthsWithDeputy = 0;
+  let negotiations = 0;
   let specialistMatches = 0;
   let delegationsMade = 0;
   let initiativesCompleted = 0;
@@ -556,6 +571,30 @@ export function playCareer(options: CareerOptions): RunResult {
          * That threshold is the whole decision the feature offers, so the bot has to make it the
          * way a player would rather than appointing somebody the moment it can.
          */
+        /*
+         * Argue about what is about to be missed.
+         *
+         * Only for files that genuinely cannot be finished — a bot that scopes everything is
+         * measuring nothing but the cost of the verb — and only while there are favours to spare,
+         * because political capital is also what promotions are keyed off. Cutting a file back is
+         * tried before moving its date: it is cheaper, and the ceiling it costs is only worth
+         * anything on a file that was going to be finished well, which this one was not.
+         */
+        if (useNegotiation && game.stats.politicalCapital > NEGOTIATION_RESERVE) {
+          const doomed = game.tasks.filter(
+            (task) =>
+              task.deadlineTurn - game.turn <= 1 &&
+              task.required - task.progress > effortAvailable(game, registry, false) / 2,
+          );
+          for (const task of doomed) {
+            if (game.stats.politicalCapital <= NEGOTIATION_RESERVE) break;
+            const before = game;
+            game = scopeDown(game, task.uid);
+            if (game === before) game = extendDeadline(game, task.uid);
+            if (game !== before) negotiations += 1;
+          }
+        }
+
         if (useDeputy && !deputyOf(game) && game.staff.length >= 4) {
           const best = [...game.staff]
             .filter(canBeDeputy)
@@ -645,6 +684,7 @@ export function playCareer(options: CareerOptions): RunResult {
     meanUnitMorale: moraleMonths > 0 ? moraleSum / moraleMonths : 0,
     peakStaffLevel,
     monthsWithDeputy,
+    negotiations,
     specialistMatches,
     delegationsMade,
     initiativesCompleted,
@@ -696,6 +736,7 @@ export function summarise(results: RunResult[]) {
     meanUnitMorale: mean((r) => r.meanUnitMorale),
     meanPeakStaffLevel: mean((r) => r.peakStaffLevel),
     meanMonthsWithDeputy: mean((r) => r.monthsWithDeputy),
+    meanNegotiations: mean((r) => r.negotiations),
     totalSpecialistMatches: results.reduce((n, r) => n + r.specialistMatches, 0),
     totalDelegations: results.reduce((n, r) => n + r.delegationsMade, 0),
     meanInitiativesCompleted: mean((r) => r.initiativesCompleted),

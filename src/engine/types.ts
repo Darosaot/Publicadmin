@@ -142,6 +142,15 @@ export interface ActiveTask {
   spawnedTurn: number;
   /** Who is carrying the file this month, if you handed it to someone. */
   assignedTo?: string;
+  /**
+   * Whether the date has already been moved, and whether the file has already been cut back.
+   *
+   * Both optional, so no save migration: absent means "not yet", which is what every file in
+   * every existing career should say. Both are once-only — without the cap, moving a deadline is
+   * an infinite loop against a stat that replenishes, and no file need ever be finished.
+   */
+  extended?: boolean;
+  scoped?: boolean;
 }
 
 /* ------------------------------------------------------------- initiatives */

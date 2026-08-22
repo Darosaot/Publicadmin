@@ -1,6 +1,7 @@
 import { registry } from '../../content';
 import type { ActiveTask, StaffMember } from '../../engine/types';
 import { useT } from '../../i18n';
+import { negotiationCost, type NegotiationKind } from '../../engine/negotiate';
 import { EffortStepper } from './EffortStepper';
 
 interface TaskCardProps {
@@ -15,6 +16,9 @@ interface TaskCardProps {
   onDelegate?: (staffId: string | null) => void;
   /** Progress the assignee is expected to add this month, for the projection. */
   delegatedProgress?: number;
+  /** The player's own political capital, for pricing the three ways of pushing back. */
+  politicalCapital?: number;
+  onNegotiate?: (kind: NegotiationKind) => void;
 }
 
 export function TaskCard({
@@ -27,6 +31,8 @@ export function TaskCard({
   assignedTo,
   onDelegate,
   delegatedProgress = 0,
+  politicalCapital = 0,
+  onNegotiate,
 }: TaskCardProps) {
   const t = useT();
   const template = registry.tasks[task.templateId];
@@ -86,6 +92,31 @@ export function TaskCard({
           />
         )}
       </div>
+
+      {/* The three things a real official does with a file they cannot deliver as specified,
+          in ascending order of what it costs them. Priced in favours owed, because that is
+          exactly what getting a date moved spends. */}
+      {onNegotiate && (
+        <div className="negotiate">
+          {(['extend', 'scope', 'refuse'] as const).map((kind) => {
+            const cost = negotiationCost(task, kind);
+            const already = (kind === 'extend' && task.extended) || (kind === 'scope' && task.scoped);
+            return (
+              <button
+                key={kind}
+                type="button"
+                className={`chipbtn negotiate__btn negotiate__btn--${kind}`}
+                disabled={already || politicalCapital < cost}
+                title={t(`negotiate.${kind}.help`)}
+                onClick={() => onNegotiate(kind)}
+              >
+                {t(already ? `negotiate.${kind}.done` : `negotiate.${kind}`)}
+                {!already && <span className="chipbtn__cost">{cost}</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <div className="task__foot">
         {onDelegate && staff.length > 0 && (

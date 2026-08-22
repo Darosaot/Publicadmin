@@ -370,4 +370,19 @@ export const uiStrings: Record<string, string> = {
   'org.capacity': 'Se ocupa de {count} expedientes al mes por ti',
   'org.too_junior': 'Demasiado júnior para llevar la mesa',
   'report.deputy_ran': '{name} se ocupó de {count} de la mesa.',
+
+  /* --------------------------------------------------------------- plantarse */
+
+  'negotiate.extend': 'Mover la fecha',
+  'negotiate.extend.help': 'Dos ciclos más. Alguien se acuerda de que lo pediste.',
+  'negotiate.extend.done': 'Fecha movida',
+  'negotiate.scope': 'Recortarlo',
+  'negotiate.scope.help':
+    'Acordar hacer menos. Expediente más pequeño, y ya no puede salir brillante: parte de lo que lo habría hecho brillante es justo lo que acordaste no hacer.',
+  'negotiate.scope.done': 'Recortado',
+  'negotiate.refuse': 'Decir que no',
+  'negotiate.refuse.help':
+    'Sale de la mesa y no cuenta como incumplido. No fallaste, rechazaste — y es lo único de los tres que se entera alguien fuera del despacho.',
+  'negotiate.refuse.done': 'Rechazado',
+  'log.refused_file': 'Rechazaste un expediente antes que incumplirlo.',
 };
