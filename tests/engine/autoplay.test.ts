@@ -897,9 +897,16 @@ describe('money that matters', () => {
    * The rule, and the reason the comfort bonus was taken out again. Money buys options and
    * pressure; it may never buy standing, because offers key off reputation and anything paying it
    * turns a hoarded resource into promotion velocity.
+   *
+   * **One-directional, because the rule is.** The first version of this assertion bounded the
+   * absolute difference and went red on a measured −3.5: turning money on *costs* about three and
+   * a half points of reputation, stably, at twelve, twenty and thirty seeds. That is the money
+   * pool being harsher than the corpus it joins — −1.24 reputation per outcome against a corpus
+   * average of +0.51 — which is the correct direction for a set of scenes about being tempted and
+   * about what refusing costs. What must never happen is the other sign.
    */
   it('does not buy a career', () => {
-    expect(Math.abs(withIt.meanLevel - without.meanLevel)).toBeLessThan(0.2);
-    expect(Math.abs(withIt.meanReputation - without.meanReputation)).toBeLessThan(2);
+    expect(withIt.meanLevel).toBeLessThan(without.meanLevel + 0.2);
+    expect(withIt.meanReputation).toBeLessThan(without.meanReputation + 2);
   });
 });

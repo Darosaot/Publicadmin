@@ -7,6 +7,15 @@ import { defineEvent } from '../authoring';
  * faster, the country falls apart at a different speed. These are the moments where it arrives at
  * your desk with a name on it.
  *
+ * ### Priced against the corpus, not in isolation
+ *
+ * This pool shipped its first draft at **1.90 reputation per outcome against a corpus average of
+ * 0.51** — nearly four times as generous as the events it was joining. That is the failure mode
+ * the Inspection department shipped with and the design document records: the balance goes wrong
+ * because the fiction is wrong, and the fiction here was that telling a new government the real
+ * position makes you famous for it. It does not. Six payouts were moved toward integrity and
+ * political capital, which is what that work actually earns and costs.
+ *
  * `evt.milestone.election` is **required by the engine** — `driftClimate` schedules it by id
  * whenever a government changes, and `validate.ts` fails the build if the corpus does not define
  * it. That is the same arrangement the Minister ending already uses: the engine states a fact and
@@ -52,8 +61,8 @@ export const climateEvents = [
         label: 'Put the real state of things in the first submission',
         text: 'Including the two paragraphs the last lot had been declining to read for three years. It is either the best thing you have ever done for this department or a career-shortening act of optimism, and it will be some months before anybody can tell which.',
         effects: [
-          { kind: 'stat', stat: 'integrity', delta: 6 },
-          { kind: 'stat', stat: 'reputation', delta: 4 },
+          { kind: 'stat', stat: 'integrity', delta: 7 },
+          { kind: 'stat', stat: 'reputation', delta: 2 },
           { kind: 'stat', stat: 'politicalCapital', delta: -6 },
           { kind: 'queueEvent', eventId: 'evt.followup.new_ministers_verdict', delayTurns: 3 },
         ],
@@ -75,7 +84,8 @@ export const climateEvents = [
             weight: 3,
             text: 'They wanted somebody who would. The next four submissions from your department go up unredacted and one of them changes a policy that had been wrong since before you joined.',
             effects: [
-              { kind: 'stat', stat: 'reputation', delta: 10 },
+              { kind: 'stat', stat: 'reputation', delta: 4 },
+              { kind: 'stat', stat: 'integrity', delta: 6 },
               { kind: 'stat', stat: 'politicalCapital', delta: 8 },
               { kind: 'flag', flag: 'trusted_by_the_centre' },
             ],
@@ -170,8 +180,8 @@ export const climateEvents = [
         label: 'Publish the workings alongside it',
         text: 'Forty pages of method nobody asked for, put out in full. Six people read it properly and two of them are journalists, and the story that runs is about an administration that showed its work.',
         effects: [
-          { kind: 'stat', stat: 'integrity', delta: 5 },
-          { kind: 'stat', stat: 'reputation', delta: 5 },
+          { kind: 'stat', stat: 'integrity', delta: 6 },
+          { kind: 'stat', stat: 'reputation', delta: 2 },
           { kind: 'stat', stat: 'stress', delta: 4 },
         ],
       },
@@ -214,8 +224,8 @@ export const climateEvents = [
         label: 'Spend it on something that can be seen',
         text: 'It is announced, photographed and genuinely useful, in that order of emphasis. The backlog is still there and is now four years older.',
         effects: [
-          { kind: 'stat', stat: 'reputation', delta: 8 },
-          { kind: 'stat', stat: 'politicalCapital', delta: 5 },
+          { kind: 'stat', stat: 'reputation', delta: 4 },
+          { kind: 'stat', stat: 'politicalCapital', delta: 7 },
           { kind: 'stat', stat: 'performance', delta: -2 },
         ],
       },
@@ -245,7 +255,7 @@ export const climateEvents = [
         text: 'Which is what the relationship is for and is the reason it exists. Your director finds out from the centre rather than from you, and is not entirely delighted about it.',
         effects: [
           { kind: 'stat', stat: 'politicalCapital', delta: 10 },
-          { kind: 'stat', stat: 'reputation', delta: 5 },
+          { kind: 'stat', stat: 'reputation', delta: 2 },
           { kind: 'stat', stat: 'integrity', delta: 3 },
         ],
       },
@@ -266,8 +276,8 @@ export const climateEvents = [
         text: 'One paragraph, at the end, about a thing nobody has been willing to put in front of them. It is read. Whether it is acted on takes two years to find out and the answer is partly.',
         effects: [
           { kind: 'stat', stat: 'politicalCapital', delta: -10 },
-          { kind: 'stat', stat: 'reputation', delta: 8 },
-          { kind: 'stat', stat: 'integrity', delta: 5 },
+          { kind: 'stat', stat: 'reputation', delta: 3 },
+          { kind: 'stat', stat: 'integrity', delta: 7 },
           { kind: 'climate', dial: 'trust', delta: 6 },
         ],
       },

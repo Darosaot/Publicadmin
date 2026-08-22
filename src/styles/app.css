@@ -456,6 +456,101 @@ input {
   color: var(--c-text-faint);
 }
 
+/* --- the purse, and the weather ------------------------------------------
+ *
+ * Both are described rather than counted, which is the rule the People and Country screens
+ * already follow: a figure on the page invites optimising it. So these are words with a tone,
+ * not numbers with a bar, and the only visual weight either carries is when it is bad news.
+ */
+
+.statsbar__purse {
+  font-weight: 700;
+  text-transform: lowercase;
+}
+
+.statsbar__purse--short {
+  color: var(--c-stress);
+}
+
+.statsbar__purse--tight {
+  color: var(--c-accent);
+}
+
+.statsbar__purse--steady,
+.statsbar__purse--comfortable {
+  color: var(--c-text-muted);
+}
+
+/* Deliberately not `.eyebrow`: a second bare one inside `.statsbar` makes the date selector the
+ * smoke test uses match two elements. Same look, its own name. */
+.statsbar__stance {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-muted);
+}
+
+.statsbar__climate {
+  align-self: start;
+  padding: var(--s-2) var(--s-3);
+  border: var(--bw) solid var(--c-border);
+  background: var(--c-surface-2);
+}
+
+.statsbar__dials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-3);
+  margin-top: var(--s-1);
+  font-size: var(--fs-sm);
+}
+
+.dial {
+  font-weight: 700;
+}
+
+.dial--low {
+  color: var(--c-stress);
+}
+
+.dial--below {
+  color: var(--c-accent);
+}
+
+.dial--level {
+  color: var(--c-text-muted);
+}
+
+.dial--above,
+.dial--high {
+  color: var(--c-performance);
+}
+
+.climate {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s-1) var(--s-3);
+  margin: var(--s-2) 0 var(--s-3);
+  font-size: var(--fs-sm);
+}
+
+.climate dt {
+  color: var(--c-text-muted);
+}
+
+.climate dd {
+  margin: 0;
+  text-align: right;
+}
+
+/* Where Elena has got to, on the two screens that have a reason to say so. */
+.person__now {
+  margin-top: var(--s-2);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+}
+
 .statsbar__meters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));

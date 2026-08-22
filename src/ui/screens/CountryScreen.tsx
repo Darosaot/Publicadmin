@@ -1,6 +1,7 @@
 import { bodies } from '../../content';
 import type { Body } from '../../content/bodies';
 import type { GameState } from '../../engine/types';
+import { climateBand } from '../../engine/climate';
 import { bodyCondition, bodyKnown, bodyStanding } from '../../engine/world';
 import { useT } from '../../i18n';
 import { StatsBar } from '../components/StatsBar';
@@ -94,6 +95,37 @@ export function CountryScreen({ game }: { game: GameState }) {
         </section>
 
         <aside className="layout__side">
+          {/*
+            The weather sits on the screen it drives. Austerity accelerates every falling body
+            below, and low trust drags what these institutions think of you — so the detail
+            belongs here rather than on a screen of its own, next to what it is doing.
+          */}
+          {game.climate && (
+            <section className="panel">
+              <h2 className="panel__title">{t('climate.heading')}</h2>
+              <p className="statsbar__stance">
+                {t(`climate.stance.${game.climate.stance}`)} ·{' '}
+                {t('climate.administration', { n: game.climate.administration })}
+              </p>
+              <dl className="climate">
+                <dt>{t('climate.fiscal')}</dt>
+                <dd className={`dial dial--${climateBand(game.climate.fiscal)}`}>
+                  {t(`climate.band.${climateBand(game.climate.fiscal)}`)}
+                </dd>
+                <dt>{t('climate.trust')}</dt>
+                <dd className={`dial dial--${climateBand(game.climate.trust)}`}>
+                  {t(`climate.trust.band.${climateBand(game.climate.trust)}`)}
+                </dd>
+              </dl>
+              <p className="muted">
+                {game.climate.monthsToElection <= 12
+                  ? t('climate.election_near')
+                  : t('climate.election_far')}
+              </p>
+              <p className="muted">{t('climate.about')}</p>
+            </section>
+          )}
+
           <section className="panel">
             <h2 className="panel__title">{t('country.about_heading')}</h2>
             <p className="muted">{t('country.about')}</p>

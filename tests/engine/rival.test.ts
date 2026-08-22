@@ -18,6 +18,7 @@ import {
   postHeld,
   rivalGap,
   rivalPost,
+  displaceRival,
 } from '../../src/engine/rival';
 import type { GameState, JobOffer, RivalState } from '../../src/engine/types';
 import { makeQuietRegistry } from './fixtures';
@@ -236,5 +237,52 @@ describe('a post you did not take', () => {
 
     expect(byRival).toBe(false);
     expect(postHeld(state, SENIOR)).toBe(true);
+  });
+});
+
+describe('taking the post she was sitting in', () => {
+  /**
+   * The career screen showed two people holding one job — the player's own post title, under
+   * somebody else's name, in the panel describing her. `advanceRival` already refused to move
+   * her onto the player's desk; nothing stopped the player moving onto hers.
+   */
+  it('moves her on when there is somewhere for her to go', () => {
+    const state = withRival(
+      { ...game(), player: { ...game().player, postId: SENIOR, level: 2 } },
+      { postId: SENIOR, level: 2, standing: 90, monthsInPost: 60 },
+    );
+    const after = displaceRival(state, registry, SENIOR);
+
+    expect(after.rival!.postId).not.toBe(SENIOR);
+    expect(after.rival!.left).toBeUndefined();
+  });
+
+  /**
+   * Leaving is the last resort, not the first. The first version resigned her whenever she could
+   * not be promoted out of the way, which ended a fourth-tier career because one desk was filled
+   * and read as the game punishing her for the player's promotion.
+   */
+  it('moves her sideways rather than out when she cannot be promoted', () => {
+    const state = withRival(
+      { ...game(), player: { ...game().player, postId: SENIOR, level: 2 } },
+      { postId: SENIOR, level: 2, standing: 5, monthsInPost: 60 },
+    );
+    const after = displaceRival(state, registry, SENIOR);
+
+    expect(after.rival!.left).toBeUndefined();
+    expect(after.rival!.postId).not.toBe(SENIOR);
+  });
+
+  it('leaves her alone when she was somewhere else', () => {
+    const state = withRival(game(), { postId: JUNIOR });
+    expect(displaceRival(state, registry, SENIOR).rival).toEqual(state.rival);
+  });
+
+  it('never leaves the two of them in the same post after a promotion', () => {
+    const state = withRival(game(), { postId: SENIOR, level: 2, standing: 90, monthsInPost: 60 });
+    const moved = { ...state, player: { ...state.player, postId: SENIOR, level: 2 } };
+    const after = displaceRival(moved, registry, SENIOR);
+
+    expect(after.rival!.left !== undefined || after.rival!.postId !== after.player.postId).toBe(true);
   });
 });

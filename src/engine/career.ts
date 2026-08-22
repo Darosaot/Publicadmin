@@ -22,7 +22,7 @@ import {
 } from './constants';
 import { adjustStat } from './effects';
 import { outgoingsFor } from './money';
-import { fillLapsedPost, postHeld } from './rival';
+import { displaceRival, fillLapsedPost, postHeld } from './rival';
 import { edgeBetween, getPost, maxTier, postsFrom, type ContentRegistry } from './registry';
 import { nextChance, nextRange } from './rng';
 import { refillBoard } from './tasks';
@@ -260,8 +260,12 @@ export function acceptOffer(
     ],
   };
 
+  // If she was sitting in it, she is not any more. Two people cannot hold one post, and the
+  // career screen would otherwise show the player their own job title under somebody else's name.
+  const settled = displaceRival(promoted, registry, target.id);
+
   // The unit you inherit comes with the post — or is handed over, if the new post has none.
-  return refillBoard(setupTeamForPost(promoted, registry, keep), registry);
+  return refillBoard(setupTeamForPost(settled, registry, keep), registry);
 }
 
 /**

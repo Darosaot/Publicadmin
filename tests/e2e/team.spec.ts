@@ -461,3 +461,51 @@ test('the month an initiative lands, the report says so', async ({ page }) => {
   // And the month is emphatically not empty.
   await expect(dialog).not.toContainText('Nothing was finished this month');
 });
+
+/**
+ * The three v3 surfaces, on a career far enough in to have all of them.
+ *
+ * Each one is the minimum a system needs to be legible, and each is asserted here because the
+ * screen is where a player finds out any of this exists. A dial nobody can see is a difficulty
+ * setting; a rival nobody can see is a number in a save file.
+ */
+test('the stats bar says what the country is like and how the money is', async ({ page }) => {
+  await resume(page, managing);
+
+  // Always visible, because a signal you have to go and look for is not a signal.
+  await expect(page.locator('.statsbar__stance')).toContainText(/government/i);
+  await expect(page.locator('.statsbar__dials')).toContainText('Money');
+  await expect(page.locator('.statsbar__dials')).toContainText('Trust');
+
+  // Described rather than counted, the rule the People and Country screens already follow.
+  await expect(page.locator('.statsbar__purse')).toHaveText(
+    /short|tight|steady|comfortable/,
+  );
+});
+
+test('the country screen shows the weather driving it', async ({ page }) => {
+  await resume(page, managing);
+  await tab(page, 'Country').click();
+
+  const panel = page.locator('.panel', { hasText: 'The conditions' });
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText(/Administration \d+/);
+  await expect(panel.locator('.climate')).toContainText('Money');
+});
+
+test('the career screen says where the one who started with you got to', async ({ page }) => {
+  await resume(page, managing);
+  await tab(page, 'Career').click();
+
+  const panel = page.locator('.panel', { hasText: 'Elena Vásquez' });
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText(/She is |She left the service/);
+
+  // And never in the post the player is standing in, which the first version managed to do.
+  const mine = await page.locator('.statsbar__post').textContent();
+  const hers = await panel.textContent();
+  const myTitle = (mine ?? '').split('·')[0]?.trim() ?? '';
+  if (myTitle && !(hers ?? '').includes('left the service')) {
+    expect(hers).not.toContain(`She is ${myTitle} at`);
+  }
+});

@@ -284,6 +284,56 @@ export function postHeld(state: GameState, postId: string): boolean {
   return typeof until === 'number' && until > state.turn;
 }
 
+/**
+ * You have just taken the post she was sitting in.
+ *
+ * Without this the career screen shows two people holding one job, which is not a subtle bug: the
+ * player is looking at their own post title in the panel describing somebody else. `advanceRival`
+ * already refuses to move her onto the player's desk, but nothing stopped the player moving onto
+ * hers.
+ *
+ * She moves the way anybody moves when their post is filled by somebody else: up if she is good
+ * enough for the next thing, across if there is one, and out if there is neither. The third case
+ * is the harshest reading and it is also what happens to people.
+ */
+export function displaceRival(state: GameState, registry: ContentRegistry, postId: string): GameState {
+  const rival = state.rival;
+  if (!rival || rival.left || rival.postId !== postId) return state;
+
+  const fromPost = getPost(registry, rival.postId);
+  const free = (p: Post) => p.id !== state.player.postId && p.id !== rival.postId;
+
+  // In descending order of how well it went for her. Leaving is last and should be rare: a career
+  // that reached the fourth tier does not end because one particular desk was filled, and the
+  // first version of this resigned her for exactly that, which read as the game punishing her for
+  // the player's promotion.
+  const destination =
+    postsFrom(registry, rival.postId)
+      .filter((p) => free(p) && qualifies(rival, p, fromPost))
+      .sort((a, b) => b.tier - a.tier)[0] ??
+    registry.posts.find((p) => free(p) && p.tier === rival.level) ??
+    registry.posts.find((p) => free(p) && p.tier === rival.level - 1);
+
+  if (destination) {
+    return {
+      ...state,
+      rival: {
+        ...rival,
+        postId: destination.id,
+        level: destination.tier,
+        track: destination.track,
+        monthsInPost: 0,
+      },
+    };
+  }
+
+  return {
+    ...state,
+    rival: { ...rival, left: 'resigned' },
+    flags: { ...state.flags, [RIVAL_GONE_FLAG]: true },
+  };
+}
+
 function clampStanding(value: number): number {
   return Math.max(STAT_MIN, Math.min(STAT_MAX, value));
 }
