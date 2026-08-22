@@ -1,3 +1,11 @@
+/* Fonts only. @import must precede every rule in the file, which also means anything
+   imported here lands *earlier* in the cascade than app.css's own declarations — so the
+   sprite layer cannot live here. It is imported from main.tsx after this file instead. */
+@import '@fontsource/press-start-2p/latin-400.css';
+@import '@fontsource/press-start-2p/latin-ext-400.css';
+@import '@fontsource/pixelify-sans/latin-400.css';
+@import '@fontsource/pixelify-sans/latin-ext-400.css';
+@import '@fontsource/pixelify-sans/latin-700.css';
 @import './tokens.css';
 
 /* ---------- Reset / base ---------- */
