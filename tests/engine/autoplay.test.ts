@@ -782,3 +782,124 @@ describe('files with teeth', () => {
     expect(met).toBeGreaterThan(0);
   });
 });
+
+/**
+ * Somebody else is running too, A/B on identical seeds.
+ *
+ * The A side is a career with no `rival` on the state at all — not a switch through the engine,
+ * literally the game as it was before she was simulated.
+ */
+describe('the rival who started the same week', () => {
+  const runs = playMany(seeds.slice(0, 12), DEPARTMENT_IDS);
+  const withHer = summarise(runs);
+  const without = summarise(playMany(seeds.slice(0, 12), DEPARTMENT_IDS, { useRival: false }));
+
+  /**
+   * A rival who always wins is a taunt and one who always loses is furniture.
+   *
+   * Her ceiling is rolled once per career from a deliberately wide band, and this is the
+   * assertion that band exists to satisfy. It caught the first tuning, where she ended at the top
+   * tier in fifty-two per cent of careers.
+   */
+  it('ends up spread across the tree rather than piled at one end', () => {
+    const tiers = new Set(runs.map((r) => r.rivalLevel));
+    expect(tiers.size).toBeGreaterThan(2);
+
+    const top = runs.filter((r) => r.rivalLevel >= 5).length / runs.length;
+    expect(top).toBeGreaterThan(0.05);
+    expect(top).toBeLessThan(0.45);
+  });
+
+  it('can have a career that goes wrong, and mostly does not', () => {
+    const left = runs.filter((r) => r.rivalLeft).length / runs.length;
+    expect(left).toBeGreaterThan(0);
+    expect(left).toBeLessThan(0.35);
+  });
+
+  /**
+   * She only costs you posts if you turn things down, and this bot takes every offer it is given
+   * — so on this side of the sweep she should cost almost nothing. That is the design working:
+   * the price of declining is paid by players who decline.
+   */
+  it('costs an ambitious career almost nothing, because it never declines anything', () => {
+    expect(withHer.meanLevel).toBeGreaterThan(without.meanLevel - 0.3);
+  });
+
+  it('is met, and turns up in the events that are about her', () => {
+    const named = runs.filter((run) =>
+      run.finalState.firedEvents.some((id) => id.startsWith('evt.rival.')),
+    );
+    expect(named.length, 'no scene about Elena ever fired').toBeGreaterThan(0);
+  });
+});
+
+/**
+ * Declining has a price, measured against a bot that actually declines.
+ *
+ * `preferredTrack` is the only policy that turns an offer down, which is why this is measured
+ * here rather than in the block above: the first version of this mechanic fired six times across
+ * three hundred and thirty-six careers and nothing said so.
+ */
+describe('a post you did not take', () => {
+  const runs = TRACK_IDS.flatMap((track) =>
+    playMany(seeds.slice(0, 6), DEPARTMENT_IDS, { preferredTrack: track }),
+  );
+
+  it('gets filled behind you', () => {
+    const mean = runs.reduce((n, r) => n + r.postsClosedBehindYou, 0) / runs.length;
+    expect(mean, 'nothing was ever filled behind a career that turned posts down').toBeGreaterThan(0.3);
+  });
+});
+
+/**
+ * The weather, A/B on identical seeds. The A side is a career with no `climate` on the state.
+ */
+describe('the country has weather', () => {
+  const runs = playMany(seeds.slice(0, 12), DEPARTMENT_IDS);
+  const withIt = summarise(runs);
+  const without = summarise(playMany(seeds.slice(0, 12), DEPARTMENT_IDS, { useClimate: false }));
+
+  it('holds elections, and the scene fires', () => {
+    expect(withIt.meanAdministrations).toBeGreaterThan(3);
+    const sawOne = runs.filter((r) => r.finalState.firedEvents.includes('evt.milestone.election'));
+    expect(sawOne.length, 'no career ever lived through a change of government').toBeGreaterThan(0);
+  });
+
+  /**
+   * Weather changes which years are hard, not which careers are possible. Its dials average out
+   * over a career — asserted directly in `climate.test.ts` — but a mean-zero dial can still shift
+   * outcomes, because the things it modulates are not linear in it. This is the bound on that.
+   */
+  it('does not move where a career ends up', () => {
+    expect(Math.abs(withIt.meanLevel - without.meanLevel)).toBeLessThan(0.35);
+    expect(Math.abs(withIt.meanYears - without.meanYears)).toBeLessThan(2.5);
+  });
+});
+
+/**
+ * Money, A/B on identical seeds.
+ *
+ * It is inert for this bot by construction, and that is the result rather than a gap in the
+ * measurement: a competent, well-paid career is never short, so the pressure half never fires and
+ * the comfort half deliberately pays nothing. What money does is open and close *choices*, which
+ * is what the pool of events gated on `maxSavings` is for.
+ */
+describe('money that matters', () => {
+  const runs = playMany(seeds.slice(0, 12), DEPARTMENT_IDS);
+  const withIt = summarise(runs);
+  const without = summarise(playMany(seeds.slice(0, 12), DEPARTMENT_IDS, { useMoney: false }));
+
+  it('accrues over a career', () => {
+    expect(withIt.meanFinalSavings).toBeGreaterThan(0);
+  });
+
+  /**
+   * The rule, and the reason the comfort bonus was taken out again. Money buys options and
+   * pressure; it may never buy standing, because offers key off reputation and anything paying it
+   * turns a hoarded resource into promotion velocity.
+   */
+  it('does not buy a career', () => {
+    expect(Math.abs(withIt.meanLevel - without.meanLevel)).toBeLessThan(0.2);
+    expect(Math.abs(withIt.meanReputation - without.meanReputation)).toBeLessThan(2);
+  });
+});

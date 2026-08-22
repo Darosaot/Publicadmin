@@ -40,9 +40,10 @@ import {
   RIVAL_HOLDS_POST_TURNS,
   RIVAL_MIN_MONTHS_TO_MOVE,
   RIVAL_OFFER_CHANCE,
+  RIVAL_GONE_FLAG,
   RIVAL_RESIGN_CHANCE,
-  RIVAL_RESIGN_MIN_MONTHS,
-  RIVAL_RESIGN_STANDING,
+  RIVAL_STALL_LEVEL,
+  RIVAL_STALL_MONTHS,
   RIVAL_STANDING_DRIFT,
   RIVAL_STANDING_ON_PROMOTION,
   RIVAL_STARTING_STANDING,
@@ -182,12 +183,20 @@ export function advanceRival(state: GameState, registry: ContentRegistry): GameS
     next.standing + (next.ceiling - next.standing) * RIVAL_STANDING_DRIFT,
   );
 
-  // Nobody walks out in their first three years, and she started the week you did.
-  if (state.calendarMonth >= RIVAL_RESIGN_MIN_MONTHS && next.standing < RIVAL_RESIGN_STANDING) {
+  // A decade in the same post, still near the bottom of the tree. Not a bad month — a career that
+  // stopped going anywhere, which is the reason people actually leave.
+  if (next.monthsInPost >= RIVAL_STALL_MONTHS && next.level <= RIVAL_STALL_LEVEL) {
     const roll = nextChance(rngState, RIVAL_RESIGN_CHANCE);
     rngState = roll.rngState;
     if (roll.value) {
-      return { ...state, rival: { ...next, left: 'resigned' }, rngState };
+      return {
+        ...state,
+        rival: { ...next, left: 'resigned' },
+        // Recorded on the state rather than left for content to infer, so the scene where she
+        // hands in her notice fires because she did, and not on a die of its own.
+        flags: { ...state.flags, [RIVAL_GONE_FLAG]: true },
+        rngState,
+      };
     }
   }
 

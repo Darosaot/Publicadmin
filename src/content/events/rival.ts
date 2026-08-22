@@ -1,3 +1,4 @@
+import { RIVAL_GONE_FLAG } from '../../engine/constants';
 import { vasquez } from '../cast';
 import { defineEvent } from '../authoring';
 
@@ -326,7 +327,10 @@ export const rivalEvents = [
     body: 'No leaving do, at her request. There is a card going round the floor and about half the people signing it have never worked with her and are signing because a card came round.',
     weight: 16,
     once: true,
-    conditions: { requiredFlags: [vasquez.metFlag] },
+    // Gated on the engine's own record of her leaving, not on a die of its own. Before this the
+    // scene could describe her handing in her notice while the simulation had her three tiers up
+    // and climbing, which is the prose and the state disagreeing about the same person.
+    conditions: { requiredFlags: [vasquez.metFlag, RIVAL_GONE_FLAG] },
     choices: [
       {
         id: 'ask_why',

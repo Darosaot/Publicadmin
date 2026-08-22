@@ -399,19 +399,26 @@ export const RIVAL_OFFER_CHANCE = 0.26;
 export const RIVAL_HOLDS_POST_TURNS = 10;
 
 /**
- * Standing below which she starts thinking about leaving, the per-cycle chance she does, and the
- * service she has to have behind her before any of it applies.
+ * When she gives up on it, and how likely that is each cycle once she has.
  *
- * The threshold sits *below* `RIVAL_STARTING_STANDING`, and the minimum service exists, because
- * the first version had neither: she started at 20 against a threshold of 24, so every rival
- * spent her first two or three cycles rolling to quit and eighteen per cent of them did. Elena
- * leaving in year one is not a story about a career, it is a bug that reads as one.
+ * Written twice before it was right, and the second version is the interesting failure. It asked
+ * whether her standing had fallen below a threshold — but her standing climbs toward a ceiling of
+ * at least 48 and the only thing that knocks it down is a promotion, so after the qualifying
+ * period nobody could ever be below the bar. Zero rivals resigned across eighty-four careers.
+ * Unreachable content is the failure this codebase has documented more than any other, and a
+ * mechanic that cannot fire is the same thing as one that does not exist.
  *
- * She can still go. It takes a career that went wrong first, which is the version worth having.
+ * **People do not leave a public administration because their standing dipped. They leave because
+ * it stopped going anywhere.** So it is a stall: a decade in the same post, still near the bottom
+ * of the tree. That is reachable — a ceiling under the tier-3 bar means exactly this career — and
+ * it is the true reason, which is usually where these end up.
  */
-export const RIVAL_RESIGN_STANDING = 18;
-export const RIVAL_RESIGN_CHANCE = 0.04;
-export const RIVAL_RESIGN_MIN_MONTHS = 36;
+export const RIVAL_STALL_MONTHS = 120;
+export const RIVAL_STALL_LEVEL = 2;
+export const RIVAL_RESIGN_CHANCE = 0.06;
+
+/** Set on the state when she goes, so content can gate on it rather than assuming. */
+export const RIVAL_GONE_FLAG = 'rival_gone';
 
 /* ------------------------------------------------------------------ money */
 

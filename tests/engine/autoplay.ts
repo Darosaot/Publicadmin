@@ -31,6 +31,7 @@ import {
   startInitiative,
   startableInitiatives,
 } from '../../src/engine/initiatives';
+import { inHardship } from '../../src/engine/money';
 import { createGame } from '../../src/engine/newGame';
 import { nextInt, seedToState } from '../../src/engine/rng';
 import { getPost, postsFrom } from '../../src/engine/registry';
@@ -108,6 +109,23 @@ export interface RunResult {
   delegationsMade: number;
   initiativesCompleted: number;
   initiativesLapsed: number;
+  /**
+   * Posts filled behind the player because an offer lapsed or was declined.
+   *
+   * Accumulated during the run rather than read off the final state, for the reason the comments
+   * above already give twice: the `post.<id>.held` flags expire, so a career that lost three
+   * posts in its twenties looks identical at retirement to one that lost none.
+   */
+  postsClosedBehindYou: number;
+  /** Where Elena finished. 0 for a career played without her. */
+  rivalLevel: number;
+  /** Whether she was still in the service at the end. */
+  rivalLeft: boolean;
+  /** Elections lived through, which is the climate's most visible product. */
+  administrations: number;
+  /** What the career had put by at the end, and how many cycles of it were spent short. */
+  finalSavings: number;
+  cyclesInHardship: number;
 }
 
 /**
@@ -521,6 +539,9 @@ export function playCareer(options: CareerOptions): RunResult {
   let peakStaffLevel = 1;
   let monthsWithDeputy = 0;
   let negotiations = 0;
+  let postsClosedBehindYou = 0;
+  let cyclesInHardship = 0;
+  let heldSeen = new Set<string>();
   let specialistMatches = 0;
   let delegationsMade = 0;
   let initiativesCompleted = 0;
@@ -685,8 +706,18 @@ export function playCareer(options: CareerOptions): RunResult {
         break;
       }
 
-      case 'report':
+      case 'report': {
+        const before = game.turn;
         game = beginNextTurn(game, registry);
+        if (game.turn !== before) {
+          if (inHardship(game)) cyclesInHardship += 1;
+          for (const key of Object.keys(game.flags)) {
+            if (key.startsWith('post.') && key.endsWith('.held') && !heldSeen.has(key)) {
+              heldSeen.add(key);
+              postsClosedBehindYou += 1;
+            }
+          }
+        }
         // The A side for money. Savings are the only one of the three new systems that cannot be
         // switched off by dropping a field, because salary has always been on the state. Holding
         // them at the starting figure reproduces the old behaviour exactly: that figure sits
@@ -696,6 +727,7 @@ export function playCareer(options: CareerOptions): RunResult {
           game = { ...game, player: { ...game.player, savings: STARTING_SAVINGS } };
         }
         break;
+      }
 
       default:
         guard = Number.MAX_SAFE_INTEGER;
@@ -733,6 +765,12 @@ export function playCareer(options: CareerOptions): RunResult {
     delegationsMade,
     initiativesCompleted,
     initiativesLapsed,
+    postsClosedBehindYou,
+    rivalLevel: game.rival?.level ?? 0,
+    rivalLeft: game.rival?.left !== undefined,
+    administrations: game.climate?.administration ?? 0,
+    finalSavings: game.player.savings,
+    cyclesInHardship,
   };
 }
 
@@ -785,6 +823,11 @@ export function summarise(results: RunResult[]) {
     totalDelegations: results.reduce((n, r) => n + r.delegationsMade, 0),
     meanInitiativesCompleted: mean((r) => r.initiativesCompleted),
     totalInitiativesLapsed: results.reduce((n, r) => n + r.initiativesLapsed, 0),
+    meanPostsClosedBehindYou: mean((r) => r.postsClosedBehindYou),
+    meanRivalLevel: mean((r) => r.rivalLevel),
+    meanAdministrations: mean((r) => r.administrations),
+    meanFinalSavings: mean((r) => r.finalSavings),
+    totalCyclesInHardship: results.reduce((n, r) => n + r.cyclesInHardship, 0),
     completionRate: mean((r) =>
       r.tasksCompleted + r.tasksFailed === 0
         ? 1

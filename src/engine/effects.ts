@@ -287,6 +287,11 @@ export function checkCondition(
   }
 
   if (condition.minRivalGap !== undefined || condition.maxRivalGap !== undefined) {
+    // A career that ended is not a career you are level with. `rivalGap` reads 0 for a rival who
+    // has gone, which is right for prose asking "how far ahead is she" and wrong for a gate: it
+    // would make every scene about being neck and neck fire for the rest of the game.
+    if (!state.rival || state.rival.left) return { reason: 'rival' };
+
     const gap = rivalGap(state);
     if (condition.minRivalGap !== undefined && gap < condition.minRivalGap) {
       return { reason: 'rival', required: condition.minRivalGap, comparison: 'min' };
