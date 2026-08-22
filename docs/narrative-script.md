@@ -3,7 +3,7 @@
 > **Generated file.** Produced from the shipped content by `npm run docs:script`. Edit the
 > content in `src/content/` and regenerate — changes made directly to this file are lost.
 
-The complete corpus: 256 events, 86 task templates, 27 initiatives, 14 public bodies, 3 standing directives, 7 departments, 15 posts across 4 tracks and 6 endings. Stat effects are shown after each outcome.
+The complete corpus: 285 events, 86 task templates, 27 initiatives, 14 public bodies, 3 standing directives, 7 departments, 15 posts across 4 tracks and 6 endings. Stat effects are shown after each outcome.
 
 ## Departments
 
@@ -3744,6 +3744,29 @@ Who you appoint when two candidates are equally plausible and one of them has do
 - You name the two things you would want a free hand on. He does not agree to either, and does not say no, and the fact that you asked is reported upward and read as seriousness rather than presumption.
   <br>↳ Political capital +5 · Reputation +3 · schedules "The hearing" in 1 cycles
 
+#### A government went, and another arrived
+
+*`evt.milestone.election`*
+
+> The building does not change. The letterhead changes, the priorities in the annual plan change, and about a third of the people you have spent two years building a working relationship with are cleaning out desks on the eleventh floor.
+
+**The work is the work**
+
+- You carry on doing it, which is what the permanent half of a public administration is for and is the whole of the argument for having one. Nobody thanks you and the files keep moving.
+  <br>↳ Performance +3 · Integrity +2
+
+**Get in front of the new people early**
+
+- *(weight 3)* Two meetings in the first fortnight, before the diary closes for a year. You are a known quantity by the time the first difficult submission goes up, which is worth more than the submission.
+  <br>↳ Political capital +9 · Stress +3
+- *(weight 2)* You are one of eleven people who had the same idea in the same fortnight, and you are remembered as one of eleven.
+  <br>↳ Stress +4
+
+**Put the real state of things in the first submission**
+
+- Including the two paragraphs the last lot had been declining to read for three years. It is either the best thing you have ever done for this department or a career-shortening act of optimism, and it will be some months before anybody can tell which.
+  <br>↳ Integrity +7 · Reputation +2 · Political capital -6 · schedules "They read the paragraphs" in 3 cycles
+
 ### Consequences
 
 *Only reachable when an earlier decision or a missed deadline schedules them.*
@@ -4211,6 +4234,45 @@ Who you appoint when two candidates are equally plausible and one of them has do
 
 - It is a courteous email from a stranger about something from years ago and there are forty in the inbox from today. You do not reply, and the institutional memory of that decision ends there.
   <br>↳ Integrity -4 · Stress -1
+
+#### They read the paragraphs
+
+*`evt.followup.new_ministers_verdict`*
+
+> Three months on, the submission comes back. The two paragraphs are underlined. There is a handwritten note in the margin and it is not from the private secretary.
+
+**Stand by every word**
+
+- *(weight 3)* They wanted somebody who would. The next four submissions from your department go up unredacted and one of them changes a policy that had been wrong since before you joined.
+  <br>↳ Reputation +4 · Integrity +6 · Political capital +8 · flag `trusted_by_the_centre`
+- *(weight 2)* They did not. The note is polite and the effect of it is that your department’s submissions are now cleared two floors above you before they go anywhere.
+  <br>↳ Political capital -10 · Reputation -3
+
+**Offer a revised version**
+
+- The revision is accurate and shorter and says less. It is accepted immediately and the thing it was about carries on being true and unaddressed for another six years.
+  <br>↳ Political capital +5 · Integrity -5
+
+#### The list has his firm on it
+
+*`evt.followup.the_panel_you_cannot_sit_on`*
+
+> You are chairing. The list is in front of you and the fourth name on it is the company that has been paying you for eight months, and there is no version of the next ten minutes that is clean.
+
+**Recuse yourself and give the real reason**
+
+- You say it out loud, to four colleagues, and hand the chair over. It is the worst professional morning of your life and it is the only reason there is a career left afterwards.
+  <br>↳ Integrity +10 · Reputation -14 · flag `undeclared_interest` cleared · flag `came_clean`
+
+**Recuse yourself and give a reason that is not the reason**
+
+- A personal connection, unspecified, minuted in six words. It holds. It holds for a long time, and it is sitting there the whole while, in six words, with a date on it.
+  <br>↳ Integrity -4 · Reputation -3 · flag `holds_leverage`
+
+**Chair it and be scrupulously fair**
+
+- And you are. His firm comes fourth of four on a scoring you would defend to anybody, which is exactly what you would say either way, and that is the whole problem with having sat in the chair at all.
+  <br>↳ Integrity -14 · flag `sat_on_a_tainted_panel`
 
 ## Endings
 

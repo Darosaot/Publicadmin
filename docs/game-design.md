@@ -86,6 +86,7 @@ Five stats run 0–100 and are always clamped to that range. Salary is money and
 | **Integrity** | 70 | Your ethical track record. High integrity closes off shortcuts but protects you when investigators arrive. Low integrity opens shortcuts and quietly accumulates risk. | Events, almost exclusively. Does not decay — a record does not fade |
 | **Stress** | 20 | Accumulated load. At 100 you burn out and the game ends. | Every turn (+2), overtime, crises; reduced by Rest |
 | **Salary** | €2,100/mo | Your pay. A progress marker, and a reason to take an offer you might otherwise refuse. | Promotions, reviews |
+| **Savings** | €1,400 | What is left after you have lived. Not a stat — it buys options and applies pressure, and never buys standing (§8l). | Salary minus outgoings, every month |
 
 ### Why three of them decay
 
@@ -99,6 +100,9 @@ wherever your current work and current allies sustain them, so a threshold of 65
 this standard", not "survive long enough". Performance reverts toward the middle in both
 directions, which also stops the opposite failure: a bad month lowering Performance, which lowers
 quality, which produces more bad months.
+
+Two things outside the six move on their own and are read all over the game: **Elena's career**
+(§8k) and **the climate** (§8m). Neither is a stat and neither is yours.
 
 **Hidden state.** The engine also tracks *flags* — named values set by choices
 (`accepted_supplier_gift`, `journalist_has_your_number`, `holds_leverage`). Flags gate later
@@ -324,9 +328,10 @@ A random event that fires goes on a **12-turn cooldown**, and events marked `onc
 
 ### The corpus
 
-241 events and 82 task templates. The events break down as 205 random, 21 follow-ups and 15
-milestones, and the random pool splits roughly evenly between work that could happen in any
-department and work that is specific to one of the seven:
+285 events and 86 task templates, regenerated from `npm run docs:script` rather than counted by
+hand — the figures here read 241 and 82 for several releases while the corpus grew underneath them.
+The random pool splits roughly evenly between work that could happen in any department and work
+that is specific to one of the seven:
 
 | Pool | Events | What it covers |
 | --- | --- | --- |
@@ -339,6 +344,11 @@ department and work that is specific to one of the seven:
 | Leadership | 14 | Only from level 4, where the decisions are institutional |
 | Milestones | 10 | The guaranteed beats, including the confirmation arc |
 | Follow-ups | 21 | Consequences, none of them ever drawn at random |
+| Alumni | 9 | Naming a former colleague, via the `{alum}` channel |
+| Crises | 6 | Files with teeth, never drawn at random |
+| Rival | 13 | Elena, gated on the gap between her tier and yours |
+| Money | 11 | What the job pays, and what being short does to a choice |
+| Climate | 6 | The settlement, the election, and the year there was money |
 
 The department row is 14 each rather than "roughly 14 each" on purpose. A test asserts every
 department has at least 12 of its own events, because the alternative is a department that is
@@ -806,6 +816,164 @@ here only against a bot with an adaptive rest policy — a bigger change than an
 features whose payoff is stress are judged on *not being a trap* in the sweep, and on deterministic
 unit tests for the relief itself.
 
+## 8k. Elena Vásquez, running
+
+Since the cast was written the design document has called her "the control group for your career",
+and for six versions that was a claim the game made and never checked. She was three authored
+scenes and a number in `flags`: prose asserting somebody was keeping pace with you, with nothing
+behind the assertion.
+
+She is now a second token on the same board. `advanceRival` moves her with the same
+`postsFrom` / `edgeBetween` helpers the player's own offers come from, and holds her to the same
+`PromotionRequirement` written on the same edges. When she turns up running a directorate it is
+because she met the terms on that edge, and the career screen will say which one.
+
+| | |
+| --- | --- |
+| Where it lives | `GameState.rival`, optional — absent means a save from before she existed |
+| What she has | a post, a tier, a track, one number, and a ceiling rolled once |
+| Her clock | calendar months, so the player's cycle length decides how often anyone looks, not how fast she moves |
+| Content gate | `minRivalGap` / `maxRivalGap` — her tier minus yours |
+
+**One stat, not five.** She has to be cheap enough to simulate every cycle for thirty years and
+legible enough that a player can reason about her; a full stat block is neither. `standing` is what
+anybody outside her own office would know, and the edges read it three times — for reputation, for
+performance, for political capital — because from the outside those are one thing.
+
+**Her ceiling is rolled once and never moved,** from a deliberately wide band. On a low roll you
+outgrow her by year ten and the late scenes are about what that does to somebody; on a high roll
+she is your director and they are about what that does to you. She ends spread across the tree —
+10% at tier 1, 25% at tier 3, 42% at tier 4, 21% at tier 5 — and a test asserts the spread, because
+a rival who always wins is a taunt and one who always loses is furniture.
+
+### What declining a post costs, which was nothing
+
+`expireOffers` dropped a lapsed offer from the array and that was the whole of it. A post you were
+offered stayed on the tree, available forever. It was the one place in this game where a decision
+had no consequence at all.
+
+**The post being filled is the consequence; Elena is the story when it fits.** That separation is
+what made the feature work. The first version closed a post only if she could take it, which made
+the cost of declining depend on where she happened to be standing that year — arbitrary from the
+player's side, and vanishingly rare: across 336 simulated careers a declined post was filled six
+times. Now it is always held for `RIVAL_HOLDS_POST_TURNS`, and `couldFill` decides whether the
+person who took it is somebody you know. It fires 1.24 times a career for a player who turns things
+down, and near enough never for one who does not — which is the design working, not a gap in it.
+
+Held for a while rather than for good, because permanent closure is a much harsher game than this
+one is tuned for and the sweep shows it immediately as a collapse in mean level.
+
+### Two things that had to agree
+
+**She leaves because the career stopped going anywhere**, not because a number dipped. The second
+draft asked whether her standing had fallen below a threshold — unreachable, because standing
+climbs toward a ceiling of at least 48 and only a promotion knocks it down. Zero rivals resigned
+across eighty-four careers. It is a stall now: a decade in the same post, still near the bottom.
+Reachable, and truer.
+
+**The scene where she hands in her notice gates on the engine's record of it.** It used to fire on
+a die of its own, so it could describe her leaving while the simulation had her three tiers up and
+climbing. Likewise a gap gate now fails outright once she has gone: `rivalGap` reads 0 for a rival
+who has left, which is right for prose asking how far ahead she is and would otherwise make every
+scene about being neck and neck fire for the rest of the game.
+
+**And you cannot both hold one post.** `advanceRival` always refused to move her onto the player's
+desk; nothing stopped the player moving onto hers, and the career screen showed the player their
+own job title under her name. `displaceRival` moves her on — promoted if she is good enough,
+sideways if there is somewhere, out only if there is neither.
+
+---
+
+## 8l. Money that does something
+
+Salary was a scoreboard for six versions. The document said stepping onto the expert track "costs
+money, which is the point" — and money bought nothing, so it cost nothing. The corpus agreed:
+`Condition.minSalary` had never been used in two hundred and fifty events, and the `salary` effect
+had exactly one use.
+
+`player.savings` accrues `(salary − outgoings) × months` with the calendar, because it is a fact
+about elapsed time rather than about any decision inside it. Outgoings scale with the post at
+`OUTGOINGS_OF_BASE_SALARY`, because the career already moves you Alderford → Northbridge → the
+Region → the Agency → the Ministry and none of those is cheaper than the last. A fixed figure made
+seniority a money printer: the first draft had a Director-General finish with more saved than they
+had earned in twenty years.
+
+**Money buys options and pressure. It may never buy standing.** The same rule perks and initiatives
+follow, for the same reason — offers key off reputation, so anything paying it converts a hoarded
+resource straight into promotion velocity. `validate.ts` fails any outcome that moves savings and
+pays reputation in the same breath, and the sweep asserts the sign one-directionally: money may
+cost a career reputation and may never add it.
+
+**Comfort pays nothing on the stats bar, and that is a correction.** The first version gave it a
+permanent point of stress relief. A competent career clears the threshold by its second post and
+holds it for twenty-five years, so the relief was a flat upgrade — and it laundered itself into
+promotion velocity through the shared sink in §8j, coming out five points of reputation ahead.
+Comfort is a state content gates on. It does not make you better at the job.
+
+**Being short is the half the corpus was waiting for.** Savings are unclamped below zero, hardship
+costs stress every cycle, and `maxSavings` is how an outcome finally says *you needed the money* —
+a sentence this game has been full of offers for and has never once been able to speak. Measured,
+turning money on costs about three and a half points of reputation across a career, because the
+pool it adds is harsher than the corpus it joins: −1.24 reputation an outcome against +0.51.
+
+---
+
+## 8m. The weather
+
+Everything else in this game is something the player does or something done to the player. The
+climate is neither: it is the conditions the work happens in, and it moves whether or not anybody is
+looking. It is the answer to the thing every city builder puts on screen and never lets you hide.
+
+| Dial | Runs | Moves |
+| --- | --- | --- |
+| **Fiscal** | austerity ↔ expansion | the unit's monthly allocation, what an undertaking costs to move, how fast the country falls apart on its own |
+| **Trust** | exhausted ↔ firm | how fast reputation fades |
+| **The government** | a term, then an election | a milestone scene, a new stance, and a swing in the money |
+
+Both dials are centred on zero, like a body's standing and unlike a stat, because 0 is a real
+reading here: an ordinary year under an ordinary government.
+
+**It runs on the state's own RNG cursor.** `driftWorld` is deliberately RNG-free because a body's
+tendencies are a property of the institution; that argument does not transfer. Weather is genuinely
+stochastic, and the cursor is saved with the game, so the same seed still produces the same weather.
+It steps a month at a time for the reason `driftWorld` does: mean reversion is path-dependent, and
+the player's clock must not change how fast the country moves.
+
+### Both dials must average out, and the first version's did not
+
+A dial with a net drift is not weather — it is a difficulty setting applied to every other guardrail
+at once, and they would move with it rather than catch it.
+
+The first version gave every new government **+12 trust**. At 7.6 elections a career that made mean
+trust **+4.00** for thirty years; trust suppresses reputation decay, so every career in the sweep
+came out four points of reputation and a tenth of a tier ahead for no reason anybody had chosen. The
+stance columns leaned −2 and −0.67 by accident on top of it.
+
+Trust now **resets toward nothing** at an election rather than bouncing up, which is also the truer
+reading: a government that has just arrived has not been believed or disbelieved. Both stance
+columns sum to zero by construction, and there is a test. Mean climate over 300 careers is now
+fiscal −0.54 and trust −0.14.
+
+**Averaging out is necessary and not sufficient.** The things the dials modulate are not linear in
+them, so a mean-zero dial can still move outcomes. The sweep bounds that separately.
+
+### It is also what makes the country responsive
+
+For three versions `bodyStanding` had no mechanical consequence anywhere and no engine mechanic read
+a body's condition at all: the country was a screen. Austerity now multiplies the *downward* half of
+a body's drift — only downward, because a place somebody else is improving has no reason to improve
+faster because the settlement was generous.
+
+### Priced against the corpus
+
+The climate pool shipped its first draft at **1.90 reputation per outcome against a corpus average of
+0.51**, nearly four times as generous as the events it joined. That is the Inspection failure
+exactly, and the same diagnosis: the balance was wrong because the fiction was wrong, and the fiction
+was that telling a new government the real position makes you famous for it. Six payouts moved toward
+integrity and political capital, and the pool now reads 0.75.
+
+---
+
 ## 9. Endings
 
 Checked at the end of every month, in this order — the first one that matches wins.
@@ -835,14 +1003,17 @@ All of these live in `src/engine/constants.ts`.
 | Establishment, line track | — / — / 4 / 6 / 8 |
 | Unit budget, line track | — / — / €11,500 / €18,500 / €26,000 a month |
 | Posts in the tree | 15 across 4 tracks |
+| A declined post is held | 10 cycles |
+| Living costs | 72% of the post's baseline salary |
+| A term of government | 48 months |
 | Overtime | +3 points, +5 stress |
 | Rest | −3 stress per point |
 | Networking | +2 political capital per point |
 | Baseline stress per turn | +2 |
 | Task workload multiplier | ×1.35 |
 | Task effort level scaling | ×(1 + 0.08 × (level − 1)) |
-| Reputation decay | 4.6% a cycle |
-| Political capital decay | 4.4% a cycle |
+| Reputation decay | 4.97% a cycle |
+| Political capital decay | 4.7% a cycle |
 | Performance reversion | 5% a cycle toward 50 |
 | Quality baseline | 58 |
 | Quality thresholds | Excellent ≥ 75, Good ≥ 45 |
@@ -872,17 +1043,20 @@ Where it currently sits:
 
 | Measure | Value |
 | --- | --- |
-| Mean years of service | 28.8 |
-| Careers reaching a tier-5 post | 29% |
-| Careers reaching tier 3 or above | 96% |
-| Careers stuck at the starting post | 0.7% |
-| Mean level, by track | line 4.4, expert 3.7, political 4.0, oversight 4.3 |
-| Mean level, by department | 3.9 to 4.3 — a spread of 0.4 |
-| Files finished on time | 98% |
-| Initiatives started / finished, per career | 9.9 / 4.9 |
-| Mean level reached | 4.1 |
-| Mean Reputation at the end | 62 |
-| Mean cycles survived | 118 of 120 |
+| Mean years of service | 28.2 |
+| Careers reaching a tier-5 post | 25% |
+| Careers reaching tier 3 or above | 98% |
+| Careers stuck at the starting post | 0.4% |
+| Mean level, by track | line 4.5, expert 3.6, political 3.9, oversight 4.2 |
+| Mean level, by department | 3.8 to 4.3 — a spread of 0.5 |
+| Files finished on time | 97% |
+| Initiatives started / finished, per career | 8.9 / 4.2 |
+| Mean level reached | 4.0 |
+| Mean Reputation at the end | 66 |
+| Mean cycles survived | 119 of 120 |
+| Posts filled behind a career that declines them | 1.24 |
+| Elena's final tier | 10% / 1% / 25% / 42% / 21% across tiers 1–5 |
+| Changes of government in a career | 7.5 |
 
 The report also prints the **A side**: the same seeds played with initiatives switched off, which
 is literally the game as it was before they existed. Level 4.2 against 4.1, 29.2 years against
@@ -898,7 +1072,7 @@ been written when the board was the only place pressure could show. It now asks 
 over both channels: across a whole career, is there anything the player did not get to? Over 90% of
 careers must fail a file or drop an initiative.
 
-Endings, over those 280 careers: honoured retirement 50%, quiet retirement 46%, Minister 2.5%.
+Endings, over those 280 careers: honoured retirement 60%, quiet retirement 36%, Minister 2.5%.
 Burnout, disgrace and dismissal do not appear, because the balanced bot rests when tired and does
 not take bribes — the first two are reached reliably by the `reckless` and `ruthless` bot
 strategies, which exist precisely to prove that an ending is not unreachable. Burnout takes a
@@ -950,14 +1124,19 @@ candidate, and should only be attempted with the spread as tight as it is now.
 
 ## 12. Deliberately out of scope for v1
 
-Sound and music; multiple save slots and save export; Spanish content (the architecture supports it,
-the dictionary isn't written yet); difficulty settings; changing department mid-career;
-achievements.
+Sound and music; multiple save slots and save export; difficulty settings; changing department
+mid-career; achievements. Spanish has since been written and is now enforced: `i18n.test.ts` fails
+a build in which any English key lacks a Spanish counterpart, in either direction.
 
-Two things that were on this list have since been built and are documented above: **named NPCs
-outside your unit** (§3a — eight of them, whose standing is tracked the way your staff's morale
-already is) and a **career that branches** (§7 — four tracks rather than one ladder). The list is
-shorter than it was, and the remaining item worth doing first is **Spanish**.
+Three things that were on this list have since been built and are documented above: **named NPCs
+outside your unit** (§3a), a **career that branches** (§7), and **Spanish**. The list is shorter
+than it was.
+
+What v3 deliberately left for later is **legibility**: there is still no time-series anywhere in
+this game — `log` is capped at sixty entries and `lastReport` holds one month — so a thirty-year
+career has no way to show its own arc, and the fourteen institutions of §8b are rendered as a
+sorted list of cards rather than as anywhere. A history view and a map of Valmara are the strongest
+next candidates, and they are worth doing on top of a world that now has more to show.
 
 ### Saving
 

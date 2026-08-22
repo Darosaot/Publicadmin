@@ -112,6 +112,11 @@ The same shape gates events and individual choices:
   maxFlag?: Record<string, number>;
   requiresTeam?: boolean;         minStaffCount?: number;
   minTeamMorale?: number;         maxTeamMorale?: number;
+  minRivalGap?: number;           maxRivalGap?: number;
+  minSavings?: number;            maxSavings?: number;
+  minClimate?: { fiscal?: number, trust?: number };
+  maxClimate?: { fiscal?: number, trust?: number };
+  stances?: Stance[];
 }
 ```
 
@@ -144,6 +149,8 @@ is almost always a flag plus a follow-up event.
 | Standing allocation | `{ kind: 'budgetMonthly', delta }` | Changes the monthly line itself |
 | Lose someone | `{ kind: 'loseStaff' }` | The lowest morale in the unit walks |
 | Gain someone | `{ kind: 'gainStaff', seniority }` | Arrives next month, no vacancy needed |
+| Money in or out | `{ kind: 'savings', delta }` | Euros, one-off. Unclamped below zero — being short is the point |
+| Move the national mood | `{ kind: 'climate', dial, delta }` | Rare. Most content should *read* the climate, not set it |
 
 The six team effects are **no-ops for a player who has no unit yet**, so a common event can carry
 one without needing a level gate. But an event whose *scene* only makes sense with staff in the
@@ -152,6 +159,41 @@ sentence that reads as nonsense.
 
 **Chains stay short.** A choice may schedule a follow-up, and that follow-up may resolve — two
 steps. Longer chains are hard to test and harder to balance.
+
+**Money never pays reputation, and `validate.ts` enforces it.** An outcome that moves `savings` may
+not also raise reputation. It is the rule initiatives already follow and for the same reason:
+offers key off reputation, so anything paying it turns a hoarded resource into promotion velocity.
+Here the failure would be worse than dominance — a scene paying standing for being short would
+teach a player to stay poor on purpose. Pay in integrity, in political capital, in a flag, or in
+nothing.
+
+## Writing for the gap, the purse and the weather
+
+Three gating vocabularies arrived in v3, and each one is about something the player does not
+control.
+
+**`minRivalGap` / `maxRivalGap`** is Elena's tier minus yours: positive means she is ahead. Write to
+the *gap* rather than to her rank — "she is your director now" is `minRivalGap: 1` whether it
+happened at tier two or tier five, and an event gated on her absolute seniority will fire in the
+wrong career. A gap gate fails outright once she has left the service, so you never have to guard
+for that. Her standing (`rel.vasquez`) is a separate question and always was: how well she is doing
+and what she thinks of you are different things.
+
+**`maxSavings`** is the interesting half of money and the reason it exists. A choice gated on being
+short is not a worse version of a choice gated on low integrity — it is a different question asked
+of a different player, and the honest answer to it is not always the same one. `minSavings` gates
+what a cushion lets you do: the lower-paid job you believe in, the help you can afford to give.
+
+**`minClimate` / `maxClimate` / `stances`** gate on the conditions the whole country is working in.
+Both dials are centred on zero, so `maxClimate: { fiscal: -25 }` means "in an austere year" and
+`minClimate: { trust: 30 }` means "while the administration is still believed". Write these for
+scenes that could only happen in that weather — the settlement letter, the year there was money —
+rather than as a flavour gate on something that could happen any time.
+
+**Price your pool against the corpus, not against itself.** The average corpus outcome pays about
++0.5 reputation. A pool at four times that will make its department or its situation a walkover
+without any single event looking harsh, which is how the Inspection department shipped as one and
+how the climate pool nearly did. `npm run balance` is how you find out.
 
 ## Adding a task template
 
