@@ -12,6 +12,7 @@ import { bodies } from './bodies';
 import { posts } from './careers';
 import { departments } from './departments';
 import { endingCopy } from './endings';
+import { ELECTION_EVENT_ID } from '../engine/climate';
 import { allEvents, eventRegistry } from './events';
 import { initiatives } from './initiatives';
 import { allTasks, taskRegistry } from './tasks';
@@ -468,6 +469,48 @@ export function validateContent(): string[] {
   );
   if (!grantsMinister) problems.push('no event can award the Minister ending');
 
+  /*
+   * The election, which the engine schedules by id.
+   *
+   * `driftClimate` pushes `ELECTION_EVENT_ID` into `scheduledEvents` whenever a government
+   * changes, and `drawEvents` silently drops a scheduled id the registry does not know. So a
+   * corpus without this event does not fail, it just quietly never fires — about seven and a half
+   * times a career, invisibly. Exactly the arrangement the Minister ending uses, and it gets the
+   * same guardrail.
+   */
+  if (!eventRegistry[ELECTION_EVENT_ID]) {
+    problems.push(
+      `the engine schedules "${ELECTION_EVENT_ID}" at every change of government and no event defines it`,
+    );
+  }
+
+  /*
+   * Money may never pay reputation.
+   *
+   * The same rule initiatives are held to a few lines above, for the same reason: offers key off
+   * reputation and reputation decays every cycle, so anything that converts a hoarded resource
+   * into standing converts it into promotion velocity, and every career learns the one build that
+   * hoards. Here the hoarded resource is cash, and the failure mode is worse than dominance — a
+   * scene that paid standing for being short would teach a player to stay poor on purpose.
+   *
+   * Both directions are checked: a choice that moves savings may not also move reputation.
+   */
+  for (const event of allEvents) {
+    for (const choice of event.choices) {
+      for (const outcome of choice.outcomes) {
+        const movesMoney = outcome.effects.some((e) => e.kind === 'savings');
+        const paysReputation = outcome.effects.some(
+          (e) => e.kind === 'stat' && e.stat === 'reputation' && e.delta > 0,
+        );
+        if (movesMoney && paysReputation) {
+          problems.push(
+            `${event.id}/${choice.id}: an outcome that moves savings also pays reputation — money buys options and pressure, never standing`,
+          );
+        }
+      }
+    }
+  }
+
   return problems;
 }
 
@@ -507,6 +550,8 @@ function validateEffects(effects: readonly Effect[], where: string): string[] {
       case 'stat':
       case 'salary':
       case 'flagDelta':
+      case 'savings':
+      case 'climate':
         if (effect.delta === 0) problems.push(`${where}: effect with a delta of zero does nothing`);
         break;
 

@@ -122,6 +122,17 @@ export interface Condition {
 export type Effect =
   | { kind: 'stat'; stat: StatId; delta: number }
   | { kind: 'salary'; delta: number }
+  /**
+   * Money in or out of your own pocket, in euros.
+   *
+   * Distinct from `salary`, which changes what you earn every month from now on. This is a
+   * one-off: the consultancy fee, the loan to somebody on your floor, the four months of overtime
+   * that closed a gap. Unclamped in both directions, because being short is the half of this the
+   * game was built to be able to say.
+   */
+  | { kind: 'savings'; delta: number }
+  /** Moves the national mood. Rare and powerful: most content should read the climate, not set it. */
+  | { kind: 'climate'; dial: ClimateId; delta: number }
   | { kind: 'flag'; flag: string; value?: boolean }
   /** Moves a numeric flag. Absent counts as 0, so the first delta sets it. */
   | { kind: 'flagDelta'; flag: string; delta: number }

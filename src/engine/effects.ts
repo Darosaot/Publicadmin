@@ -7,7 +7,7 @@
 
 import { yearsElapsed } from './calendar';
 import { STAT_MAX, STAT_MIN } from './constants';
-import { climateOf } from './climate';
+import { clampClimate, climateOf } from './climate';
 import type { ContentRegistry } from './registry';
 import { rivalGap } from './rival';
 import { spawnTask } from './tasks';
@@ -92,6 +92,23 @@ export function applyEffects(
 
       case 'salary':
         next.player.salary = Math.max(0, Math.round(next.player.salary + effect.delta));
+        break;
+
+      case 'savings':
+        // Deliberately unclamped below zero. Hardship is the half of this system the corpus was
+        // waiting for, and a floor at nought would delete it.
+        next.player.savings = Math.round(next.player.savings + effect.delta);
+        break;
+
+      case 'climate':
+        // A no-op for a career with no weather, exactly as the management effects are a no-op for
+        // a player with no unit — so a common event can carry one without a gate.
+        if (next.climate) {
+          next.climate = {
+            ...next.climate,
+            [effect.dial]: clampClimate(next.climate[effect.dial] + effect.delta),
+          };
+        }
         break;
 
       case 'flag':
