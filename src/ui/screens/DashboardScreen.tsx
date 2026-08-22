@@ -13,7 +13,7 @@ import { TaskCard } from '../components/TaskCard';
 /** The desk: the month's work, what you plan to do about it, and what it will cost you. */
 export function DashboardScreen({ game }: { game: GameState }) {
   const t = useT();
-  const { state, dispatch, effortTotal, effortSpent, effortRemaining } = useGame();
+  const { state, dispatch, effortTotal, effortRemaining } = useGame();
   const { allocation } = state;
 
   const hasOffers = game.offers.length > 0;
@@ -87,7 +87,7 @@ export function DashboardScreen({ game }: { game: GameState }) {
             <div className="effort__track">
               <div
                 className="effort__fill"
-                style={{ width: `${effortTotal ? (effortSpent / effortTotal) * 100 : 0}%` }}
+                style={{ width: `${effortTotal ? (effortRemaining / effortTotal) * 100 : 0}%` }}
               />
             </div>
 

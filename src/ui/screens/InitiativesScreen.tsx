@@ -25,7 +25,7 @@ import { StatsBar } from '../components/StatsBar';
  */
 export function InitiativesScreen({ game }: { game: GameState }) {
   const t = useT();
-  const { state, dispatch, effortTotal, effortSpent, effortRemaining } = useGame();
+  const { state, dispatch, effortTotal, effortRemaining } = useGame();
   const { allocation } = state;
 
   const open = startableInitiatives(game, registry);
@@ -188,7 +188,7 @@ export function InitiativesScreen({ game }: { game: GameState }) {
             <div className="effort__track">
               <div
                 className="effort__fill"
-                style={{ width: `${effortTotal ? (effortSpent / effortTotal) * 100 : 0}%` }}
+                style={{ width: `${effortTotal ? (effortRemaining / effortTotal) * 100 : 0}%` }}
               />
             </div>
             <p className="muted">{t('init.budget_note')}</p>

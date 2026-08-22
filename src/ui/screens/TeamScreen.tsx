@@ -13,6 +13,7 @@ import { discretionarySpend } from '../../engine/turn';
 import { SENIORITIES, type GameState, type Seniority, type StaffMember } from '../../engine/types';
 import { useT } from '../../i18n';
 import { useGame } from '../../state/GameProvider';
+import { Portrait } from '../components/Portrait';
 import { StatsBar } from '../components/StatsBar';
 import { GameTabs } from '../components/GameTabs';
 import { formatSalary } from '../format';
@@ -20,7 +21,7 @@ import { formatSalary } from '../format';
 /** The unit: who works for you, how they are, and what it all costs. */
 export function TeamScreen({ game }: { game: GameState }) {
   const t = useT();
-  const { state, dispatch, effortTotal, effortSpent, effortRemaining } = useGame();
+  const { state, dispatch, effortTotal, effortRemaining } = useGame();
   const { allocation } = state;
 
   const establishment = headcountFor(game, registry);
@@ -81,7 +82,7 @@ export function TeamScreen({ game }: { game: GameState }) {
             <div className="effort__track">
               <div
                 className="effort__fill"
-                style={{ width: `${effortTotal ? (effortSpent / effortTotal) * 100 : 0}%` }}
+                style={{ width: `${effortTotal ? (effortRemaining / effortTotal) * 100 : 0}%` }}
               />
             </div>
           </section>
@@ -253,7 +254,8 @@ function StaffCard({
   return (
     <article className={`staff staff--${moraleTone}`}>
       <div className="staff__head">
-        <div>
+        <Portrait name={member.name} size={48} />
+        <div className="staff__ident">
           <h3 className="staff__name">{member.name}</h3>
           <p className="staff__grade">
             {t(`team.grade.${member.seniority}`)} · {formatSalary(member.salary)}

@@ -318,3 +318,54 @@ canvas {
 .bodycard__fill {
   height: 100%;
 }
+
+/* ---------- Portraits ---------- */
+
+/* A generated face is a sprite, so it gets a sprite's frame: hard border, top-left bevel, and
+   no smoothing at any scale. `flex-shrink: 0` matters more than it looks — without it a long
+   name compresses the portrait into a sliver rather than wrapping. */
+.portrait {
+  display: block;
+  flex-shrink: 0;
+  border: var(--px) solid var(--c-border-strong);
+  box-shadow:
+    inset var(--px) var(--px) 0 var(--c-bevel-light),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--c-bevel-dark);
+  background: var(--c-surface-sunken);
+}
+
+/* The roster card becomes a portrait beside an identity block, with the tenure count still
+   pushed to the far right. */
+.staff__head {
+  align-items: flex-start;
+  gap: var(--s-3);
+}
+
+.staff__ident {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.staff__months {
+  flex-shrink: 0;
+}
+
+.person__head {
+  /* Was `align-items: baseline`, which hangs a 40px portrait off the text baseline and pushes
+     it out of the card. */
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.person__name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* In the epilogue the face sits inline with the sentence about the person, so it rides the
+   text rather than starting a new block. */
+.epilogue__list .portrait {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: var(--s-1);
+}

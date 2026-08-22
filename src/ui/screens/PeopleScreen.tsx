@@ -4,6 +4,7 @@ import type { GameState } from '../../engine/types';
 import { useT } from '../../i18n';
 import { StatsBar } from '../components/StatsBar';
 import { GameTabs } from '../components/GameTabs';
+import { Portrait } from '../components/Portrait';
 
 /**
  * Who you know, and how you stand with them.
@@ -51,6 +52,7 @@ export function PeopleScreen({ game }: { game: GameState }) {
                 return (
                   <article key={person.id} className={`person person--${tone}`}>
                     <div className="person__head">
+                      <Portrait name={person.name} size={40} />
                       <h3 className="person__name">{person.name}</h3>
                       <span className="person__tone eyebrow">{t(`people.tone.${tone}`)}</span>
                     </div>
