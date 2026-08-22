@@ -29,7 +29,7 @@ describe('moving a date', () => {
     const task = before.tasks[0]!;
     const cost = negotiationCost(task, 'extend');
 
-    const after = extendDeadline(before, task.uid);
+    const after = extendDeadline(before, registry, task.uid);
     const moved = after.tasks.find((t) => t.uid === task.uid)!;
 
     expect(moved.deadlineTurn).toBe(task.deadlineTurn + EXTENSION_TURNS);
@@ -38,9 +38,9 @@ describe('moving a date', () => {
 
   /** Without the cap this is an infinite loop against a stat that replenishes. */
   it('can only be done once per file', () => {
-    const once = extendDeadline(game(), uid(game()));
-    expect(canNegotiate(once, uid(once), 'extend')).toBe(false);
-    expect(extendDeadline(once, uid(once))).toBe(once);
+    const once = extendDeadline(game(), registry, uid(game()));
+    expect(canNegotiate(once, registry, uid(once), 'extend')).toBe(false);
+    expect(extendDeadline(once, registry, uid(once))).toBe(once);
   });
 
   it('costs more on a file barely started than on one nearly done', () => {
@@ -52,8 +52,8 @@ describe('moving a date', () => {
 
   it('is refused when the favours are not there', () => {
     const broke = game(0);
-    expect(canNegotiate(broke, uid(broke), 'extend')).toBe(false);
-    expect(extendDeadline(broke, uid(broke))).toBe(broke);
+    expect(canNegotiate(broke, registry, uid(broke), 'extend')).toBe(false);
+    expect(extendDeadline(broke, registry, uid(broke))).toBe(broke);
   });
 });
 
@@ -61,7 +61,7 @@ describe('cutting a file back', () => {
   it('shrinks what is required', () => {
     const before = game();
     const task = before.tasks[0]!;
-    const after = scopeDown(before, task.uid);
+    const after = scopeDown(before, registry, task.uid);
     const cut = after.tasks.find((t) => t.uid === task.uid)!;
 
     expect(cut.required).toBeLessThan(task.required);
@@ -77,7 +77,7 @@ describe('cutting a file back', () => {
       tasks: [{ ...task, progress: task.required - 1 }],
     };
 
-    const after = scopeDown(nearlyDone, task.uid);
+    const after = scopeDown(nearlyDone, registry, task.uid);
     const cut = after.tasks.find((t) => t.uid === task.uid)!;
     expect(cut.required).toBeGreaterThan(cut.progress);
   });
@@ -102,8 +102,8 @@ describe('cutting a file back', () => {
   });
 
   it('can only be done once per file', () => {
-    const once = scopeDown(game(), uid(game()));
-    expect(canNegotiate(once, uid(once), 'scope')).toBe(false);
+    const once = scopeDown(game(), registry, uid(game()));
+    expect(canNegotiate(once, registry, uid(once), 'scope')).toBe(false);
   });
 });
 
@@ -123,8 +123,8 @@ describe('saying no', () => {
     const refused = refuseTask(before, registry, uid(before));
     expect(refused.stats.reputation).toBe(before.stats.reputation - REFUSE_REPUTATION_COST);
 
-    const extended = extendDeadline(before, uid(before));
-    const scoped = scopeDown(before, uid(before));
+    const extended = extendDeadline(before, registry, uid(before));
+    const scoped = scopeDown(before, registry, uid(before));
     expect(extended.stats.reputation).toBe(before.stats.reputation);
     expect(scoped.stats.reputation).toBe(before.stats.reputation);
   });

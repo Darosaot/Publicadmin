@@ -534,3 +534,22 @@ canvas {
   opacity: 0.45;
   cursor: default;
 }
+
+/* ---------- Files with teeth ---------- */
+
+/* A crisis must not look like the four files beside it, because the decision it forces is a
+   different kind of decision: everything else on the board suffers for as long as it is open. */
+.task--crisis {
+  border-color: var(--c-bad);
+  box-shadow:
+    inset var(--px) var(--px) 0 var(--c-bevel-light),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--c-bevel-dark),
+    0 0 0 var(--px) var(--c-bad),
+    var(--shadow-md);
+}
+
+.task__crisis {
+  color: var(--c-bad);
+  font-size: var(--fd-xs);
+  line-height: 1.8;
+}

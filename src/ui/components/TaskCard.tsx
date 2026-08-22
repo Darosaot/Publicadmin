@@ -37,6 +37,7 @@ export function TaskCard({
   const t = useT();
   const template = registry.tasks[task.templateId];
   const title = template ? t(template.titleKey) : task.templateId;
+  const crisis = template?.crisis === true;
 
   const remaining = Math.max(0, task.required - task.progress);
   const monthsLeft = task.deadlineTurn - turn;
@@ -59,12 +60,15 @@ export function TaskCard({
   const maxUseful = remaining + 4;
 
   return (
-    <article className={`task${willFinish ? ' task--will-finish' : ''}`}>
+    <article
+      className={`task${willFinish ? ' task--will-finish' : ''}${crisis ? ' task--crisis' : ''}`}
+    >
       <div className="task__head">
         <h3 className="task__title">{title}</h3>
         <span className={`chip chip--${urgency}`}>{deadlineLabel}</span>
       </div>
 
+      {crisis && <p className="task__crisis eyebrow">{t('task.crisis_label')}</p>}
       {template && <p className="task__desc">{t(template.descKey)}</p>}
 
       <div className="task__meta">
@@ -100,7 +104,11 @@ export function TaskCard({
         <div className="negotiate">
           {(['extend', 'scope', 'refuse'] as const).map((kind) => {
             const cost = negotiationCost(task, kind);
-            const already = (kind === 'extend' && task.extended) || (kind === 'scope' && task.scoped);
+            // A crisis can be argued about, but not away: no declining and no cutting back.
+            const barred = crisis && kind !== 'extend';
+            const already =
+              (kind === 'extend' && task.extended) || (kind === 'scope' && task.scoped);
+            if (barred) return null;
             return (
               <button
                 key={kind}

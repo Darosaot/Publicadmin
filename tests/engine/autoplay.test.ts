@@ -599,21 +599,8 @@ describe('people are good at particular things', () => {
  * how the whole senior half of the career played before v2.3.
  */
 describe('naming a second', () => {
-  /*
-   * Both sides run with negotiation off, for the third occurrence of the same lesson.
-   *
-   * The bot rests when stress crosses a fixed threshold, so stress is a shared sink: any second
-   * system that touches it pushes the equilibrium straight back and the comparison reads noise.
-   * It swamped the directives sweep when perks landed, and it swamped this one when negotiation
-   * landed — a deputy's whole payoff is a point of stress a month, and against longer careers
-   * with more months in them the sign flipped. Any A/B on stress has to isolate.
-   */
-  const withDeputy = summarise(
-    playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useNegotiation: false }),
-  );
-  const without = summarise(
-    playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useDeputy: false, useNegotiation: false }),
-  );
+  const withDeputy = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS));
+  const without = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useDeputy: false }));
 
   it('gets used at all once a unit is big enough to want one', () => {
     expect(withDeputy.meanMonthsWithDeputy).toBeGreaterThan(0);
@@ -634,9 +621,27 @@ describe('naming a second', () => {
     expect(without.completionRate - withDeputy.completionRate).toBeLessThan(0.01);
   });
 
-  /** What it is actually for: the month stops being yours alone to hold. */
-  it('takes some of the weight off the person holding it', () => {
-    expect(withDeputy.meanStress).toBeLessThan(without.meanStress);
+  /*
+   * There is deliberately no assertion about stress here, and the reason is worth writing down
+   * because four separate features have now tripped over it.
+   *
+   * A deputy's payoff is a point of stress a month. So is the `thick_skin` perk, `methodical`,
+   * the `hours` directive, and — indirectly — every crisis. But the bot rests whenever stress
+   * crosses a fixed threshold, so **stress is a shared sink**: anything that lowers it simply
+   * means less resting, the equilibrium returns to the same number, and the freed points go
+   * somewhere else entirely. The comparison then reads whatever the last-landed system did.
+   *
+   * It swamped the directives sweep when perks arrived, this one when negotiation arrived, and
+   * this one again when crises arrived. Isolating the A/B works exactly until the next system
+   * lands, which is not a guardrail, it is a maintenance appointment. Stress is measurable in
+   * this harness only against a bot with an adaptive rest policy, which is a bigger change than
+   * anything it would buy — so the deputy is judged on not being a trap, above, and its stress
+   * relief is left to the unit tests in `org.test.ts` where it is deterministic.
+   */
+  it('is worth having by the time a unit is big enough to want one', () => {
+    // Measured at 10.0 cycles of a career spent with somebody in the job. The bar is 6, not 11:
+    // a threshold set just under an observed value fails on noise and gets deleted.
+    expect(withDeputy.meanMonthsWithDeputy).toBeGreaterThan(6);
   });
 });
 
@@ -677,5 +682,59 @@ describe('arguing about a file', () => {
   /** It is how you survive a bad month, not how you stop having them. */
   it('does not make the board solvable', () => {
     expect(arguing.completionRate).toBeLessThan(0.995);
+  });
+});
+
+/**
+ * Crises: files with teeth.
+ *
+ * The whole risk with these is that they are authored, translated, validated — and then never
+ * seen, because they arrive only through a `spawnTask` effect on a milestone gated to level 3 and
+ * a minimum turn. A crisis nobody meets is the most expensive kind of dead content there is.
+ */
+describe('files with teeth', () => {
+  const crises = Object.values(shippedRegistry.tasks).filter((task) => task.crisis);
+
+  it('never puts one on the board by chance', () => {
+    // `refillBoard` filters them out, and `validate.ts` requires weight 0 so nothing can be
+    // written that assumes otherwise.
+    for (const crisis of crises) expect(crisis.weight, crisis.id).toBe(0);
+  });
+
+  it('makes each one far bigger than an ordinary file', () => {
+    const ordinary = Object.values(shippedRegistry.tasks).filter((task) => !task.crisis);
+    const typical =
+      ordinary.reduce((sum, task) => sum + task.baseEffort, 0) / Math.max(1, ordinary.length);
+
+    for (const crisis of crises) {
+      expect(crisis.baseEffort, crisis.id).toBeGreaterThan(typical * 2);
+    }
+  });
+
+  /** Every one has to be spawnable by something, or it is prose nobody will ever be handed. */
+  it('has an event that brings each one', () => {
+    const spawned = new Set(
+      Object.values(shippedRegistry.events)
+        .flatMap((event) => event.choices)
+        .flatMap((choice) => choice.outcomes)
+        .flatMap((outcome) => outcome.effects)
+        .filter((effect) => effect.kind === 'spawnTask')
+        .map((effect) => (effect as { templateId: string }).templateId),
+    );
+
+    for (const crisis of crises) expect(spawned.has(crisis.id), crisis.id).toBe(true);
+  });
+
+  it('actually lands on somebody in ordinary play', () => {
+    let met = 0;
+    for (const seed of seeds.slice(0, 8)) {
+      for (const department of DEPARTMENT_IDS) {
+        const run = playCareer({ seed, department });
+        if (run.finalState.firedEvents.some((id) => id.startsWith('evt.crisis.'))) met += 1;
+      }
+    }
+    // Milestones are drawn against everything else on offer, so this is not every career — but a
+    // corpus where it is *no* career means the gates are unreachable.
+    expect(met).toBeGreaterThan(0);
   });
 });

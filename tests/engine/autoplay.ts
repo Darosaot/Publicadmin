@@ -589,8 +589,8 @@ export function playCareer(options: CareerOptions): RunResult {
           for (const task of doomed) {
             if (game.stats.politicalCapital <= NEGOTIATION_RESERVE) break;
             const before = game;
-            game = scopeDown(game, task.uid);
-            if (game === before) game = extendDeadline(game, task.uid);
+            game = scopeDown(game, registry, task.uid);
+            if (game === before) game = extendDeadline(game, registry, task.uid);
             if (game !== before) negotiations += 1;
           }
         }

@@ -170,9 +170,9 @@ export function gameReducer(state: AppState, action: GameAction): AppState {
       const { taskUid, kind } = action;
       const game =
         kind === 'extend'
-          ? extendDeadline(state.game, taskUid)
+          ? extendDeadline(state.game, registry, taskUid)
           : kind === 'scope'
-            ? scopeDown(state.game, taskUid)
+            ? scopeDown(state.game, registry, taskUid)
             : refuseTask(state.game, registry, taskUid);
 
       // A refused file must not keep its allocation, or the points stay committed to something

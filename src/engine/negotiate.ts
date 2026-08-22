@@ -56,9 +56,24 @@ export function negotiationCost(task: ActiveTask, kind: NegotiationKind): number
   return REFUSE_PC_COST;
 }
 
-export function canNegotiate(state: GameState, taskUid: string, kind: NegotiationKind): boolean {
+export function canNegotiate(
+  state: GameState,
+  registry: ContentRegistry,
+  taskUid: string,
+  kind: NegotiationKind,
+): boolean {
   const task = state.tasks.find((t) => t.uid === taskUid);
   if (!task) return false;
+
+  /*
+   * A crisis can be argued about, but not away.
+   *
+   * You may always ask for more time — that is what everybody does, and it is priced. You may not
+   * decline it and you may not agree to do less of it, because a crisis you can hand back is not
+   * a crisis, and the whole reason it is on the board is that somebody has to deal with it.
+   */
+  const template = registry.tasks[task.templateId];
+  if (template?.crisis && kind !== 'extend') return false;
 
   if (kind === 'extend' && task.extended) return false;
   if (kind === 'scope' && task.scoped) return false;
@@ -67,8 +82,12 @@ export function canNegotiate(state: GameState, taskUid: string, kind: Negotiatio
 }
 
 /** Move the date. The file is unchanged; you simply have longer, and somebody remembers asking. */
-export function extendDeadline(state: GameState, taskUid: string): GameState {
-  if (!canNegotiate(state, taskUid, 'extend')) return state;
+export function extendDeadline(
+  state: GameState,
+  registry: ContentRegistry,
+  taskUid: string,
+): GameState {
+  if (!canNegotiate(state, registry, taskUid, 'extend')) return state;
   const task = state.tasks.find((t) => t.uid === taskUid)!;
 
   const next: GameState = {
@@ -91,8 +110,12 @@ export function extendDeadline(state: GameState, taskUid: string): GameState {
  * cannot be finished brilliantly, because part of what would have made it brilliant is the part
  * you agreed not to do.
  */
-export function scopeDown(state: GameState, taskUid: string): GameState {
-  if (!canNegotiate(state, taskUid, 'scope')) return state;
+export function scopeDown(
+  state: GameState,
+  registry: ContentRegistry,
+  taskUid: string,
+): GameState {
+  if (!canNegotiate(state, registry, taskUid, 'scope')) return state;
   const task = state.tasks.find((t) => t.uid === taskUid)!;
 
   const next: GameState = {
@@ -125,7 +148,7 @@ export function refuseTask(
   registry: ContentRegistry,
   taskUid: string,
 ): GameState {
-  if (!canNegotiate(state, taskUid, 'refuse')) return state;
+  if (!canNegotiate(state, registry, taskUid, 'refuse')) return state;
   const task = state.tasks.find((t) => t.uid === taskUid);
   if (!task) return state;
 

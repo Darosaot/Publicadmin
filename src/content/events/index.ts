@@ -1,5 +1,6 @@
 import type { GameEvent } from '../../engine/types';
 import { alumniEvents } from './alumni';
+import { crisisEvents } from './crises';
 import { castEvents } from './cast';
 import { commonEvents } from './common';
 import { commonExtraEvents } from './common-extra';
@@ -22,6 +23,7 @@ import { projectsEvents } from './projects';
 export const allEvents: GameEvent[] = [
   ...commonEvents,
   ...alumniEvents,
+  ...crisisEvents,
   ...castEvents,
   ...commonExtraEvents,
   ...legalEvents,

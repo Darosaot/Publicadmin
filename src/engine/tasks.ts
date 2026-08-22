@@ -82,7 +82,10 @@ export function refillBoard(state: GameState, registry: ContentRegistry): GameSt
   const slots = getPost(registry, state.player.postId).taskSlots;
   let next = state;
 
-  const allEligible = Object.values(registry.tasks).filter((t) => isTemplateEligible(t, next));
+  // Crises are never drawn: they arrive because something went wrong, through `spawnTask`.
+  const allEligible = Object.values(registry.tasks).filter(
+    (t) => !t.crisis && isTemplateEligible(t, next),
+  );
   if (allEligible.length === 0) return next;
 
   while (next.tasks.length < slots) {

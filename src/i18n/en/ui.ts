@@ -388,4 +388,6 @@ export const uiStrings: Record<string, string> = {
     'It leaves the board and does not count as missed. You did not fail it, you declined it — and it is the only one of the three anybody outside the room hears about.',
   'negotiate.refuse.done': 'Declined',
   'log.refused_file': 'You declined a file rather than miss it.',
+
+  'task.crisis_label': 'This will not wait, and cannot be handed back',
 };

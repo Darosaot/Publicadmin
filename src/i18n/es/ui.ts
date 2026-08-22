@@ -385,4 +385,6 @@ export const uiStrings: Record<string, string> = {
     'Sale de la mesa y no cuenta como incumplido. No fallaste, rechazaste — y es lo único de los tres que se entera alguien fuera del despacho.',
   'negotiate.refuse.done': 'Rechazado',
   'log.refused_file': 'Rechazaste un expediente antes que incumplirlo.',
+
+  'task.crisis_label': 'Esto no espera, y no se puede devolver',
 };

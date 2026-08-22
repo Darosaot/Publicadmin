@@ -119,6 +119,15 @@ export interface TaskTemplate {
   descKey: string;
   /** `'any'` means the template can land on any department's desk. */
   departments: DepartmentId[] | 'any';
+  /**
+   * A file with teeth: it arrives because something went wrong, not because the board refilled.
+   *
+   * Three consequences, all of them the point. It is never drawn at random — only a `spawnTask`
+   * effect puts one on the desk. It cannot be declined or cut back, because a crisis you can hand
+   * back is not one. And missing it costs what its own `onFail` says rather than the ordinary
+   * penalty, which is usually a great deal more.
+   */
+  crisis?: boolean;
   minLevel?: number;
   maxLevel?: number;
   /** Effort before level scaling is applied at spawn time. */

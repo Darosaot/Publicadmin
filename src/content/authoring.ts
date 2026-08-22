@@ -125,6 +125,8 @@ export interface TaskSpec {
   deadlineRange: [number, number];
   difficulty: 1 | 2 | 3;
   weight?: number;
+  /** A file that arrives because something went wrong. See `TaskTemplate.crisis`. */
+  crisis?: boolean;
   onComplete?: Partial<Record<QualityTier, Effect[]>>;
   onFail?: Effect[];
 }
@@ -135,6 +137,7 @@ export function defineTask(id: string, spec: TaskSpec): TaskTemplate {
     titleKey: register(`${id}.title`, spec.title),
     descKey: register(`${id}.desc`, spec.desc),
     departments: spec.departments,
+    ...(spec.crisis ? { crisis: true } : {}),
     minLevel: spec.minLevel,
     maxLevel: spec.maxLevel,
     baseEffort: spec.baseEffort,

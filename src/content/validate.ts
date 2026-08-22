@@ -88,7 +88,22 @@ export function validateContent(): string[] {
     requireString(task.descKey, `task ${task.id}`);
 
     if (task.baseEffort <= 0) problems.push(`task ${task.id}: baseEffort must be positive`);
-    if (task.weight <= 0) problems.push(`task ${task.id}: weight must be positive`);
+    /*
+     * Crises invert the weight rule rather than being exempted from it.
+     *
+     * `refillBoard` filters them out, so a weight would never be read — but a template carrying
+     * one is a template somebody might later assume can be drawn, and a crisis leaking into the
+     * random pool would put a twenty-six-point file on an unsuspecting desk. Requiring zero makes
+     * "this never arrives by chance" a thing the build checks rather than a thing the comment
+     * claims.
+     */
+    if (task.crisis) {
+      if (task.weight !== 0) {
+        problems.push(`task ${task.id}: a crisis must have weight 0 — it is never drawn`);
+      }
+    } else if (task.weight <= 0) {
+      problems.push(`task ${task.id}: weight must be positive`);
+    }
 
     const [min, max] = task.deadlineRange;
     if (min < 1 || max < min) {
