@@ -7,7 +7,7 @@
 
 import type { PlayerStats } from './types';
 
-export const SAVE_VERSION = 7;
+export const SAVE_VERSION = 8;
 
 export const STAT_MIN = 0;
 export const STAT_MAX = 100;
@@ -341,6 +341,149 @@ export const HONOURED_RETIREMENT_REPUTATION = 60;
 /** Requirements for the Minister confirmation arc to begin, from level 5. */
 export const MINISTER_MIN_REPUTATION = 88;
 export const MINISTER_MIN_POLITICAL_CAPITAL = 70;
+
+/* ------------------------------------------------------------------ rival */
+
+/**
+ * Elena Vásquez's numbers.
+ *
+ * She is tuned to be a pacer rather than an opponent. A rival who always wins is a taunt and a
+ * rival who always loses is furniture; the sweep asserts her final tier spreads across the range
+ * rather than piling at either end, and these are the numbers that keep it there.
+ */
+
+/** She starts where you start, because she started the week you did. */
+export const RIVAL_STARTING_STANDING = 20;
+
+/**
+ * How good she turns out to be, rolled once per career and never moved.
+ *
+ * The band is deliberately wide. On a low roll you outgrow her by year ten and the late scenes
+ * are about what that does to somebody; on a high roll she is your director and they are about
+ * what that does to you. Both are worth playing and neither should be the only one you ever see.
+ */
+export const RIVAL_CEILING_MIN = 52;
+export const RIVAL_CEILING_MAX = 94;
+
+/** Fraction of the distance to her ceiling that she closes each cycle. */
+export const RIVAL_STANDING_DRIFT = 0.08;
+
+/** A new post knocks anybody back. You arrive one post short; so does she. */
+export const RIVAL_STANDING_ON_PROMOTION = -7;
+
+/**
+ * Her chance of taking any one edge she qualifies for, per cycle.
+ *
+ * Below the player's `OFFER_BASE_CHANCE` on purpose: she is walking the same graph without a
+ * player's attention on it, and a rival who is promoted faster than you can be while playing well
+ * reads as the game cheating rather than as a career.
+ */
+export const RIVAL_OFFER_CHANCE = 0.26;
+
+/**
+ * How long a post she took is closed to you.
+ *
+ * The mechanic that finally gives offer expiry teeth: before this, an offer lapsing cost nothing
+ * whatsoever. A cooldown rather than a permanent closure, because permanent is a much harsher
+ * game than the one these constants are tuned for — the sweep shows it immediately as a collapse
+ * in mean level.
+ */
+export const RIVAL_HOLDS_POST_TURNS = 10;
+
+/** Standing below which she starts thinking about leaving, and the per-cycle chance she does. */
+export const RIVAL_RESIGN_STANDING = 24;
+export const RIVAL_RESIGN_CHANCE = 0.04;
+
+/* ------------------------------------------------------------------ money */
+
+/**
+ * Savings, and the rule that keeps them from becoming a second reputation.
+ *
+ * Money buys **options and relief**; its absence buys **pressure**. It must never buy standing or
+ * promotion velocity, which is the same rule perks and initiatives already follow and for the same
+ * reason: offers key off reputation, so anything paying reputation converts a hoarded resource
+ * straight into promotion speed and every career converges on one build. `validate.ts` enforces
+ * it on content.
+ */
+export const MONEY_NEVER_BUYS_REPUTATION = true;
+
+export const STARTING_SAVINGS = 1400;
+
+/**
+ * What living costs, as a fraction of the post's baseline salary.
+ *
+ * Scaled to the post rather than fixed, because the career moves you to a bigger place every time
+ * it promotes you and the rent goes with it. Holding it fixed would have made seniority a money
+ * printer and the whole system trivial by tier three.
+ */
+export const OUTGOINGS_OF_BASE_SALARY = 0.72;
+
+/** Hardship: below this you are short, and it costs you every cycle until you are not. */
+export const HARDSHIP_SAVINGS = 0;
+export const HARDSHIP_STRESS_PER_CYCLE = 2;
+
+/** Above this you have a cushion, and the ordinary weight of the job sits a little lighter. */
+export const COMFORT_SAVINGS = 45_000;
+export const COMFORT_STRESS_RELIEF = 1;
+
+/* ---------------------------------------------------------------- climate */
+
+export const CLIMATE_MIN = -100;
+export const CLIMATE_MAX = 100;
+
+/**
+ * How fast each dial returns to nothing in particular.
+ *
+ * Mean reversion is not decoration here, it is the guardrail. A dial with a net drift is not
+ * weather — it is a difficulty setting applied to every other guardrail at once, and they would
+ * move with it rather than catching it. A career's mean climate has to come out near zero, and
+ * there is a test that says so.
+ */
+export const CLIMATE_REVERSION_RATE = 0.055;
+
+/** How hard the dials are pushed each month, before reversion pulls back. */
+export const CLIMATE_SHOCK_MAX = 4;
+
+/** A term of government, in calendar months, and how much of it the campaign occupies. */
+export const ELECTION_TERM_MONTHS = 48;
+
+/** What a change of government does to the dials, before its own stance starts telling. */
+export const ELECTION_FISCAL_SWING = 18;
+export const ELECTION_TRUST_BOUNCE = 12;
+
+/**
+ * What each stance leans the dials toward while it is in.
+ *
+ * A reforming government spends and is believed until it isn't; a consolidating one cuts and is
+ * trusted for it; a drifting one does neither and is credited with nothing.
+ */
+export const STANCE_FISCAL_LEAN: Record<string, number> = {
+  reforming: 14,
+  consolidating: -16,
+  drifting: -4,
+};
+export const STANCE_TRUST_LEAN: Record<string, number> = {
+  reforming: 8,
+  consolidating: 2,
+  drifting: -12,
+};
+
+/**
+ * What the climate is worth, mechanically.
+ *
+ * Every one of these is a small multiple of a dial at full deflection, and "small" is doing real
+ * work: these hooks sit on the two things the entire game is tuned against — the decay rates and
+ * the unit budget. The climate is meant to change which years are hard, not which careers are
+ * possible.
+ */
+/** Unit budget moves this fraction of itself at full fiscal deflection. */
+export const CLIMATE_BUDGET_SWING = 0.18;
+/** Reputation decays faster when nobody believes the administration. */
+export const CLIMATE_TRUST_DECAY_SWING = 0.012;
+/** An undertaking costs more effort to move in an austere year. */
+export const CLIMATE_INITIATIVE_EFFORT_SWING = 0.2;
+/** Austerity accelerates the country's own decline, which is what makes the bodies responsive. */
+export const CLIMATE_BODY_DRIFT_SWING = 0.5;
 
 /* -------------------------------------------------------------------- misc */
 

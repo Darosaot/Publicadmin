@@ -122,7 +122,72 @@ const MIGRATIONS: Record<number, (raw: RawSave) => RawSave> = {
         }))
       : raw.staff,
   }),
+
+  /**
+   * A rival, a country with weather, and a bank balance.
+   *
+   * All three are seeded rather than invented, and each one has an honest answer to "where was
+   * this before?".
+   *
+   * **Elena** is placed at the player's own tier on the line track. She joined the same week they
+   * did and the prose has said so for six versions, so an in-flight career has to resume with her
+   * roughly level — appearing from nowhere at the bottom would contradict every scene already
+   * played. Her ceiling is the midpoint of the band rather than a roll, because a migration must
+   * not consume randomness: the cursor in the save is mid-career and shifting it would change
+   * every draw that career had left.
+   *
+   * **The climate** starts neutral under a consolidating government. A save that predates the
+   * weather was played in ordinary conditions by definition, and that is what neutral means.
+   *
+   * **Savings** are reconstructed from months served at a flat rate rather than replayed from a
+   * salary history the save never kept. The figure is deliberately modest: crediting an old
+   * career with a fortune it never earned would hand it every money-gated choice in the game at
+   * once.
+   */
+  7: (raw) => {
+    const player = (raw.player ?? {}) as Record<string, unknown>;
+    const tier = Number(player.level ?? 1);
+    const months = Number(raw.calendarMonth ?? 0);
+    const salary = Number(player.salary ?? 2100);
+
+    return {
+      ...raw,
+      player: {
+        ...player,
+        savings: Math.round(months * V8_SAVINGS_PER_MONTH),
+        outgoings: Math.round(salary * V8_OUTGOINGS_FRACTION),
+      },
+      rival: {
+        postId: LINE_TRACK_BY_TIER[tier] ?? LINE_TRACK_BY_TIER[1],
+        level: tier,
+        track: 'line',
+        standing: V8_RIVAL_STANDING,
+        ceiling: V8_RIVAL_CEILING,
+        monthsInPost: 0,
+      },
+      climate: {
+        fiscal: 0,
+        trust: 0,
+        administration: 1,
+        stance: 'consolidating',
+        monthsToElection: V8_MONTHS_TO_ELECTION,
+      },
+    };
+  },
 };
+
+/**
+ * Frozen figures for the v7 → v8 migration.
+ *
+ * Literals rather than imports from `constants.ts` for the reason stated below `LINE_TRACK_BY_TIER`:
+ * a migration has to keep producing the same save when the balance moves on, and reading today's
+ * numbers to reconstruct yesterday's career is how migrations rot.
+ */
+const V8_SAVINGS_PER_MONTH = 320;
+const V8_OUTGOINGS_FRACTION = 0.72;
+const V8_RIVAL_STANDING = 45;
+const V8_RIVAL_CEILING = 73;
+const V8_MONTHS_TO_ELECTION = 24;
 
 /**
  * The line track, by tier — the ladder every pre-v3 career was on.
@@ -188,6 +253,10 @@ function hasRequiredShape(raw: RawSave): boolean {
     Array.isArray(raw.tasks) &&
     Array.isArray(raw.initiatives) &&
     Array.isArray(raw.alumni) &&
+    // Required rather than optional on the state, so a save that reaches here without one has
+    // not been through the v8 migration and is not safe to hand to the engine.
+    typeof raw.climate === 'object' &&
+    raw.climate !== null &&
     typeof player === 'object' &&
     player !== null &&
     typeof player.department === 'string' &&
@@ -215,6 +284,13 @@ function pruneUnknownContent(state: GameState, registry: ContentRegistry): GameS
     player: post
       ? { ...state.player, postId: post.id, level: post.tier, track: post.track }
       : state.player,
+    // Same problem as the player's own post, and the same answer. She goes back to the start
+    // rather than to nowhere: a career whose control group vanished is missing the point of
+    // having one, and every scene that names her would silently stop being reachable.
+    rival:
+      state.rival && !registry.posts.some((p) => p.id === state.rival?.postId)
+        ? { ...state.rival, postId: startingPost(registry).id, level: 1, track: 'line' }
+        : state.rival,
     offers: state.offers.filter((o) => registry.posts.some((p) => p.id === o.toPost)),
     tasks: state.tasks.filter((t) => registry.tasks[t.templateId] !== undefined),
     // A dropped initiative would throw nothing but would sit on the screen forever with no prose

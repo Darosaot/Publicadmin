@@ -30,6 +30,8 @@ export function cloneState(state: GameState): GameState {
     ...state,
     player: { ...state.player },
     stats: { ...state.stats },
+    rival: state.rival ? { ...state.rival } : undefined,
+    climate: { ...state.climate },
     tasks: state.tasks.map((t) => ({ ...t })),
     initiatives: state.initiatives.map((i) => ({ ...i })),
     alumni: state.alumni.map((a) => ({ ...a })),
