@@ -55,31 +55,44 @@
   --c-bad: #bd3030;
   --c-bad-soft: #e8c0bc;
 
-  /* Type. Press Start 2P is the chrome and Pixelify Sans is the prose, because this game
-     asks people to read four-sentence paragraphs and an 8x8 display face at that length is
-     a punishment. Both cover latin-ext, so Spanish keeps its accents in-font. */
-  --f-display: "Press Start 2P", "Courier New", monospace;
-  --f-sans: "Pixelify Sans", "Trebuchet MS", Verdana, sans-serif;
+  /* Type, in three layers, and the split is the whole readability story.
+   *
+   * v2.0 put Press Start 2P on every heading, tab, button, stat label and stat value. It is a
+   * beautiful 8x8 face and it is exhausting: twice the width per character, no descender room,
+   * and at the sizes that made it fit it was small as well as blocky. The pixel *chrome* — the
+   * bevels, the cell-filled bars, the hard shadows — carries the look on its own and costs
+   * nothing to read, so the face is where the reduction goes.
+   *
+   * - **Title only** for Press Start 2P. One place, large, iconic.
+   * - **Pixelify Sans for chrome.** Still unmistakably a pixel face, normal width, and legible
+   *     at a glance rather than after a moment's decoding.
+   * - **A plain system stack for prose**, because the game asks people to read four-sentence
+   *     paragraphs and nothing about a paragraph is improved by making it a puzzle.
+   */
+  --f-title: "Press Start 2P", "Courier New", monospace;
+  --f-display: "Pixelify Sans", "Trebuchet MS", Verdana, sans-serif;
+  --f-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
   --f-serif: var(--f-sans);
-  --f-mono: "Press Start 2P", ui-monospace, Menlo, Consolas, monospace;
+  --f-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  /* Prose sizes. Pixel faces read small, so the base is a step up from a normal web body. */
-  --fs-xs: 0.8125rem;
-  --fs-sm: 0.9375rem;
-  --fs-base: 1.0625rem;
-  --fs-md: 1.1875rem;
-  --fs-lg: 1.375rem;
-  --fs-xl: 1.75rem;
-  --fs-2xl: 2.375rem;
+  /* Prose sizes, back to ordinary web values now that the body face is an ordinary web face. */
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-md: 1.0625rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.625rem;
+  --fs-2xl: 2.25rem;
 
-  /* Display sizes, kept deliberately small: Press Start 2P is about twice as wide per
-     character as a normal face, so 11px of it occupies the room 20px of prose would. */
-  --fd-xs: 0.5rem;
-  --fd-sm: 0.625rem;
-  --fd-base: 0.75rem;
-  --fd-md: 0.875rem;
-  --fd-lg: 1.125rem;
-  --fd-xl: 1.5rem;
+  /* Display sizes. These were tuned tiny to stop Press Start 2P wrapping every heading onto
+     four lines; Pixelify Sans is normal-width, so they go back up to sizes a person can read
+     without leaning in. */
+  --fd-xs: 0.75rem;
+  --fd-sm: 0.875rem;
+  --fd-base: 1rem;
+  --fd-md: 1.1875rem;
+  --fd-lg: 1.5rem;
+  --fd-xl: 2rem;
 
   /* Space: multiples of 8, with 4 kept only for inside-the-bevel padding */
   --s-1: 4px;
@@ -94,7 +107,7 @@
   --r-sm: 0;
   --r-md: 0;
   --r-lg: 0;
-  --px: 4px; /* one "pixel" of the art grid, at the app's chosen scale */
+  --px: 3px; /* one "pixel" of the art grid. 4 was heavy enough to fight the text. */
   --shadow-sm: 4px 4px 0 rgba(59, 51, 36, 0.35);
   --shadow-md: 8px 8px 0 rgba(59, 51, 36, 0.4);
   --shadow-lg: 12px 12px 0 rgba(59, 51, 36, 0.5);
