@@ -17,7 +17,6 @@ import {
   AGENCY_TEMP_MAX,
   BASELINE_STRESS_PER_TURN,
   COACHING_EFFORT_COST,
-  DELEGATION_CAPACITY,
   DELEGATION_EFFORT_COST,
   LOG_LIMIT,
   NETWORK_PC_GAIN,
@@ -65,6 +64,7 @@ import {
   reputationDecayReduction,
   restReliefBonus,
 } from './perks';
+import { capacityOf, specialismFactor, traitOutputFactor } from './people';
 import {
   adjustStaffMorale,
   applyAssignments,
@@ -207,14 +207,14 @@ export function normalizeAllocation(
     // Nobody may be handed more than they can carry. Enforced here, once, so that everything
     // downstream — assignment, output, quality — can trust the allocation it is given.
     const carrying = new Map<string, number>();
-    const capacityOf = (staffId: string) => {
+    const capacityFor = (staffId: string) => {
       const member = state.staff.find((s) => s.id === staffId);
-      return member ? DELEGATION_CAPACITY[member.seniority] : 0;
+      return member ? capacityOf(member) : 0;
     };
 
     for (const [taskUid, staffId] of Object.entries(allocation.delegations)) {
       if (!taskIds.has(taskUid) || !staffIds.has(staffId)) continue;
-      if ((carrying.get(staffId) ?? 0) >= capacityOf(staffId)) continue;
+      if ((carrying.get(staffId) ?? 0) >= capacityFor(staffId)) continue;
       if (remaining < delegationCost(state)) break;
       normalized.delegations[taskUid] = staffId;
       carrying.set(staffId, (carrying.get(staffId) ?? 0) + 1);
@@ -236,7 +236,7 @@ export function normalizeAllocation(
     // it is the same person's month either way.
     for (const [templateId, staffId] of Object.entries(allocation.initiativeDelegations)) {
       if (!activeInitiativeIds.has(templateId) || !staffIds.has(staffId)) continue;
-      if ((carrying.get(staffId) ?? 0) >= capacityOf(staffId)) continue;
+      if ((carrying.get(staffId) ?? 0) >= capacityFor(staffId)) continue;
       if (remaining < delegationCost(state)) break;
       normalized.initiativeDelegations[templateId] = staffId;
       carrying.set(staffId, (carrying.get(staffId) ?? 0) + 1);
@@ -332,7 +332,15 @@ export function resolveTurn(
       if (!member) return task;
 
       const share = Math.max(1, load.get(member.id) ?? 1);
-      const contribution = Math.max(1, Math.round(staffOutput(member) / share));
+      // Who they are, and what the file is: a procurement officer on a procurement file is a
+      // third more use than the same person on a housing one, and a quick worker gets more done
+      // than a meticulous one who is doing it better.
+      const template = registry.tasks[task.templateId];
+      const fit = template ? specialismFactor(member, template) : 1;
+      const contribution = Math.max(
+        1,
+        Math.round((staffOutput(member) * fit * traitOutputFactor(member)) / share),
+      );
       team.delegatedProgress.push({
         staffName: member.name,
         taskTemplateId: task.templateId,

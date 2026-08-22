@@ -342,4 +342,22 @@ export const uiStrings: Record<string, string> = {
   'self.perk_needs': 'Needs {name}',
   'self.perk_needs_rank': 'Needs tier {tier}',
   'self.perk_needs_points': 'Needs {cost} points',
+
+  /* ------------------------------------------------------- people as people */
+
+  'team.level': 'Lv.{level}',
+  'team.specialism': 'Best at {field}',
+  'team.experience': 'Experience',
+  'staff.trait.meticulous': 'Meticulous',
+  'staff.trait.meticulous.help': 'Slower, and the work comes back right.',
+  'staff.trait.quick': 'Quick',
+  'staff.trait.quick.help': 'Gets through more of it than anyone. Some of it needs doing again.',
+  'staff.trait.steady': 'Steady',
+  'staff.trait.steady.help': 'Holds their level through a bad year without being managed.',
+  'staff.trait.restless': 'Restless',
+  'staff.trait.restless.help': 'Learns faster than anyone and is always half out of the door.',
+  'staff.trait.organiser': 'Organiser',
+  'staff.trait.organiser.help': 'Can hold one more file than the grade says.',
+  'staff.trait.diplomat': 'Diplomat',
+  'staff.trait.diplomat.help': 'Everyone else in the room is easier to manage.',
 };

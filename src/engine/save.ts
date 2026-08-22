@@ -12,6 +12,7 @@
 import { SAVE_VERSION } from './constants';
 import { startingPost, type ContentRegistry } from './registry';
 import type { GameState } from './types';
+import { specialismFromName } from './people';
 
 export const SAVE_KEY = 'padmin.save';
 
@@ -101,6 +102,26 @@ const MIGRATIONS: Record<number, (raw: RawSave) => RawSave> = {
    * are gone, which is a small loss and an honest one.
    */
   5: (raw) => ({ ...raw, alumni: [] }),
+
+  /**
+   * Everyone in an existing unit starts from no recorded experience, and gets the field their
+   * name implies.
+   *
+   * Neither is invented. Experience is genuinely zero — the system did not exist, so nobody
+   * earned any — and the specialism is a fold of the name, which is stable across loads and
+   * across saves of the same career. Rolling for it here would write a different unit every time
+   * the file was opened.
+   */
+  6: (raw) => ({
+    ...raw,
+    staff: Array.isArray(raw.staff)
+      ? (raw.staff as Record<string, unknown>[]).map((member) => ({
+          ...member,
+          xp: 0,
+          specialism: specialismFromName(String(member.name ?? '')),
+        }))
+      : raw.staff,
+  }),
 };
 
 /**

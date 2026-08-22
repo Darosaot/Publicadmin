@@ -7,7 +7,7 @@
 
 import type { PlayerStats } from './types';
 
-export const SAVE_VERSION = 6;
+export const SAVE_VERSION = 7;
 
 export const STAT_MIN = 0;
 export const STAT_MAX = 100;
@@ -168,6 +168,16 @@ export const DRIFT_FLOOR = 20;
  * number of people from a thirty-year career whose name a player could actually place.
  */
 export const ALUMNI_LIMIT = 12;
+
+/**
+ * How often a new officer's field is the one you work in.
+ *
+ * Uniform across seven departments, a unit of four almost never held a specialist for its own
+ * board — the sweep put the bonus on eight per cent of files, which is a decoration rather than a
+ * decision. Somewhat under half keeps the unit a mix while making "who is actually best at this
+ * one" a question worth asking most months.
+ */
+export const SPECIALIST_HIRE_CHANCE = 0.45;
 
 /** How many of your unit you may take with you when you take a new post. */
 export const KEEP_ON_MOVE_LIMIT = 2;

@@ -178,6 +178,8 @@ function populatedGame(): GameState {
         id: 's1',
         name: 'Someone',
         seniority: 'officer',
+        xp: 0,
+        specialism: 'legal',
         skill: 55,
         morale: 60,
         salary: 2600,

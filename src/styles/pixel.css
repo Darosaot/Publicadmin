@@ -458,3 +458,33 @@ canvas {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- People as people ---------- */
+
+.staff__level {
+  font-family: var(--f-display);
+  font-size: var(--fd-xs);
+  color: var(--c-accent);
+  white-space: nowrap;
+}
+
+.staff__aptitude {
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  margin-top: var(--s-1);
+}
+
+/* The trait is the one word that says who somebody is, so it is chipped rather than left as
+   running text — it has to be findable when scanning eight cards for who to hand a file to. */
+.staff__trait {
+  display: inline-block;
+  padding: 0 var(--s-1);
+  background: var(--c-brand-soft);
+  border: var(--px) solid var(--c-border);
+  color: var(--c-text);
+  cursor: help;
+}
+
+.staffbar__fill--xp {
+  background: var(--c-accent);
+}

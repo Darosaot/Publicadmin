@@ -339,4 +339,22 @@ export const uiStrings: Record<string, string> = {
   'self.perk_needs': 'Requiere {name}',
   'self.perk_needs_rank': 'Requiere nivel {tier}',
   'self.perk_needs_points': 'Requiere {cost} puntos',
+
+  /* --------------------------------------------------- las personas, una a una */
+
+  'team.level': 'Nv.{level}',
+  'team.specialism': 'Su fuerte: {field}',
+  'team.experience': 'Experiencia',
+  'staff.trait.meticulous': 'Meticulosa',
+  'staff.trait.meticulous.help': 'Más lenta, y el trabajo vuelve bien hecho.',
+  'staff.trait.quick': 'Rápida',
+  'staff.trait.quick.help': 'Despacha más que nadie. Parte hay que rehacerla.',
+  'staff.trait.steady': 'Constante',
+  'staff.trait.steady.help': 'Aguanta su nivel un mal año sin que nadie la lleve de la mano.',
+  'staff.trait.restless': 'Inquieta',
+  'staff.trait.restless.help': 'Aprende más rápido que nadie y siempre está medio fuera.',
+  'staff.trait.organiser': 'Organizadora',
+  'staff.trait.organiser.help': 'Puede llevar un expediente más de lo que dice su categoría.',
+  'staff.trait.diplomat': 'Diplomática',
+  'staff.trait.diplomat.help': 'Con ella en la sala, los demás se llevan mejor.',
 };

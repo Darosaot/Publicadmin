@@ -20,6 +20,7 @@ import {
   COACHING_SKILL_GAIN,
   HIRING_MONTHS,
   KEEP_ON_MOVE_LIMIT,
+  SPECIALIST_HIRE_CHANCE,
   POACHING_CHANCE,
   POACHING_MORALE,
   POACHING_SKILL,
@@ -41,6 +42,7 @@ import { knownBodies } from './world';
 import { hiringMoraleDelta, hiringSkillDelta, hoursMoraleDelta } from './directives';
 import { getPost, type ContentRegistry } from './registry';
 import { nextChance, nextInt, pick } from './rng';
+import { DEPARTMENT_IDS } from './types';
 import type {
   Allocation,
   Budget,
@@ -49,6 +51,16 @@ import type {
   StaffMember,
   TeamReport,
 } from './types';
+import {
+  MAX_STAFF_LEVEL,
+  STAFF_LEVEL_SKILL_GAIN,
+  XP_PER_LEVEL,
+  diplomatFloor,
+  staffLevel,
+  traitMoraleDrift,
+  traitQualityDelta,
+  traitSkillGrowth,
+} from './people';
 import {
   arrivalMoraleBonus,
   budgetBonus,
@@ -99,10 +111,22 @@ export function createStaff(
   const moraleRoll = nextInt(rng, STAFF_START_MORALE[0], STAFF_START_MORALE[1]);
   rng = moraleRoll.rngState;
 
+  // Recruitment advertises where the work is, so a little under half of any unit knows the
+  // department's own business and the rest came from somewhere else in the service.
+  const ownField = nextChance(rng, SPECIALIST_HIRE_CHANCE);
+  rng = ownField.rngState;
+  const fieldPick = pick(rng, DEPARTMENT_IDS);
+  rng = fieldPick.rngState;
+  const specialism = ownField.value
+    ? state.player.department
+    : (fieldPick.value ?? state.player.department);
+
   const staff: StaffMember = {
     id: `s${state.nextStaffUid}`,
     name: namePick.value ?? `Officer ${state.nextStaffUid}`,
     seniority,
+    xp: 0,
+    specialism,
     // Potential arrives cheaper and keener; experience arrives able and settled.
     skill: clamp(skillRoll.value + hiringSkillDelta(state)),
     morale: clamp(moraleRoll.value + hiringMoraleDelta(state) + arrivalMoraleBonus(state)),
@@ -191,14 +215,27 @@ export function setupTeamForPost(
   // The people you brought fill establishment slots, so a move with two in tow arrives with two
   // fewer strangers rather than with a unit two over headcount.
   for (const seniority of shape.slice(kept.length)) {
-    const made = createStaff(next, registry, seniority);
-    next = made.state;
+    /*
+     * `createStaff` avoids names already in `state.staff`, so the unit being built has to be
+     * visible to it as it grows. Passing the un-updated state hired the same person twice —
+     * harmless when a name was only a label, and not harmless now that it decides a face and a
+     * temperament: a unit could contain two identical officers with the same portrait.
+     */
+    const made = createStaff({ ...next, staff }, registry, seniority);
+    next = { ...made.state, staff: next.staff };
 
     // You are new; they are not. An inherited unit has history, and showing everyone at nought
     // months makes it read as a team that was assembled for you this morning.
     const tenure = nextInt(next.rngState, 4, 60);
     next = { ...next, rngState: tenure.rngState };
-    staff.push({ ...made.staff, monthsInPost: tenure.value });
+    // And they have been carrying files that whole time, not sitting still — roughly half those
+    // months, since nobody is handed something every single month. Without this an inherited unit
+    // reads "43 months in post, no experience", which is a contradiction on the face of the card.
+    staff.push({
+      ...made.staff,
+      monthsInPost: tenure.value,
+      xp: Math.floor(tenure.value / 2),
+    });
   }
 
   const brought =
@@ -258,7 +295,9 @@ export function staffOutput(staff: StaffMember): number {
 
 /** The effective ability behind a delegated file, used in place of your own form. */
 export function delegatedQualityBase(staff: StaffMember): number {
-  return staff.skill * 0.75 + staff.morale * 0.25;
+  // Meticulous work is better work and quick work is not — the other half of the trade their
+  // output factor makes, so neither trait is simply the good one.
+  return staff.skill * 0.75 + staff.morale * 0.25 + traitQualityDelta(staff);
 }
 
 /* --------------------------------------------------------- monthly cycle */
@@ -295,7 +334,13 @@ export function resolveStaffMonth(
 
       // Whichever way the office has decided pressure flows, it lands on them every month — in
       // the opposite direction to the way it lands on you.
-      morale += STAFF_MORALE_DRIFT + moraleDriftReduction(state) + hoursMoraleDelta(state);
+      morale +=
+        STAFF_MORALE_DRIFT +
+        moraleDriftReduction(state) +
+        hoursMoraleDelta(state) +
+        // Some people hold their level and some are always half out of the door; and somebody
+        // who is good with the room lifts everybody in it except themselves.
+        traitMoraleDrift(member);
       if (coached.has(member.id)) {
         skill += COACHING_SKILL_GAIN + coachingSkillBonus(state);
         morale += COACHING_MORALE_GAIN;
@@ -305,9 +350,28 @@ export function resolveStaffMonth(
 
       // A slow drip of learning by doing.
       const monthsInPost = member.monthsInPost + 1;
-      if (monthsInPost % 12 === 0) skill += STAFF_SKILL_DRIFT_PER_YEAR;
+      if (monthsInPost % 12 === 0) skill += STAFF_SKILL_DRIFT_PER_YEAR + traitSkillGrowth(member);
 
-      return { ...member, skill: clamp(skill), morale: clamp(morale), monthsInPost };
+      /*
+       * Experience is earned by carrying work, not by being on the payroll.
+       *
+       * Deliberately not `monthsInPost`: somebody nobody ever hands a file to sits at the same
+       * desk for nine years and learns nothing, which is both true to life and the thing that
+       * makes delegation an investment rather than only a cost. Levelling pays out in skill, so
+       * it lands on the bar the roster already draws instead of needing a new one.
+       */
+      const carrying = state.tasks.some((task) => task.assignedTo === member.id);
+      const xp = member.xp + (carrying ? 1 : 0);
+      if (carrying && xp % XP_PER_LEVEL === 0 && staffLevel({ ...member, xp }) <= MAX_STAFF_LEVEL) {
+        skill += STAFF_LEVEL_SKILL_GAIN;
+      }
+
+      // Somebody good with the room does not stop the slide, but does stop it becoming a
+      // resignation — so the floor is applied last, after everything that pushed morale down.
+      const floor = diplomatFloor(state.staff, member);
+      const held = Math.max(clamp(morale), Math.min(floor, member.morale));
+
+      return { ...member, skill: clamp(skill), morale: held, monthsInPost, xp };
     }),
   };
 

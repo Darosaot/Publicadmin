@@ -43,6 +43,7 @@ import {
   emptyAllocation,
   resolveTurn,
 } from '../../src/engine/turn';
+import { specialismFactor, staffLevel } from '../../src/engine/people';
 import { canTakePerk, perkCost, takePerk, takenPerks } from '../../src/engine/perks';
 import type {
   Allocation,
@@ -51,6 +52,7 @@ import type {
   EndingId,
   GameState,
   PerkBranch,
+  StaffMember,
   TrackId,
 } from '../../src/engine/types';
 
@@ -84,6 +86,19 @@ export interface RunResult {
    * measuring promotion velocity three times and reporting the people branch as worthless.
    */
   meanUnitMorale: number;
+  /**
+   * The highest level anybody in the unit reached, and how often a file went to somebody whose
+   * field it was.
+   *
+   * Both are counted *during* the run because neither survives to the end of one: a career's
+   * final unit was hired at its last post change, so everybody in it is new and unblooded, and
+   * the board in the final state has been refilled with nothing assigned yet. Measuring either at
+   * `finalState` reads zero however well the mechanic works — which is exactly what the first
+   * version of these guardrails did.
+   */
+  peakStaffLevel: number;
+  specialistMatches: number;
+  delegationsMade: number;
   initiativesCompleted: number;
   initiativesLapsed: number;
 }
@@ -149,6 +164,12 @@ export interface CareerOptions {
   usePerks?: boolean;
   /** Which column the bot spends down. Left undefined it takes the cheapest thing available. */
   perkBranch?: PerkBranch;
+  /**
+   * Whether the bot hands a file to whoever is best at *that* file, or simply to whoever is
+   * strongest. Off is the A side: the policy as it was before people had specialisms, which is
+   * the only honest baseline for "does matching actually match".
+   */
+  matchSpecialisms?: boolean;
 }
 
 const REST_THRESHOLD = 62;
@@ -167,6 +188,7 @@ function planAllocation(
   game: GameState,
   strategy: Strategy,
   useInitiatives: boolean,
+  matchSpecialisms = true,
 ): Allocation {
   const allocation: Allocation = emptyAllocation();
 
@@ -197,12 +219,31 @@ function planAllocation(
       budget -= RECRUITING_EFFORT_COST;
     }
 
-    // Hand out the files, strongest people onto the tightest deadlines.
+    /*
+     * Hand out the files: tightest deadline first, and to whoever is actually best at *that* file.
+     *
+     * The old policy sorted by raw output and paired the lists off, which ignored specialisms
+     * entirely — so the thirty per cent a procurement officer brings to a procurement file only
+     * ever landed by accident, and the sweep would have reported the mechanic as worthless while
+     * any human player was using it deliberately.
+     */
     const byOutput = [...game.staff].sort((a, b) => staffOutput(b) - staffOutput(a));
     const byDeadline = [...game.tasks].sort((a, b) => a.deadlineTurn - b.deadlineTurn);
-    for (let i = 0; i < byOutput.length && i < byDeadline.length; i += 1) {
+    const handed = new Set<string>();
+
+    for (const task of byDeadline) {
       if (budget < DELEGATION_EFFORT_COST) break;
-      allocation.delegations[byDeadline[i]!.uid] = byOutput[i]!.id;
+
+      const template = registry.tasks[task.templateId];
+      const fit = (member: StaffMember) =>
+        matchSpecialisms && template ? specialismFactor(member, template) : 1;
+      const best = byOutput
+        .filter((member) => !handed.has(member.id))
+        .sort((a, b) => staffOutput(b) * fit(b) - staffOutput(a) * fit(a))[0];
+
+      if (!best) break;
+      allocation.delegations[task.uid] = best.id;
+      handed.add(best.id);
       budget -= DELEGATION_EFFORT_COST;
     }
 
@@ -210,7 +251,7 @@ function planAllocation(
     // month undivided; a senior can take a second thing, at half speed on each, which is the
     // trade `DELEGATION_CAPACITY` exists to offer.
     if (useInitiatives && game.initiatives.length > 0 && budget >= DELEGATION_EFFORT_COST) {
-      const spare = byOutput.filter((s) => !Object.values(allocation.delegations).includes(s.id));
+      const spare = byOutput.filter((s) => !handed.has(s.id));
       const carrier = spare[0] ?? byOutput.find((s) => s.seniority === 'senior');
       const live = game.initiatives[0];
       if (carrier && live) {
@@ -382,6 +423,7 @@ export function playCareer(options: CareerOptions): RunResult {
     useDirectives = true,
     usePerks = true,
     perkBranch,
+    matchSpecialisms = true,
   } = options;
 
   let game = createGame({ name: 'Bot', department, seed }, registry);
@@ -415,6 +457,9 @@ export function playCareer(options: CareerOptions): RunResult {
   let perksTaken = 0;
   let moraleSum = 0;
   let moraleMonths = 0;
+  let peakStaffLevel = 1;
+  let specialistMatches = 0;
+  let delegationsMade = 0;
   let initiativesCompleted = 0;
   let initiativesLapsed = 0;
   let guard = 0;
@@ -496,7 +541,20 @@ export function playCareer(options: CareerOptions): RunResult {
           perksTaken = takenPerks(game, registry).length;
         }
 
-        game = resolveTurn(game, registry, planAllocation(game, strategy, useInitiatives));
+        const plan = planAllocation(game, strategy, useInitiatives, matchSpecialisms);
+        for (const [taskUid, staffId] of Object.entries(plan.delegations)) {
+          const member = game.staff.find((s) => s.id === staffId);
+          const task = game.tasks.find((t) => t.uid === taskUid);
+          const template = task ? registry.tasks[task.templateId] : undefined;
+          if (!member || !template) continue;
+          delegationsMade += 1;
+          if (specialismFactor(member, template) > 1) specialistMatches += 1;
+        }
+
+        game = resolveTurn(game, registry, plan);
+        for (const member of game.staff) {
+          peakStaffLevel = Math.max(peakStaffLevel, staffLevel(member));
+        }
         if (game.staff.length > 0) {
           moraleSum += averageMorale(game);
           moraleMonths += 1;
@@ -557,6 +615,9 @@ export function playCareer(options: CareerOptions): RunResult {
     initiativesStarted,
     perksTaken,
     meanUnitMorale: moraleMonths > 0 ? moraleSum / moraleMonths : 0,
+    peakStaffLevel,
+    specialistMatches,
+    delegationsMade,
     initiativesCompleted,
     initiativesLapsed,
   };
@@ -604,6 +665,9 @@ export function summarise(results: RunResult[]) {
     meanInitiativesStarted: mean((r) => r.initiativesStarted),
     meanPerksTaken: mean((r) => r.perksTaken),
     meanUnitMorale: mean((r) => r.meanUnitMorale),
+    meanPeakStaffLevel: mean((r) => r.peakStaffLevel),
+    totalSpecialistMatches: results.reduce((n, r) => n + r.specialistMatches, 0),
+    totalDelegations: results.reduce((n, r) => n + r.delegationsMade, 0),
     meanInitiativesCompleted: mean((r) => r.initiativesCompleted),
     totalInitiativesLapsed: results.reduce((n, r) => n + r.initiativesLapsed, 0),
     completionRate: mean((r) =>

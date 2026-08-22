@@ -13,6 +13,7 @@ import { discretionarySpend } from '../../engine/turn';
 import { SENIORITIES, type GameState, type Seniority, type StaffMember } from '../../engine/types';
 import { useT } from '../../i18n';
 import { useGame } from '../../state/GameProvider';
+import { levelProgress, specialismOf, staffLevel, traitOf } from '../../engine/people';
 import { Portrait } from '../components/Portrait';
 import { StatsBar } from '../components/StatsBar';
 import { GameTabs } from '../components/GameTabs';
@@ -250,15 +251,31 @@ function StaffCard({
   const { dispatch } = useGame();
 
   const moraleTone = member.morale < 30 ? 'bad' : member.morale < 55 ? 'warn' : 'good';
+  const level = staffLevel(member);
+  const trait = traitOf(member);
+  const specialism = specialismOf(member);
+  const progress = levelProgress(member);
 
   return (
     <article className={`staff staff--${moraleTone}`}>
       <div className="staff__head">
         <Portrait name={member.name} size={48} />
         <div className="staff__ident">
-          <h3 className="staff__name">{member.name}</h3>
+          <h3 className="staff__name">
+            {member.name} <span className="staff__level">{t('team.level', { level })}</span>
+          </h3>
           <p className="staff__grade">
             {t(`team.grade.${member.seniority}`)} · {formatSalary(member.salary)}
+          </p>
+          {/* Who they are, rather than three more numbers. The specialism reuses the department
+              names the game already has, so it costs no new translation. */}
+          <p className="staff__aptitude">
+            <span className="staff__trait" title={t(`staff.trait.${trait}.help`)}>
+              {t(`staff.trait.${trait}`)}
+            </span>{' '}
+            <span className="muted">
+              {t('team.specialism', { field: t(`dept.${specialism}.name`) })}
+            </span>
           </p>
         </div>
         <span className="staff__months">
@@ -267,6 +284,14 @@ function StaffCard({
       </div>
 
       <div className="staff__bars">
+        {/* Experience is the one thing about a person that actually changes, so it gets a bar
+            that visibly fills rather than a number nobody watches. */}
+        <StaffBar
+          label={t('team.experience')}
+          value={(progress.current / progress.needed) * 100}
+          display={`${progress.current}/${progress.needed}`}
+          kind="xp"
+        />
         <StaffBar label={t('team.skill')} value={member.skill} kind="skill" />
         <StaffBar label={t('team.morale')} value={member.morale} kind={moraleTone} />
       </div>
@@ -303,12 +328,23 @@ function StaffCard({
   );
 }
 
-function StaffBar({ label, value, kind }: { label: string; value: number; kind: string }) {
+function StaffBar({
+  label,
+  value,
+  kind,
+  display,
+}: {
+  label: string;
+  value: number;
+  kind: string;
+  /** What to print beside the label, when the bar's fill is not the number a player wants. */
+  display?: string;
+}) {
   return (
     <div className="staffbar">
       <div className="staffbar__head">
         <span>{label}</span>
-        <strong>{value}</strong>
+        <strong>{display ?? value}</strong>
       </div>
       <div className="staffbar__track">
         <div className={`staffbar__fill staffbar__fill--${kind}`} style={{ width: `${value}%` }} />

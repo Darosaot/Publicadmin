@@ -36,6 +36,8 @@ function person(name: string, overrides: Partial<StaffMember> = {}): StaffMember
     id: name,
     name,
     seniority: 'officer',
+    xp: 0,
+    specialism: 'legal',
     skill: 55,
     morale: 60,
     salary: 2600,

@@ -236,6 +236,22 @@ export interface StaffMember {
   /** Monthly cost to the unit budget. */
   salary: number;
   monthsInPost: number;
+  /**
+   * Months spent actually carrying work, which is not the same as months in post.
+   *
+   * Somebody nobody ever hands a file to sits at the same desk for nine years and learns nothing.
+   */
+  xp: number;
+  /**
+   * The field they are actually good at.
+   *
+   * Stored rather than read off the name, unlike their trait and their face, and for one reason:
+   * hiring is *biased* toward the department you work in. Derived uniformly across seven
+   * departments, a unit of four almost never contained a specialist for its own board and the
+   * bonus fired on eight per cent of files — a decoration rather than a decision. Biasing it
+   * needs the roll, and the roll has to be remembered.
+   */
+  specialism: DepartmentId;
 }
 
 /** A recruitment in progress. Posts take months to fill, as they do. */

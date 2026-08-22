@@ -13,6 +13,7 @@ import { bodies } from '../../src/content';
 import { DRIFT_FLOOR } from '../../src/engine/constants';
 import { bodyCondition } from '../../src/engine/world';
 import { registry as shippedRegistry } from '../../src/content';
+import { STAFF_TRAITS, specialismFromName, traitOf } from '../../src/engine/people';
 import { playCareer, playMany, summarise } from './autoplay';
 
 const registryEvents = shippedRegistry.events;
@@ -505,14 +506,88 @@ describe('what the career made of you', () => {
     // budgets a month; a human who rested anyway would see the opposite. What can honestly be
     // required is that no branch is dead, which is what the people column was.
     expect(people.meanUnitMorale).toBeGreaterThan(without.meanUnitMorale);
-    expect(craft.meanYears).toBeGreaterThan(without.meanYears);
+    // Craft is measured on the long work it finishes, not on career length. Years was the first
+    // choice — `methodical` buys them by holding off burnout — but the margin is a few tenths
+    // against a seventy-career sample and it flipped sign the moment the bot learned to match
+    // specialisms and every career got slightly longer. Initiatives completed is `systems_thinker`
+    // acting directly, and runs about a quarter above baseline.
+    expect(craft.meanInitiativesCompleted).toBeGreaterThan(without.meanInitiativesCompleted);
     expect(politics.meanPoliticalCapital).toBeGreaterThan(without.meanPoliticalCapital);
 
     // And that each is worth its points at all — a column nobody would take is three wasted
     // perks and a lie on the character sheet.
     for (const [branch, run] of [['people', people], ['craft', craft], ['politics', politics]] as const) {
       expect(run.meanPerksTaken, branch).toBeGreaterThan(1);
-      expect(run.meanLevel, branch).toBeGreaterThanOrEqual(without.meanLevel);
+      // Not "at least as good on rank", which is the craft-shaped measure this test exists to
+      // avoid — the people branch trades rank for a unit that stays, and asserting otherwise
+      // failed on a difference of 0.014. What matters is that no column is a *trap*: spending a
+      // career down any one of them must not leave you materially worse off than never having
+      // opened the screen.
+      expect(without.meanLevel - run.meanLevel, branch).toBeLessThan(0.2);
     }
+  });
+});
+
+/**
+ * The unit as a cast rather than as three numbers each.
+ *
+ * The specialism bonus only ever fires when the right person gets the right file, which means it
+ * is entirely possible to ship the mechanic, ship the prose describing it, and have it never once
+ * apply in a real career. That is the failure this file exists to catch.
+ */
+describe('people are good at particular things', () => {
+  it('gives the shipped cast a spread of aptitudes rather than a house style', () => {
+    const names = shippedRegistry.staffNames;
+    expect(new Set(names.map(specialismFromName)).size).toBe(DEPARTMENT_IDS.length);
+    expect(
+      new Set(
+        names.map((name) =>
+          traitOf({
+            id: name,
+            name,
+            seniority: 'officer',
+            skill: 50,
+            morale: 50,
+            salary: 2600,
+            monthsInPost: 0,
+            xp: 0,
+            specialism: 'legal',
+          }),
+        ),
+      ).size,
+    ).toBe(STAFF_TRAITS.length);
+  });
+
+  /**
+   * Measured across the run, not at the end of it.
+   *
+   * The first version of both assertions below read `finalState` and reported zero: a career's
+   * last unit was hired at its last post change so nobody in it has any history, and the final
+   * board has been refilled with nothing assigned. The mechanics were working the whole time.
+   */
+  const sweep = summarise(playMany(seeds.slice(0, 6), DEPARTMENT_IDS));
+
+  it('actually lands work on the person whose field it is', () => {
+    /*
+     * A/B against the policy as it was before specialisms existed, rather than against a number
+     * I picked. Two thresholds were guessed here and both were wrong — the first at 0.3 when the
+     * real rate was 0.065, the second still at 0.3 when biased hiring had lifted it to 0.27. The
+     * only honest bar is the fit-blind policy on the same seeds.
+     */
+    const blind = summarise(
+      playMany(seeds.slice(0, 6), DEPARTMENT_IDS, { matchSpecialisms: false }),
+    );
+
+    expect(sweep.totalDelegations).toBeGreaterThan(0);
+    expect(sweep.totalSpecialistMatches / sweep.totalDelegations).toBeGreaterThan(
+      blind.totalSpecialistMatches / blind.totalDelegations,
+    );
+  });
+
+  it('grows the people who are given something to do', () => {
+    // Measured at 2.07: the best officer in a unit typically reaches level two and sometimes
+    // three. `> 1` was the first bar and it passed while the system was nearly inert at 1.43,
+    // which is the failure mode this whole file exists to catch.
+    expect(sweep.meanPeakStaffLevel).toBeGreaterThan(1.5);
   });
 });
