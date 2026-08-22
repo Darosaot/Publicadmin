@@ -102,69 +102,115 @@
 
 /* ---------- Type ---------- */
 
-.eyebrow,
+/*
+ * The pixel face is a *heading* face, and only that.
+ *
+ * v2.0 set every heading, tab, button, label and stat value in Press Start 2P, which was
+ * exhausting. The first reduction moved all of it to Pixelify Sans, which was much better and
+ * still wrong at the small end: at 12px its C and O are near-identical, so the "Cut it back"
+ * button on every file read as "Out it back". A control nobody can read is worse than a plain one.
+ *
+ * So the rule is size. Above about 19px a pixel face is characterful and instantly legible; below
+ * it, it is a puzzle. Headings get it. Everything a player has to read *quickly* — a button, a
+ * chip, a stat label, a number that matters — is plain, and takes its "chrome" feel from weight,
+ * letter-spacing and caps instead, which cost nothing to read.
+ *
+ * The look does not live in the font. It lives in the bevels, the cell-filled bars, the hard
+ * shadows and the portraits, none of which anybody has to decode.
+ */
+
 .panel__title,
 .section__title,
 .modal__title,
-.tab,
-.btn,
-.chipbtn,
-.stepper__btn,
-.stepper__value,
-.tag,
-.chip,
-.rung__status,
-.tree__tier-label,
-.title__heading,
 .ending__title,
-.statsbar__name,
-.meter__label,
-.meter__value {
+.title__heading,
+.perk__name,
+.org__who,
+.self__points {
   font-family: var(--f-display);
   letter-spacing: 0;
   text-transform: none;
 }
 
-/* Press Start 2P has no lowercase descender room and no italic; at prose sizes it would
-   wrap every heading onto four lines. Every display element is therefore stepped down. */
 .panel__title,
 .section__title,
 .modal__title {
   font-size: var(--fd-md);
-  line-height: 1.6;
+  line-height: 1.4;
 }
 
-.eyebrow,
-.rung__status,
-.tree__tier-label,
-.tag,
-.chip,
-.meter__label {
-  font-size: var(--fd-xs);
-  line-height: 1.8;
+/* A count sitting inside a heading is data, not a title, and inherits the pixel face if left
+   alone — "4 of 8 posts filled" was the least readable thing on the roster. */
+.team__count,
+.section__title .muted {
+  font-family: var(--f-sans);
+  font-size: var(--fs-sm);
+  font-weight: 600;
 }
 
-.btn,
-.tab,
-.chipbtn,
-.meter__value,
-.stepper__value {
-  font-size: var(--fd-sm);
-  line-height: 1.8;
-}
-
+/* The one place the 8x8 face stays: the game's own name, once, at a size that earns it. */
 .title__heading {
-  font-size: var(--fd-xl);
+  font-family: var(--f-title);
+  font-size: var(--fd-lg);
   line-height: 1.5;
 }
 
 .ending__title {
   font-size: var(--fd-lg);
+  line-height: 1.4;
+}
+
+/* Small chrome: plain face, and the character comes from case and spacing. */
+.eyebrow,
+.rung__status,
+.tree__tier-label,
+.tag,
+.chip,
+.meter__label,
+.task__crisis,
+.staff__level {
+  font-family: var(--f-sans);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   line-height: 1.5;
 }
 
-/* Prose stays in the readable face and gets more leading than a normal web body, because
-   pixel glyphs have no anti-aliased edge to help the eye find the next line. */
+.btn,
+.tab,
+.chipbtn,
+.stepper__value,
+.negotiate__btn,
+.staff__trait {
+  font-family: var(--f-sans);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+}
+
+/* Numbers carry meaning in a game about budgets, so they are plain, tabular and bold. */
+.meter__value,
+.meter__delta,
+.statsbar__salary,
+.task__progress-text,
+.staffbar__head strong {
+  font-family: var(--f-sans);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.meter__value {
+  font-size: var(--fs-sm);
+}
+
+.meter__delta {
+  font-size: var(--fs-xs);
+}
+
+/* Prose is in the plain face now, with ordinary leading — the extra was there to help the eye
+   find the next line of a pixel font, and there is no pixel font left in a paragraph. */
 .modal__prose,
 .task__desc,
 .initiative__desc,
@@ -174,7 +220,7 @@
 .epilogue__list,
 .logpanel__list {
   font-family: var(--f-sans);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 /* ---------- Buttons press in ---------- */
@@ -265,36 +311,19 @@ canvas {
   flex-wrap: wrap;
 }
 
-.meter__label {
-  font-size: var(--fd-xs);
-  line-height: 1.7;
-  font-weight: 400;
-}
-
 .meter__value {
-  font-size: var(--fd-sm);
   white-space: nowrap;
 }
 
-.meter__delta {
-  font-family: var(--f-display);
-  font-size: var(--fd-xs);
-}
-
-/* The player's name is the one piece of display type that takes a proper name of unknown
-   length, so it gets the display face at a size that survives "Bartholomew Featherstone". */
+/* The player's own name, which is a proper noun of unknown length and has to survive
+   "Bartholomew Featherstone". Plain, because a name is the last thing to render as a puzzle. */
 .statsbar__name {
-  font-size: var(--fd-lg);
-  line-height: 1.4;
-  letter-spacing: 0;
+  font-family: var(--f-sans);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
   overflow-wrap: anywhere;
-}
-
-/* Numbers in the display face are already tabular; the v1 declaration is a no-op that
-   would silently pick a fallback face if it ever applied. */
-.statsbar__salary,
-.meter__value {
-  font-variant-numeric: normal;
 }
 
 /* Bars need room for their own bevel. v1's tracks were 5–8px tall hairlines, and a 4px
@@ -413,9 +442,8 @@ canvas {
 }
 
 .perk__name {
-  font-family: var(--f-display);
-  font-size: var(--fd-sm);
-  line-height: 1.7;
+  font-size: var(--fd-base);
+  line-height: 1.4;
 }
 
 .perk__desc {
@@ -426,7 +454,6 @@ canvas {
 }
 
 .perk__state {
-  font-size: var(--fd-xs);
   color: var(--c-text-faint);
 }
 
@@ -447,9 +474,8 @@ canvas {
 }
 
 .self__points {
-  font-family: var(--f-display);
   font-size: var(--fd-md);
-  line-height: 1.6;
+  line-height: 1.4;
   color: var(--c-accent);
 }
 
@@ -462,8 +488,6 @@ canvas {
 /* ---------- People as people ---------- */
 
 .staff__level {
-  font-family: var(--f-display);
-  font-size: var(--fd-xs);
   color: var(--c-accent);
   white-space: nowrap;
 }
@@ -503,9 +527,8 @@ canvas {
 }
 
 .org__who {
-  font-family: var(--f-display);
-  font-size: var(--fd-sm);
-  line-height: 1.7;
+  font-size: var(--fd-base);
+  line-height: 1.4;
   color: var(--c-accent);
 }
 
@@ -519,7 +542,7 @@ canvas {
 }
 
 .negotiate__btn {
-  font-size: var(--fd-xs);
+  font-size: var(--fs-xs);
   padding: var(--s-1) var(--s-2);
 }
 
@@ -550,6 +573,4 @@ canvas {
 
 .task__crisis {
   color: var(--c-bad);
-  font-size: var(--fd-xs);
-  line-height: 1.8;
 }
