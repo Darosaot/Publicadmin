@@ -43,12 +43,18 @@ import {
   emptyAllocation,
   resolveTurn,
 } from '../../src/engine/turn';
+import { extendDeadline, scopeDown } from '../../src/engine/negotiate';
+import { appointDeputy, canBeDeputy, deputyOf } from '../../src/engine/org';
+import { specialismFactor, staffLevel } from '../../src/engine/people';
+import { canTakePerk, perkCost, takePerk, takenPerks } from '../../src/engine/perks';
 import type {
   Allocation,
   Choice,
   DepartmentId,
   EndingId,
   GameState,
+  PerkBranch,
+  StaffMember,
   TrackId,
 } from '../../src/engine/types';
 
@@ -72,6 +78,33 @@ export interface RunResult {
   tasksFailed: number;
   /** The new verb, counted so a guardrail can tell whether the bot ever actually used it. */
   initiativesStarted: number;
+  perksTaken: number;
+  /**
+   * Average unit morale across every month the career had a unit.
+   *
+   * Recorded because the people branch of the perk tree pays in morale and retention, and none of
+   * the other metrics can see it — a career's final morale is often zero simply because the last
+   * post had no unit. Without this the "is every branch worth taking?" guardrail would have been
+   * measuring promotion velocity three times and reporting the people branch as worthless.
+   */
+  meanUnitMorale: number;
+  /**
+   * The highest level anybody in the unit reached, and how often a file went to somebody whose
+   * field it was.
+   *
+   * Both are counted *during* the run because neither survives to the end of one: a career's
+   * final unit was hired at its last post change, so everybody in it is new and unblooded, and
+   * the board in the final state has been refilled with nothing assigned yet. Measuring either at
+   * `finalState` reads zero however well the mechanic works — which is exactly what the first
+   * version of these guardrails did.
+   */
+  peakStaffLevel: number;
+  /** Months of the career spent with somebody running the board. */
+  monthsWithDeputy: number;
+  /** How often the bot argued about a file rather than simply missing it. */
+  negotiations: number;
+  specialistMatches: number;
+  delegationsMade: number;
   initiativesCompleted: number;
   initiativesLapsed: number;
 }
@@ -83,6 +116,31 @@ export interface RunResult {
  * immediate reason is `useInitiatives`: the balance guardrail has to run the *same seeds* with the
  * feature on and off, and a boolean in seventh position is unreadable at every call site.
  */
+
+/**
+ * Spend whatever points are in hand, cheapest affordable perk first.
+ *
+ * Cheapest-first rather than deepest-first on purpose. A bot that saves for capstones spends most
+ * of a career holding unspent points, which measures patience rather than the perk tree — and the
+ * A/B would then report that perks barely matter because the bot never had any.
+ */
+function spendPerkPoints(state: GameState, branch?: PerkBranch): GameState {
+  let game = state;
+
+  for (let guard = 0; guard < registry.perks.length; guard += 1) {
+    const affordable = registry.perks
+      .filter((perk) => branch === undefined || perk.branch === branch)
+      .filter((perk) => canTakePerk(game, registry, perk.id))
+      .sort((a, b) => perkCost(a) - perkCost(b));
+
+    const next = affordable[0];
+    if (!next) break;
+    game = takePerk(game, registry, next.id);
+  }
+
+  return game;
+}
+
 export interface CareerOptions {
   seed: number;
   department: DepartmentId;
@@ -102,9 +160,42 @@ export interface CareerOptions {
   useInitiatives?: boolean;
   /** Likewise for the house rules. */
   useDirectives?: boolean;
+  /**
+   * And for perks, which are the riskiest of the three to measure.
+   *
+   * Directives are symmetrical trades and initiatives cost the months they pay for. A perk is a
+   * pure upgrade with no downside at all, so the A/B on identical seeds is the only thing
+   * standing between "the career feels better" and "every career is now two tiers longer".
+   */
+  usePerks?: boolean;
+  /** Which column the bot spends down. Left undefined it takes the cheapest thing available. */
+  perkBranch?: PerkBranch;
+  /**
+   * Whether the bot hands a file to whoever is best at *that* file, or simply to whoever is
+   * strongest. Off is the A side: the policy as it was before people had specialisms, which is
+   * the only honest baseline for "does matching actually match".
+   */
+  matchSpecialisms?: boolean;
+  /**
+   * Whether the bot names a second once its unit is big enough to want one.
+   *
+   * Off is the A side: every file handed over individually, which is how the whole senior half of
+   * the career played before v2.3.
+   */
+  useDeputy?: boolean;
+  /**
+   * Whether the bot argues about files it is going to miss, rather than simply missing them.
+   *
+   * Off is the A side: the board as an immovable fact, which is how every version of this game
+   * before v2.4 worked.
+   */
+  useNegotiation?: boolean;
 }
 
 const REST_THRESHOLD = 62;
+
+/** Favours the bot will not spend on files, because promotions are keyed off the same stat. */
+const NEGOTIATION_RESERVE = 45;
 
 /**
  * How the bot plays.
@@ -120,6 +211,7 @@ function planAllocation(
   game: GameState,
   strategy: Strategy,
   useInitiatives: boolean,
+  matchSpecialisms = true,
 ): Allocation {
   const allocation: Allocation = emptyAllocation();
 
@@ -150,12 +242,31 @@ function planAllocation(
       budget -= RECRUITING_EFFORT_COST;
     }
 
-    // Hand out the files, strongest people onto the tightest deadlines.
+    /*
+     * Hand out the files: tightest deadline first, and to whoever is actually best at *that* file.
+     *
+     * The old policy sorted by raw output and paired the lists off, which ignored specialisms
+     * entirely — so the thirty per cent a procurement officer brings to a procurement file only
+     * ever landed by accident, and the sweep would have reported the mechanic as worthless while
+     * any human player was using it deliberately.
+     */
     const byOutput = [...game.staff].sort((a, b) => staffOutput(b) - staffOutput(a));
     const byDeadline = [...game.tasks].sort((a, b) => a.deadlineTurn - b.deadlineTurn);
-    for (let i = 0; i < byOutput.length && i < byDeadline.length; i += 1) {
+    const handed = new Set<string>();
+
+    for (const task of byDeadline) {
       if (budget < DELEGATION_EFFORT_COST) break;
-      allocation.delegations[byDeadline[i]!.uid] = byOutput[i]!.id;
+
+      const template = registry.tasks[task.templateId];
+      const fit = (member: StaffMember) =>
+        matchSpecialisms && template ? specialismFactor(member, template) : 1;
+      const best = byOutput
+        .filter((member) => !handed.has(member.id))
+        .sort((a, b) => staffOutput(b) * fit(b) - staffOutput(a) * fit(a))[0];
+
+      if (!best) break;
+      allocation.delegations[task.uid] = best.id;
+      handed.add(best.id);
       budget -= DELEGATION_EFFORT_COST;
     }
 
@@ -163,7 +274,7 @@ function planAllocation(
     // month undivided; a senior can take a second thing, at half speed on each, which is the
     // trade `DELEGATION_CAPACITY` exists to offer.
     if (useInitiatives && game.initiatives.length > 0 && budget >= DELEGATION_EFFORT_COST) {
-      const spare = byOutput.filter((s) => !Object.values(allocation.delegations).includes(s.id));
+      const spare = byOutput.filter((s) => !handed.has(s.id));
       const carrier = spare[0] ?? byOutput.find((s) => s.seniority === 'senior');
       const live = game.initiatives[0];
       if (carrier && live) {
@@ -333,6 +444,11 @@ export function playCareer(options: CareerOptions): RunResult {
     preferredTrack,
     useInitiatives = true,
     useDirectives = true,
+    usePerks = true,
+    perkBranch,
+    matchSpecialisms = true,
+    useDeputy = true,
+    useNegotiation = true,
   } = options;
 
   let game = createGame({ name: 'Bot', department, seed }, registry);
@@ -363,6 +479,14 @@ export function playCareer(options: CareerOptions): RunResult {
   let tasksCompleted = 0;
   let tasksFailed = 0;
   let initiativesStarted = 0;
+  let perksTaken = 0;
+  let moraleSum = 0;
+  let moraleMonths = 0;
+  let peakStaffLevel = 1;
+  let monthsWithDeputy = 0;
+  let negotiations = 0;
+  let specialistMatches = 0;
+  let delegationsMade = 0;
   let initiativesCompleted = 0;
   let initiativesLapsed = 0;
   let guard = 0;
@@ -436,7 +560,72 @@ export function playCareer(options: CareerOptions): RunResult {
           }
         }
 
-        game = resolveTurn(game, registry, planAllocation(game, strategy, useInitiatives));
+        // Spent before the month resolves, so a perk taken this cycle is felt in this cycle —
+        // which is what a player clicking the button would see, and therefore what the A/B has
+        // to measure.
+        /*
+         * Name a second once there are enough people to be worth it.
+         *
+         * Below four the arithmetic is against you: you lose that person's own output to save a
+         * handover or two, and a small unit needs the output more than it needs the structure.
+         * That threshold is the whole decision the feature offers, so the bot has to make it the
+         * way a player would rather than appointing somebody the moment it can.
+         */
+        /*
+         * Argue about what is about to be missed.
+         *
+         * Only for files that genuinely cannot be finished — a bot that scopes everything is
+         * measuring nothing but the cost of the verb — and only while there are favours to spare,
+         * because political capital is also what promotions are keyed off. Cutting a file back is
+         * tried before moving its date: it is cheaper, and the ceiling it costs is only worth
+         * anything on a file that was going to be finished well, which this one was not.
+         */
+        if (useNegotiation && game.stats.politicalCapital > NEGOTIATION_RESERVE) {
+          const doomed = game.tasks.filter(
+            (task) =>
+              task.deadlineTurn - game.turn <= 1 &&
+              task.required - task.progress > effortAvailable(game, registry, false) / 2,
+          );
+          for (const task of doomed) {
+            if (game.stats.politicalCapital <= NEGOTIATION_RESERVE) break;
+            const before = game;
+            game = scopeDown(game, registry, task.uid);
+            if (game === before) game = extendDeadline(game, registry, task.uid);
+            if (game !== before) negotiations += 1;
+          }
+        }
+
+        if (useDeputy && !deputyOf(game) && game.staff.length >= 4) {
+          const best = [...game.staff]
+            .filter(canBeDeputy)
+            .sort((a, b) => b.skill - a.skill)[0];
+          if (best) game = appointDeputy(game, best.id);
+        }
+
+        if (usePerks) {
+          game = spendPerkPoints(game, perkBranch);
+          perksTaken = takenPerks(game, registry).length;
+        }
+
+        const plan = planAllocation(game, strategy, useInitiatives, matchSpecialisms);
+        for (const [taskUid, staffId] of Object.entries(plan.delegations)) {
+          const member = game.staff.find((s) => s.id === staffId);
+          const task = game.tasks.find((t) => t.uid === taskUid);
+          const template = task ? registry.tasks[task.templateId] : undefined;
+          if (!member || !template) continue;
+          delegationsMade += 1;
+          if (specialismFactor(member, template) > 1) specialistMatches += 1;
+        }
+
+        game = resolveTurn(game, registry, plan);
+        if (deputyOf(game)) monthsWithDeputy += 1;
+        for (const member of game.staff) {
+          peakStaffLevel = Math.max(peakStaffLevel, staffLevel(member));
+        }
+        if (game.staff.length > 0) {
+          moraleSum += averageMorale(game);
+          moraleMonths += 1;
+        }
         tasksCompleted += game.lastReport?.completed.length ?? 0;
         tasksFailed += game.lastReport?.failed.length ?? 0;
         initiativesCompleted += game.lastReport?.initiativesCompleted?.length ?? 0;
@@ -491,6 +680,13 @@ export function playCareer(options: CareerOptions): RunResult {
     tasksCompleted,
     tasksFailed,
     initiativesStarted,
+    perksTaken,
+    meanUnitMorale: moraleMonths > 0 ? moraleSum / moraleMonths : 0,
+    peakStaffLevel,
+    monthsWithDeputy,
+    negotiations,
+    specialistMatches,
+    delegationsMade,
     initiativesCompleted,
     initiativesLapsed,
   };
@@ -536,6 +732,13 @@ export function summarise(results: RunResult[]) {
     meanPoliticalCapital: mean((r) => r.stats.politicalCapital),
     meanSalary: mean((r) => r.salary),
     meanInitiativesStarted: mean((r) => r.initiativesStarted),
+    meanPerksTaken: mean((r) => r.perksTaken),
+    meanUnitMorale: mean((r) => r.meanUnitMorale),
+    meanPeakStaffLevel: mean((r) => r.peakStaffLevel),
+    meanMonthsWithDeputy: mean((r) => r.monthsWithDeputy),
+    meanNegotiations: mean((r) => r.negotiations),
+    totalSpecialistMatches: results.reduce((n, r) => n + r.specialistMatches, 0),
+    totalDelegations: results.reduce((n, r) => n + r.delegationsMade, 0),
     meanInitiativesCompleted: mean((r) => r.initiativesCompleted),
     totalInitiativesLapsed: results.reduce((n, r) => n + r.initiativesLapsed, 0),
     completionRate: mean((r) =>

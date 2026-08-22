@@ -6,7 +6,7 @@ export default defineConfig({
   base: './',
   plugins: [react()],
   test: {
-    include: ['tests/engine/**/*.test.ts'],
+    include: ['tests/{engine,ui}/**/*.test.ts'],
     environment: 'node',
     /**
      * The balance sweeps in `autoplay.test.ts` play tens of thousands of simulated months, and

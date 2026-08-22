@@ -17,7 +17,6 @@ import {
   AGENCY_TEMP_MAX,
   BASELINE_STRESS_PER_TURN,
   COACHING_EFFORT_COST,
-  DELEGATION_CAPACITY,
   DELEGATION_EFFORT_COST,
   LOG_LIMIT,
   NETWORK_PC_GAIN,
@@ -57,6 +56,21 @@ import {
   resolveInitiatives,
 } from './initiatives';
 import { driftWorld, learnLocalBodies } from './world';
+import {
+  baselineStressReduction,
+  delegationCostReduction,
+  networkingCapitalBonus,
+  politicalDecayReduction,
+  reputationDecayReduction,
+  restReliefBonus,
+} from './perks';
+import { capacityOf, specialismFactor, traitOutputFactor } from './people';
+import {
+  DEPUTY_OUTPUT_BONUS,
+  deputyAssignments,
+  deputyStressRelief,
+  isDeputy,
+} from './org';
 import {
   adjustStaffMorale,
   applyAssignments,
@@ -107,19 +121,31 @@ export function effortAvailable(
   return base + (overtime ? OVERTIME_POINTS : 0) + bought;
 }
 
+/**
+ * What one handover costs in oversight this month.
+ *
+ * State-dependent because the `delegator` perk reduces it, which is why `managementCost` and
+ * `allocationTotal` both take state now. They could not stay pure without the UI and the engine
+ * quietly disagreeing about how many points a month has — the exact silent failure that the
+ * initiative allocation channel was designed around.
+ */
+export function delegationCost(state: GameState): number {
+  return Math.max(1, DELEGATION_EFFORT_COST - delegationCostReduction(state));
+}
+
 /** The effort cost of the management half of a month. */
-export function managementCost(allocation: Allocation): number {
+export function managementCost(state: GameState, allocation: Allocation): number {
   return (
     (Object.keys(allocation.delegations).length +
       Object.keys(allocation.initiativeDelegations).length) *
-      DELEGATION_EFFORT_COST +
+      delegationCost(state) +
     allocation.coaching.length * COACHING_EFFORT_COST +
     allocation.oneToOnes.length * ONE_TO_ONE_EFFORT_COST +
     (allocation.recruiting ? RECRUITING_EFFORT_COST : 0)
   );
 }
 
-export function allocationTotal(allocation: Allocation): number {
+export function allocationTotal(state: GameState, allocation: Allocation): number {
   const taskPoints = Object.values(allocation.tasks).reduce((sum, n) => sum + Math.max(0, n), 0);
   // Initiative effort is ordinary desk work and counts here in full. Leaving it out would make
   // the UI over-report what is left while the engine silently truncated the difference — the two
@@ -133,7 +159,7 @@ export function allocationTotal(allocation: Allocation): number {
     initiativePoints +
     Math.max(0, allocation.rest) +
     Math.max(0, allocation.networking) +
-    managementCost(allocation)
+    managementCost(state, allocation)
   );
 }
 
@@ -187,18 +213,21 @@ export function normalizeAllocation(
     // Nobody may be handed more than they can carry. Enforced here, once, so that everything
     // downstream — assignment, output, quality — can trust the allocation it is given.
     const carrying = new Map<string, number>();
-    const capacityOf = (staffId: string) => {
+    const capacityFor = (staffId: string) => {
       const member = state.staff.find((s) => s.id === staffId);
-      return member ? DELEGATION_CAPACITY[member.seniority] : 0;
+      return member ? capacityOf(member) : 0;
     };
 
     for (const [taskUid, staffId] of Object.entries(allocation.delegations)) {
       if (!taskIds.has(taskUid) || !staffIds.has(staffId)) continue;
-      if ((carrying.get(staffId) ?? 0) >= capacityOf(staffId)) continue;
-      if (remaining < DELEGATION_EFFORT_COST) break;
+      // The other half of naming a deputy: they are running the board, not working it. Losing
+      // your best officer's own output is what the free handovers actually cost.
+      if (isDeputy(state, staffId)) continue;
+      if ((carrying.get(staffId) ?? 0) >= capacityFor(staffId)) continue;
+      if (remaining < delegationCost(state)) break;
       normalized.delegations[taskUid] = staffId;
       carrying.set(staffId, (carrying.get(staffId) ?? 0) + 1);
-      remaining -= DELEGATION_EFFORT_COST;
+      remaining -= delegationCost(state);
     }
     for (const staffId of allocation.coaching) {
       if (!staffIds.has(staffId) || normalized.coaching.includes(staffId)) continue;
@@ -216,11 +245,11 @@ export function normalizeAllocation(
     // it is the same person's month either way.
     for (const [templateId, staffId] of Object.entries(allocation.initiativeDelegations)) {
       if (!activeInitiativeIds.has(templateId) || !staffIds.has(staffId)) continue;
-      if ((carrying.get(staffId) ?? 0) >= capacityOf(staffId)) continue;
-      if (remaining < DELEGATION_EFFORT_COST) break;
+      if ((carrying.get(staffId) ?? 0) >= capacityFor(staffId)) continue;
+      if (remaining < delegationCost(state)) break;
       normalized.initiativeDelegations[templateId] = staffId;
       carrying.set(staffId, (carrying.get(staffId) ?? 0) + 1);
-      remaining -= DELEGATION_EFFORT_COST;
+      remaining -= delegationCost(state);
     }
     if (allocation.recruiting && state.hiring && remaining >= RECRUITING_EFFORT_COST) {
       normalized.recruiting = true;
@@ -283,6 +312,25 @@ export function resolveTurn(
 
   // Record who is carrying what before anyone does any work.
   next = applyAssignments(next, allocation);
+
+  /*
+   * And then the deputy picks up what is left.
+   *
+   * After your handovers, not instead of them: the files you chose to place go where you put
+   * them, and the deputy takes the next few by deadline with none of your month spent on it.
+   * That is the whole of what naming a second buys — the top of your month back — and it is why
+   * a directorate of eight now plays differently from a unit of three rather than just longer.
+   */
+  const deputyFiles = deputyAssignments(next, new Set(Object.keys(allocation.delegations)));
+  if (deputyFiles.length > 0 && next.deputyId) {
+    const runner = next.deputyId;
+    next = {
+      ...next,
+      tasks: next.tasks.map((task) =>
+        deputyFiles.includes(task.uid) ? { ...task, assignedTo: runner } : task,
+      ),
+    };
+  }
   next = applyInitiativeAssignments(next, allocation);
 
   // Your own effort onto the board.
@@ -312,7 +360,16 @@ export function resolveTurn(
       if (!member) return task;
 
       const share = Math.max(1, load.get(member.id) ?? 1);
-      const contribution = Math.max(1, Math.round(staffOutput(member) / share));
+      // Who they are, and what the file is: a procurement officer on a procurement file is a
+      // third more use than the same person on a housing one, and a quick worker gets more done
+      // than a meticulous one who is doing it better.
+      const template = registry.tasks[task.templateId];
+      const fit = template ? specialismFactor(member, template) : 1;
+      const running = isDeputy(next, member.id) ? DEPUTY_OUTPUT_BONUS : 1;
+      const contribution = Math.max(
+        1,
+        Math.round((staffOutput(member) * fit * traitOutputFactor(member) * running) / share),
+      );
       team.delegatedProgress.push({
         staffName: member.name,
         taskTemplateId: task.templateId,
@@ -410,12 +467,19 @@ export function resolveTurn(
   adjustStat(
     next.stats,
     'reputation',
-    -Math.round(next.stats.reputation * REPUTATION_DECAY_RATE),
+    // Institutional memory slows the fade rather than paying reputation, so it cannot be farmed
+    // and hands the bot no lump of promotion velocity in the month it is taken.
+    -Math.round(
+      next.stats.reputation * Math.max(0, REPUTATION_DECAY_RATE - reputationDecayReduction(next)),
+    ),
   );
   adjustStat(
     next.stats,
     'politicalCapital',
-    -Math.round(next.stats.politicalCapital * POLITICAL_CAPITAL_DECAY_RATE),
+    -Math.round(
+      next.stats.politicalCapital *
+        Math.max(0, POLITICAL_CAPITAL_DECAY_RATE - politicalDecayReduction(next)),
+    ),
   );
   adjustStat(
     next.stats,
@@ -427,14 +491,20 @@ export function resolveTurn(
   const stressDelta =
     BASELINE_STRESS_PER_TURN +
     (allocation.overtime ? OVERTIME_STRESS : 0) -
-    allocation.rest * REST_STRESS_RELIEF +
+    allocation.rest * (REST_STRESS_RELIEF + restReliefBonus(next)) -
+    baselineStressReduction(next) -
+    deputyStressRelief(next) +
     // An office where nobody works late is one point a month easier to survive; one that pushes
     // is one point harder. Small, permanent, and compounding over three hundred months.
     hoursStressDelta(next);
   adjustStat(next.stats, 'stress', stressDelta);
 
   if (allocation.networking > 0) {
-    adjustStat(next.stats, 'politicalCapital', allocation.networking * NETWORK_PC_GAIN);
+    adjustStat(
+      next.stats,
+      'politicalCapital',
+      allocation.networking * (NETWORK_PC_GAIN + networkingCapitalBonus(next)),
+    );
   }
 
   // The unit's month: attention paid, recruitment advanced, money spent, people lost.

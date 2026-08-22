@@ -11,6 +11,7 @@ import type {
   DepartmentId,
   GameEvent,
   InitiativeTemplate,
+  PerkTemplate,
   Post,
   TaskTemplate,
   WorldBody,
@@ -28,6 +29,8 @@ export interface ContentRegistry {
   bodies: WorldBody[];
   /** Undertakings the player may start, in menu order. */
   initiatives: InitiativeTemplate[];
+  /** The perk tree, in branch then tier order. */
+  perks: PerkTemplate[];
 }
 
 export function getPost(registry: ContentRegistry, id: string): Post {

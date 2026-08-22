@@ -1,6 +1,7 @@
 import { registry } from '../../content';
 import type { ActiveTask, StaffMember } from '../../engine/types';
 import { useT } from '../../i18n';
+import { negotiationCost, type NegotiationKind } from '../../engine/negotiate';
 import { EffortStepper } from './EffortStepper';
 
 interface TaskCardProps {
@@ -15,6 +16,9 @@ interface TaskCardProps {
   onDelegate?: (staffId: string | null) => void;
   /** Progress the assignee is expected to add this month, for the projection. */
   delegatedProgress?: number;
+  /** The player's own political capital, for pricing the three ways of pushing back. */
+  politicalCapital?: number;
+  onNegotiate?: (kind: NegotiationKind) => void;
 }
 
 export function TaskCard({
@@ -27,10 +31,13 @@ export function TaskCard({
   assignedTo,
   onDelegate,
   delegatedProgress = 0,
+  politicalCapital = 0,
+  onNegotiate,
 }: TaskCardProps) {
   const t = useT();
   const template = registry.tasks[task.templateId];
   const title = template ? t(template.titleKey) : task.templateId;
+  const crisis = template?.crisis === true;
 
   const remaining = Math.max(0, task.required - task.progress);
   const monthsLeft = task.deadlineTurn - turn;
@@ -53,12 +60,15 @@ export function TaskCard({
   const maxUseful = remaining + 4;
 
   return (
-    <article className={`task${willFinish ? ' task--will-finish' : ''}`}>
+    <article
+      className={`task${willFinish ? ' task--will-finish' : ''}${crisis ? ' task--crisis' : ''}`}
+    >
       <div className="task__head">
         <h3 className="task__title">{title}</h3>
         <span className={`chip chip--${urgency}`}>{deadlineLabel}</span>
       </div>
 
+      {crisis && <p className="task__crisis eyebrow">{t('task.crisis_label')}</p>}
       {template && <p className="task__desc">{t(template.descKey)}</p>}
 
       <div className="task__meta">
@@ -86,6 +96,35 @@ export function TaskCard({
           />
         )}
       </div>
+
+      {/* The three things a real official does with a file they cannot deliver as specified,
+          in ascending order of what it costs them. Priced in favours owed, because that is
+          exactly what getting a date moved spends. */}
+      {onNegotiate && (
+        <div className="negotiate">
+          {(['extend', 'scope', 'refuse'] as const).map((kind) => {
+            const cost = negotiationCost(task, kind);
+            // A crisis can be argued about, but not away: no declining and no cutting back.
+            const barred = crisis && kind !== 'extend';
+            const already =
+              (kind === 'extend' && task.extended) || (kind === 'scope' && task.scoped);
+            if (barred) return null;
+            return (
+              <button
+                key={kind}
+                type="button"
+                className={`chipbtn negotiate__btn negotiate__btn--${kind}`}
+                disabled={already || politicalCapital < cost}
+                title={t(`negotiate.${kind}.help`)}
+                onClick={() => onNegotiate(kind)}
+              >
+                {t(already ? `negotiate.${kind}.done` : `negotiate.${kind}`)}
+                {!already && <span className="chipbtn__cost">{cost}</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <div className="task__foot">
         {onDelegate && staff.length > 0 && (

@@ -1,109 +1,183 @@
 /* Design tokens: one place for colour, type and spacing.
-   Light palette on bare :root, dark override via prefers-color-scheme. */
+   
+   v2 is a pixel-art game, so three rules run through every value below:
+   
+   - **Nothing is round and nothing is blurred.** Radii are 0 and shadows are solid offset
+     blocks. A 14px radius or a 48px blur is the one thing that instantly reads as "web app"
+     rather than "sprite", and no amount of pixel typography survives it.
+   - **Space is a multiple of 8.** Sprite UI is built on a grid; half-steps make bevels land
+     between physical pixels and go soft.
+   - **The palette is small on purpose.** Sixteen-bit hardware could not show more, and the
+     discipline is what makes the accent colours mean something when they appear.
+   
+   Light palette on bare :root, dark override via prefers-color-scheme. The dark one is the
+   game's real home — a night-time office — and the light one is its daylight counterpart
+   rather than a different design. */
 
 :root {
-  /* Surfaces */
-  --c-bg: #eef1f6;
-  --c-surface: #ffffff;
-  --c-surface-2: #f5f7fa;
-  --c-surface-sunken: #e4e9f0;
-  --c-border: #cfd7e3;
-  --c-border-strong: #a9b6c9;
+  /* Surfaces — daylight: warm paper, like a printed manual for a game you own */
+  --c-bg: #d8cfb4;
+  --c-surface: #f2ecd8;
+  --c-surface-2: #e6ddc2;
+  --c-surface-sunken: #c8bd9e;
+  --c-border: #6b5f42;
+  --c-border-strong: #3b3324;
+
+  /* Bevels: sprite panels are lit from the top-left, always */
+  --c-bevel-light: #fffdf2;
+  --c-bevel-dark: #8f8261;
 
   /* Text */
-  --c-text: #16202e;
-  --c-text-muted: #5b6b80;
-  --c-text-faint: #8a97a8;
-  --c-text-inverse: #ffffff;
+  --c-text: #241f16;
+  --c-text-muted: #5d5340;
+  --c-text-faint: #857a62;
+  --c-text-inverse: #f2ecd8;
 
-  /* Brand: institutional blue + civic gold */
-  --c-brand: #1b4b8f;
-  --c-brand-strong: #12356a;
-  --c-brand-soft: #dce6f5;
-  --c-accent: #b8860b;
-  --c-accent-soft: #f6ecd2;
+  /* Brand: institutional blue + civic gold, pushed to sprite saturation */
+  --c-brand: #2a4a9c;
+  --c-brand-strong: #17306e;
+  --c-brand-soft: #b9c6ea;
+  --c-accent: #b8791a;
+  --c-accent-soft: #f0dca8;
 
   /* Stat semantics */
-  --c-reputation: #1b6bb5;
-  --c-performance: #2f7d54;
-  --c-political: #7b4fa8;
-  --c-integrity: #b8860b;
-  --c-stress: #c0453a;
+  --c-reputation: #2a6ec4;
+  --c-performance: #24803f;
+  --c-political: #7a3bb5;
+  --c-integrity: #b8791a;
+  --c-stress: #bd3030;
 
   /* Feedback */
-  --c-good: #2f7d54;
-  --c-good-soft: #dff0e5;
-  --c-warn: #b06a12;
-  --c-warn-soft: #fbeed8;
-  --c-bad: #c0453a;
-  --c-bad-soft: #fadfdd;
+  --c-good: #24803f;
+  --c-good-soft: #bcdcc2;
+  --c-warn: #a86412;
+  --c-warn-soft: #f0dca8;
+  --c-bad: #bd3030;
+  --c-bad-soft: #e8c0bc;
 
-  /* Type */
-  --f-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  --f-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  --f-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Type. Press Start 2P is the chrome and Pixelify Sans is the prose, because this game
+     asks people to read four-sentence paragraphs and an 8x8 display face at that length is
+     a punishment. Both cover latin-ext, so Spanish keeps its accents in-font. */
+  --f-display: "Press Start 2P", "Courier New", monospace;
+  --f-sans: "Pixelify Sans", "Trebuchet MS", Verdana, sans-serif;
+  --f-serif: var(--f-sans);
+  --f-mono: "Press Start 2P", ui-monospace, Menlo, Consolas, monospace;
 
-  --fs-xs: 0.75rem;
-  --fs-sm: 0.8125rem;
-  --fs-base: 0.9375rem;
-  --fs-md: 1.0625rem;
-  --fs-lg: 1.25rem;
-  --fs-xl: 1.625rem;
-  --fs-2xl: 2.25rem;
+  /* Prose sizes. Pixel faces read small, so the base is a step up from a normal web body. */
+  --fs-xs: 0.8125rem;
+  --fs-sm: 0.9375rem;
+  --fs-base: 1.0625rem;
+  --fs-md: 1.1875rem;
+  --fs-lg: 1.375rem;
+  --fs-xl: 1.75rem;
+  --fs-2xl: 2.375rem;
 
-  /* Space */
+  /* Display sizes, kept deliberately small: Press Start 2P is about twice as wide per
+     character as a normal face, so 11px of it occupies the room 20px of prose would. */
+  --fd-xs: 0.5rem;
+  --fd-sm: 0.625rem;
+  --fd-base: 0.75rem;
+  --fd-md: 0.875rem;
+  --fd-lg: 1.125rem;
+  --fd-xl: 1.5rem;
+
+  /* Space: multiples of 8, with 4 kept only for inside-the-bevel padding */
   --s-1: 4px;
   --s-2: 8px;
-  --s-3: 12px;
+  --s-3: 16px;
   --s-4: 16px;
   --s-5: 24px;
   --s-6: 32px;
   --s-7: 48px;
 
-  /* Shape */
-  --r-sm: 4px;
-  --r-md: 8px;
-  --r-lg: 14px;
-  --shadow-sm: 0 1px 2px rgba(16, 28, 45, 0.08);
-  --shadow-md: 0 4px 14px rgba(16, 28, 45, 0.12);
-  --shadow-lg: 0 18px 48px rgba(16, 28, 45, 0.28);
+  /* Shape: nothing is round, nothing is blurred */
+  --r-sm: 0;
+  --r-md: 0;
+  --r-lg: 0;
+  --px: 4px; /* one "pixel" of the art grid, at the app's chosen scale */
+  --shadow-sm: 4px 4px 0 rgba(59, 51, 36, 0.35);
+  --shadow-md: 8px 8px 0 rgba(59, 51, 36, 0.4);
+  --shadow-lg: 12px 12px 0 rgba(59, 51, 36, 0.5);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --c-bg: #10161f;
-    --c-surface: #1a222e;
-    --c-surface-2: #212b39;
-    --c-surface-sunken: #141c26;
-    --c-border: #2f3d4e;
-    --c-border-strong: #46586d;
+    --c-bg: #0d0e1c;
+    --c-surface: #232a4d;
+    --c-surface-2: #2c3560;
+    --c-surface-sunken: #171b36;
+    --c-border: #4a5896;
+    --c-border-strong: #8c9ad6;
 
-    --c-text: #e6ecf4;
-    --c-text-muted: #a2b0c2;
-    --c-text-faint: #7b8899;
-    --c-text-inverse: #10161f;
+    --c-bevel-light: #6675bb;
+    --c-bevel-dark: #0a0b18;
 
-    --c-brand: #6aa3e8;
-    --c-brand-strong: #8dbcf3;
-    --c-brand-soft: #1e314a;
-    --c-accent: #e2b33f;
-    --c-accent-soft: #3a3016;
+    --c-text: #eef1fb;
+    --c-text-muted: #a6b0d8;
+    --c-text-faint: #7b86b4;
+    --c-text-inverse: #0d0e1c;
 
-    --c-reputation: #5aa4de;
-    --c-performance: #57b183;
-    --c-political: #ab86d4;
-    --c-integrity: #e2b33f;
-    --c-stress: #e0726a;
+    --c-brand: #6f9bff;
+    --c-brand-strong: #a8c2ff;
+    --c-brand-soft: #26315e;
+    --c-accent: #ffc94a;
+    --c-accent-soft: #4a3a12;
 
-    --c-good: #57b183;
-    --c-good-soft: #1c3428;
-    --c-warn: #d99a3c;
-    --c-warn-soft: #382c16;
-    --c-bad: #e0726a;
-    --c-bad-soft: #3a2020;
+    --c-reputation: #4fa8ff;
+    --c-performance: #4ad97f;
+    --c-political: #c77dff;
+    --c-integrity: #ffc94a;
+    --c-stress: #ff5c5c;
 
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
-    --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.6);
+    --c-good: #4ad97f;
+    --c-good-soft: #16351f;
+    --c-warn: #ffa93a;
+    --c-warn-soft: #3d2a0d;
+    --c-bad: #ff5c5c;
+    --c-bad-soft: #3d1616;
+
+    --shadow-sm: 4px 4px 0 rgba(0, 0, 0, 0.55);
+    --shadow-md: 8px 8px 0 rgba(0, 0, 0, 0.6);
+    --shadow-lg: 12px 12px 0 rgba(0, 0, 0, 0.7);
   }
+}
+
+:root[data-theme="dark"] {
+  --c-bg: #0d0e1c;
+  --c-surface: #232a4d;
+  --c-surface-2: #2c3560;
+  --c-surface-sunken: #171b36;
+  --c-border: #4a5896;
+  --c-border-strong: #8c9ad6;
+
+  --c-bevel-light: #6675bb;
+  --c-bevel-dark: #0a0b18;
+
+  --c-text: #eef1fb;
+  --c-text-muted: #a6b0d8;
+  --c-text-faint: #7b86b4;
+  --c-text-inverse: #0d0e1c;
+
+  --c-brand: #6f9bff;
+  --c-brand-strong: #a8c2ff;
+  --c-brand-soft: #26315e;
+  --c-accent: #ffc94a;
+  --c-accent-soft: #4a3a12;
+
+  --c-reputation: #4fa8ff;
+  --c-performance: #4ad97f;
+  --c-political: #c77dff;
+  --c-integrity: #ffc94a;
+  --c-stress: #ff5c5c;
+
+  --c-good: #4ad97f;
+  --c-good-soft: #16351f;
+  --c-warn: #ffa93a;
+  --c-warn-soft: #3d2a0d;
+  --c-bad: #ff5c5c;
+  --c-bad-soft: #3d1616;
+
+  --shadow-sm: 4px 4px 0 rgba(0, 0, 0, 0.55);
+  --shadow-md: 8px 8px 0 rgba(0, 0, 0, 0.6);
+  --shadow-lg: 12px 12px 0 rgba(0, 0, 0, 0.7);
 }

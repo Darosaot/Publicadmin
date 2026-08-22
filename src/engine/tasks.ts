@@ -24,6 +24,8 @@ import {
   REFERENCE_TASK_SLOTS,
 } from './constants';
 import { rigourEffortDelta, rigourQualityDelta } from './directives';
+import { SCOPED_QUALITY_CAP } from './negotiate';
+import { taskQualityBonus } from './perks';
 import { getPost, type ContentRegistry } from './registry';
 import { nextInt, nextRange, weightedPick } from './rng';
 import type { ActiveTask, GameState, QualityTier, TaskTemplate } from './types';
@@ -80,7 +82,10 @@ export function refillBoard(state: GameState, registry: ContentRegistry): GameSt
   const slots = getPost(registry, state.player.postId).taskSlots;
   let next = state;
 
-  const allEligible = Object.values(registry.tasks).filter((t) => isTemplateEligible(t, next));
+  // Crises are never drawn: they arrive because something went wrong, through `spawnTask`.
+  const allEligible = Object.values(registry.tasks).filter(
+    (t) => !t.crisis && isTemplateEligible(t, next),
+  );
   if (allEligible.length === 0) return next;
 
   while (next.tasks.length < slots) {
@@ -150,6 +155,7 @@ export function rollQuality(
     // An office that writes things down produces better work than one that does not, and pays
     // for it in the effort every file costs — see `spawnTask`.
     rigourQualityDelta(state) +
+    taskQualityBonus(state) +
     earlyBonus +
     overinvestBonus +
     formBonus -
@@ -157,9 +163,18 @@ export function rollQuality(
     stressPenalty +
     jitterRoll.value;
 
+  /*
+   * A file cut back to what was actually needed cannot come back brilliant.
+   *
+   * Without this, scoping is free: the required effort falls, everything else is unchanged, and
+   * the shortened file scores *better* because the early-delivery bonus grows. Part of what would
+   * have made it excellent is precisely the part you agreed not to do.
+   */
+  const capped = task.scoped ? Math.min(score, SCOPED_QUALITY_CAP) : score;
+
   return {
-    score: Math.round(score),
-    tier: tierForScore(score),
+    score: Math.round(capped),
+    tier: tierForScore(capped),
     rngState: jitterRoll.rngState,
   };
 }

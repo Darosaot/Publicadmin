@@ -53,7 +53,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       ? effortAvailable(game, registry, state.allocation.overtime, state.allocation.agencyTemps)
       : 0;
     const effortSpent = game
-      ? allocationTotal(normalizeAllocation(game, registry, state.allocation))
+      ? allocationTotal(game, normalizeAllocation(game, registry, state.allocation))
       : 0;
 
     return {

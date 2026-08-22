@@ -6,6 +6,7 @@ import {
   DELEGATION_CAPACITY,
   DELEGATION_EFFORT_COST,
   ONE_TO_ONE_EFFORT_COST,
+  POACHING_SKILL,
   STAFF_ATTRITION_MORALE,
   STAFF_SALARY,
 } from '../../src/engine/constants';
@@ -64,6 +65,8 @@ function staff(overrides: Partial<StaffMember> = {}): StaffMember {
     id: 'x1',
     name: 'Test Person',
     seniority: 'officer',
+    xp: 0,
+    specialism: 'legal',
     skill: 60,
     morale: 60,
     salary: STAFF_SALARY.officer,
@@ -163,10 +166,10 @@ describe('the cost of managing', () => {
       recruiting: true,
     });
 
-    expect(managementCost(allocation)).toBe(
+    expect(managementCost(state, allocation)).toBe(
       DELEGATION_EFFORT_COST + COACHING_EFFORT_COST + ONE_TO_ONE_EFFORT_COST + 2,
     );
-    expect(allocationTotal(allocation)).toBe(managementCost(allocation));
+    expect(allocationTotal(state, allocation)).toBe(managementCost(state, allocation));
   });
 
   it('drops delegations to people who do not work here', () => {
@@ -261,9 +264,16 @@ describe('delegation in a real month', () => {
 
   it('costs the person morale when the file they were carrying is missed', () => {
     const base = manager(11);
-    const carrier = base.staff[0]!;
+    /*
+     * Skill pinned below `POACHING_SKILL`, so the only thing that can move this person's morale
+     * is the file they were carrying. Left as rolled, they were quietly poached in the same month
+     * and the assertion below read `undefined.morale` — a test measuring one mechanic knocked
+     * over by an unrelated one that happened to fire on this seed.
+     */
+    const carrier = { ...base.staff[0]!, skill: POACHING_SKILL - 10 };
     const state: GameState = {
       ...base,
+      staff: [carrier, ...base.staff.slice(1)],
       turn: 5,
       tasks: [
         {

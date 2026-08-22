@@ -1,0 +1,555 @@
+/* The sprite layer.
+ *
+ * `app.css` still owns layout — what sits beside what, and how wide. This file owns the
+ * *material*: how a panel is lit, how a bar is filled, how a button behaves when pressed.
+ * Keeping them apart means the game's structure survived the re-skin from v1 to v2 without
+ * every screen being rewritten, and it means a future skin only has to replace this file.
+ *
+ * The whole look rests on one trick. A sixteen-bit panel is not a rectangle with a border;
+ * it is a rectangle lit from the top-left, so it carries a light edge on two sides and a
+ * dark edge on the other two. Four `box-shadow` insets do that with no extra markup, and
+ * because they are hard-edged they scale to any size without going soft.
+ */
+
+/* ---------- The bevel ---------- */
+
+.panel,
+.task,
+.staff,
+.initiative,
+.bodycard,
+.deptcard,
+.offer,
+.person,
+.modal,
+.ending__panel,
+.title,
+.newgame__post,
+.directive__pole {
+  border: var(--px) solid var(--c-border-strong);
+  border-radius: 0;
+  box-shadow:
+    inset var(--px) var(--px) 0 var(--c-bevel-light),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--c-bevel-dark),
+    var(--shadow-sm);
+}
+
+/* Sunken things are lit from the *bottom*-right — the same trick inverted, which is how a
+   sprite UI says "this is a hole, not a tile". */
+.meter__track,
+.effort__track,
+.staffbar__track,
+.task__track,
+.initiative__track,
+.bodycard__track {
+  border: var(--px) solid var(--c-border-strong);
+  border-radius: 0;
+  box-shadow:
+    inset var(--px) var(--px) 0 var(--c-bevel-dark),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--c-bevel-light);
+  background: var(--c-surface-sunken);
+  overflow: hidden;
+}
+
+/* ---------- Bars fill in whole cells ---------- */
+
+/* A smooth gradient bar is the second-clearest "this is a web page" signal after a rounded
+   corner. `repeating-linear-gradient` cuts every fill into discrete cells with a gap, so a
+   bar advances a notch at a time the way a sprite meter does — and the cell size is the art
+   grid, so it lines up with everything else. */
+.meter__fill,
+.effort__fill,
+.staffbar__fill,
+.task__fill,
+.initiative__fill,
+.bodycard__fill {
+  border-radius: 0;
+  transition: none;
+  -webkit-mask-image: repeating-linear-gradient(
+    to right,
+    #000 0,
+    #000 calc(var(--px) * 2),
+    transparent calc(var(--px) * 2),
+    transparent calc(var(--px) * 3)
+  );
+  mask-image: repeating-linear-gradient(
+    to right,
+    #000 0,
+    #000 calc(var(--px) * 2),
+    transparent calc(var(--px) * 2),
+    transparent calc(var(--px) * 3)
+  );
+}
+
+/* The planned-progress overlay reads as a *different material*, not a different colour, so
+   it stays legible for anyone who cannot separate the two hues. */
+.task__fill--planned {
+  -webkit-mask-image: repeating-linear-gradient(
+    45deg,
+    #000 0,
+    #000 var(--px),
+    transparent var(--px),
+    transparent calc(var(--px) * 2)
+  );
+  mask-image: repeating-linear-gradient(
+    45deg,
+    #000 0,
+    #000 var(--px),
+    transparent var(--px),
+    transparent calc(var(--px) * 2)
+  );
+}
+
+/* ---------- Type ---------- */
+
+.eyebrow,
+.panel__title,
+.section__title,
+.modal__title,
+.tab,
+.btn,
+.chipbtn,
+.stepper__btn,
+.stepper__value,
+.tag,
+.chip,
+.rung__status,
+.tree__tier-label,
+.title__heading,
+.ending__title,
+.statsbar__name,
+.meter__label,
+.meter__value {
+  font-family: var(--f-display);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Press Start 2P has no lowercase descender room and no italic; at prose sizes it would
+   wrap every heading onto four lines. Every display element is therefore stepped down. */
+.panel__title,
+.section__title,
+.modal__title {
+  font-size: var(--fd-md);
+  line-height: 1.6;
+}
+
+.eyebrow,
+.rung__status,
+.tree__tier-label,
+.tag,
+.chip,
+.meter__label {
+  font-size: var(--fd-xs);
+  line-height: 1.8;
+}
+
+.btn,
+.tab,
+.chipbtn,
+.meter__value,
+.stepper__value {
+  font-size: var(--fd-sm);
+  line-height: 1.8;
+}
+
+.title__heading {
+  font-size: var(--fd-xl);
+  line-height: 1.5;
+}
+
+.ending__title {
+  font-size: var(--fd-lg);
+  line-height: 1.5;
+}
+
+/* Prose stays in the readable face and gets more leading than a normal web body, because
+   pixel glyphs have no anti-aliased edge to help the eye find the next line. */
+.modal__prose,
+.task__desc,
+.initiative__desc,
+.bodycard__blurb,
+.deptcard__blurb,
+.ending__body,
+.epilogue__list,
+.logpanel__list {
+  font-family: var(--f-sans);
+  line-height: 1.7;
+}
+
+/* ---------- Buttons press in ---------- */
+
+.btn,
+.chipbtn,
+.stepper__btn,
+.tab {
+  border: var(--px) solid var(--c-border-strong);
+  border-radius: 0;
+  box-shadow:
+    inset var(--px) var(--px) 0 var(--c-bevel-light),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--c-bevel-dark);
+  transition: none;
+}
+
+/* No transform, no easing: the button moves by exactly its shadow offset and the shadow
+   goes away, which is what a pressed sprite button does. Anything smoother reads as CSS. */
+.btn:active,
+.chipbtn:active,
+.stepper__btn:active {
+  box-shadow:
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--c-bevel-light),
+    inset var(--px) var(--px) 0 var(--c-bevel-dark);
+  transform: translate(var(--px), var(--px));
+}
+
+.btn--primary {
+  background: var(--c-brand);
+  color: #fff;
+}
+
+.chipbtn--on,
+.tab--active,
+.directive__pole--active {
+  background: var(--c-accent-soft);
+  border-color: var(--c-accent);
+}
+
+/* ---------- Everything pixelated, nothing smoothed ---------- */
+
+img,
+svg,
+canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* ---------- The overlay is a dither, not a blur ---------- */
+
+/* `backdrop-filter: blur()` is the single most modern-looking effect available and it is
+   what v1 used. A 50% checkerboard is how the hardware this look comes from dimmed a
+   screen behind a dialogue box: no blur, no partial alpha, just every other pixel. */
+.overlay {
+  backdrop-filter: none;
+  background:
+    repeating-conic-gradient(
+        rgba(0, 0, 0, 0.72) 0% 25%,
+        transparent 0% 50%
+      )
+      0 0 / calc(var(--px) * 2) calc(var(--px) * 2),
+    rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- Focus is a marching box, not a soft ring ---------- */
+
+:focus-visible {
+  outline: var(--px) solid var(--c-accent);
+  outline-offset: var(--px);
+}
+
+/* ---------- Layout the display face broke ---------- */
+
+/* Press Start 2P is roughly twice as wide per character as the face v1 laid these out for,
+   so several fixed-width grids that were comfortable are now overflowing. These are the
+   places where the *measurement* changed, not the design. */
+
+.statsbar__meters {
+  /* "Political capital" at 8px of an 8x8 face is still ~130px wide, which overran the old
+     8.5rem track and collided with its own value. */
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  flex: 1 1 34rem;
+}
+
+.meter__head {
+  /* A two-line label must push the bar down rather than squeeze the number out. */
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.meter__label {
+  font-size: var(--fd-xs);
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+.meter__value {
+  font-size: var(--fd-sm);
+  white-space: nowrap;
+}
+
+.meter__delta {
+  font-family: var(--f-display);
+  font-size: var(--fd-xs);
+}
+
+/* The player's name is the one piece of display type that takes a proper name of unknown
+   length, so it gets the display face at a size that survives "Bartholomew Featherstone". */
+.statsbar__name {
+  font-size: var(--fd-lg);
+  line-height: 1.4;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Numbers in the display face are already tabular; the v1 declaration is a no-op that
+   would silently pick a fallback face if it ever applied. */
+.statsbar__salary,
+.meter__value {
+  font-variant-numeric: normal;
+}
+
+/* Bars need room for their own bevel. v1's tracks were 5–8px tall hairlines, and a 4px
+   bevel on each side of a 5px track leaves nothing at all — every meter in the game
+   rendered as a flat line with no visible fill. A sprite meter wants to be chunky in any
+   case: 20px outside, 12px of interior, which is three cells of the art grid. */
+.meter__track,
+.effort__track,
+.staffbar__track,
+.task__track,
+.initiative__track,
+.bodycard__track {
+  height: calc(var(--px) * 5);
+}
+
+.meter__fill,
+.effort__fill,
+.staffbar__fill,
+.task__fill,
+.initiative__fill,
+.bodycard__fill {
+  height: 100%;
+}
+
+/* ---------- Portraits ---------- */
+
+/* A generated face is a sprite, so it gets a sprite's frame: hard border, top-left bevel, and
+   no smoothing at any scale. `flex-shrink: 0` matters more than it looks — without it a long
+   name compresses the portrait into a sliver rather than wrapping. */
+.portrait {
+  display: block;
+  flex-shrink: 0;
+  border: var(--px) solid var(--c-border-strong);
+  box-shadow:
+    inset var(--px) var(--px) 0 var(--c-bevel-light),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--c-bevel-dark);
+  background: var(--c-surface-sunken);
+}
+
+/* The roster card becomes a portrait beside an identity block, with the tenure count still
+   pushed to the far right. */
+.staff__head {
+  align-items: flex-start;
+  gap: var(--s-3);
+}
+
+.staff__ident {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.staff__months {
+  flex-shrink: 0;
+}
+
+.person__head {
+  /* Was `align-items: baseline`, which hangs a 40px portrait off the text baseline and pushes
+     it out of the card. */
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.person__name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* In the epilogue the face sits inline with the sentence about the person, so it rides the
+   text rather than starting a new block. */
+.epilogue__list .portrait {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: var(--s-1);
+}
+
+/* ---------- The character sheet ---------- */
+
+.tree--perks .tree__tier {
+  margin-bottom: var(--s-5);
+}
+
+.tree--perks .tree__posts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-3);
+  align-items: stretch;
+}
+
+.perk {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  background: var(--c-surface);
+  border: var(--px) solid var(--c-border-strong);
+  box-shadow:
+    inset var(--px) var(--px) 0 var(--c-bevel-light),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--c-bevel-dark),
+    var(--shadow-sm);
+}
+
+/* Three states, three materials. A perk you hold is lit; one you could take is outlined in the
+   colour that means "spend here" everywhere else in the game; one you cannot is dimmed but still
+   fully readable, because the whole point of showing it is that you can plan toward it. */
+.perk--taken {
+  background: var(--c-accent-soft);
+  border-color: var(--c-accent);
+}
+
+.perk--open {
+  border-color: var(--c-brand);
+}
+
+.perk--shut {
+  opacity: 0.62;
+}
+
+.perk__name {
+  font-family: var(--f-display);
+  font-size: var(--fd-sm);
+  line-height: 1.7;
+}
+
+.perk__desc {
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+  color: var(--c-text-muted);
+  flex: 1 1 auto;
+}
+
+.perk__state {
+  font-size: var(--fd-xs);
+  color: var(--c-text-faint);
+}
+
+.perk--taken .perk__state {
+  color: var(--c-accent);
+}
+
+/* Branches are columns, so each one gets a colour that runs the height of the tree and makes
+   "I went down the corridor branch" legible at a glance. */
+.perk--people { border-left: calc(var(--px) * 2) solid var(--c-performance); }
+.perk--craft { border-left: calc(var(--px) * 2) solid var(--c-reputation); }
+.perk--politics { border-left: calc(var(--px) * 2) solid var(--c-political); }
+
+.self__who {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.self__points {
+  font-family: var(--f-display);
+  font-size: var(--fd-md);
+  line-height: 1.6;
+  color: var(--c-accent);
+}
+
+@media (max-width: 720px) {
+  .tree--perks .tree__posts {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- People as people ---------- */
+
+.staff__level {
+  font-family: var(--f-display);
+  font-size: var(--fd-xs);
+  color: var(--c-accent);
+  white-space: nowrap;
+}
+
+.staff__aptitude {
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  margin-top: var(--s-1);
+}
+
+/* The trait is the one word that says who somebody is, so it is chipped rather than left as
+   running text — it has to be findable when scanning eight cards for who to hand a file to. */
+.staff__trait {
+  display: inline-block;
+  padding: 0 var(--s-1);
+  background: var(--c-brand-soft);
+  border: var(--px) solid var(--c-border);
+  color: var(--c-text);
+  cursor: help;
+}
+
+.staffbar__fill--xp {
+  background: var(--c-accent);
+}
+
+/* ---------- The second ---------- */
+
+/* The one card in the roster with a different job gets a different frame, so "who is running
+   the board" is answerable at a glance rather than by reading the side panel. */
+.staff--second {
+  border-color: var(--c-accent);
+  box-shadow:
+    inset var(--px) var(--px) 0 var(--c-bevel-light),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--c-bevel-dark),
+    0 0 0 var(--px) var(--c-accent),
+    var(--shadow-sm);
+}
+
+.org__who {
+  font-family: var(--f-display);
+  font-size: var(--fd-sm);
+  line-height: 1.7;
+  color: var(--c-accent);
+}
+
+/* ---------- Pushing back ---------- */
+
+.negotiate {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+  margin-top: var(--s-2);
+}
+
+.negotiate__btn {
+  font-size: var(--fd-xs);
+  padding: var(--s-1) var(--s-2);
+}
+
+/* Saying no is the only one anybody outside the room hears about, so it is the only one that
+   looks like a decision rather than an adjustment. */
+.negotiate__btn--refuse {
+  border-color: var(--c-bad);
+  color: var(--c-bad);
+}
+
+.negotiate__btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ---------- Files with teeth ---------- */
+
+/* A crisis must not look like the four files beside it, because the decision it forces is a
+   different kind of decision: everything else on the board suffers for as long as it is open. */
+.task--crisis {
+  border-color: var(--c-bad);
+  box-shadow:
+    inset var(--px) var(--px) 0 var(--c-bevel-light),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 var(--c-bevel-dark),
+    0 0 0 var(--px) var(--c-bad),
+    var(--shadow-md);
+}
+
+.task__crisis {
+  color: var(--c-bad);
+  font-size: var(--fd-xs);
+  line-height: 1.8;
+}

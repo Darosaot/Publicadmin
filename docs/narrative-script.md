@@ -3,7 +3,7 @@
 > **Generated file.** Produced from the shipped content by `npm run docs:script`. Edit the
 > content in `src/content/` and regenerate — changes made directly to this file are lost.
 
-The complete corpus: 250 events, 82 task templates, 27 initiatives, 14 public bodies, 3 standing directives, 7 departments, 15 posts across 4 tracks and 6 endings. Stat effects are shown after each outcome.
+The complete corpus: 256 events, 86 task templates, 27 initiatives, 14 public bodies, 3 standing directives, 7 departments, 15 posts across 4 tracks and 6 endings. Stat effects are shown after each outcome.
 
 ## Departments
 
@@ -119,6 +119,8 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 | Staff appraisal round | any desk, level 2+ | 7 | 3–5 | 2 | excellent: Political capital +2; poor: schedules "A grievance" in 2 cycles |
 | Reorganisation consultation | any desk | 6 | 3–4 | 2 | — |
 | Annual activity report | any desk | 8 | 3–5 | 2 | excellent: Reputation +2; missed: schedules "A conversation with the door closed" in 1 cycles |
+| The inquiry | any desk, level 3+ | 26 | 3–3 | 3 | excellent: Reputation +8 · Integrity +4; good: Reputation +3; missed: Reputation -14 · Integrity -6 · schedules "The findings" in 1 cycles |
+| The system that will not migrate | any desk, level 3+ | 24 | 3–3 | 3 | excellent: Performance +8; good: Performance +4; missed: Performance -12 · Reputation -8 · team morale -12 |
 | Unit business plan | any desk, level 3+ | 16 | 3–4 | 2 | excellent: Reputation +2 · team morale +4; poor: team morale -4 |
 | Budget bid | any desk, level 3+ | 18 | 2–3 | 3 | excellent: monthly budget +1200 · Reputation +2; poor: monthly budget -800; missed: monthly budget -1200 · Reputation -2 |
 | Paper for the management board | any desk, level 3+ | 12 | 2–2 | 2 | excellent: Political capital +3 |
@@ -132,6 +134,8 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 **Staff appraisal round** — Everyone in the unit needs a written assessment, a development objective, and half an hour of your undivided attention.
 **Reorganisation consultation** — The structure is being redrawn again. Your department is asked to comment, which is not the same as being asked.
 **Annual activity report** — Twelve months of work, compressed into a document that will be read by four people and cited by none.
+**The inquiry** — A decision taken four years ago is now being examined line by line by people with subpoena powers and no deadline of their own. Everything you send is permanent.
+**The system that will not migrate** — Eleven years of records, a supplier who has stopped answering, and a switch-off date somebody agreed to in writing before you arrived.
 **Unit business plan** — What the unit will achieve next year, in a document that will be used to judge you and to justify your headcount.
 **Budget bid** — Next year’s allocation is decided in a room you will be in for eleven minutes. This is the paper that speaks for you the rest of the time.
 **Paper for the management board** — Six pages for people who will read two of them, on a decision that cannot be unmade.
@@ -143,6 +147,7 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
+| The case that was missed | social/inspection/legal, level 3+ | 22 | 2–2 | 3 | excellent: Integrity +6 · Reputation +4; good: Integrity +3; missed: Reputation -16 · Stress +12 · schedules "The review" in 1 cycles |
 | Contract review | legal | 6 | 2–4 | 2 | poor: schedules "Internal review" in 3 cycles; missed: schedules "A formal challenge" in 1 cycles |
 | Licensing appeal | legal, level 1–3 | 7 | 2–4 | 2 | missed: schedules "A formal complaint" in 1 cycles |
 | Legal opinion | legal | 4 | 2–3 | 2 | excellent: Political capital +2 |
@@ -154,6 +159,7 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 | Drafting instructions | legal, level 4+ | 22 | 3–5 | 3 | excellent: Reputation +4 |
 | Legal risk register | legal, level 4+ | 16 | 3–4 | 2 | — |
 
+**The case that was missed** — A file that passed through three teams, including one of yours, and stopped somewhere it should not have. Everything about this is now urgent and nothing about it is now fixable.
 **Contract review** — Forty pages of clauses drafted by the supplier’s lawyers, who were paid rather more than you are.
 **Licensing appeal** — A refused permit, an angry applicant, and a deadline set by statute rather than by anyone you can negotiate with.
 **Legal opinion** — The director wants to know whether something can be done. The honest answer has three conditions and nobody wants to hear any of them.
@@ -169,6 +175,7 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
+| The money that has to go back | finance/procurement/projects, level 3+ | 20 | 3–3 | 3 | excellent: Political capital +8; good: Political capital +3; missed: monthly budget -1800 · Reputation -10 |
 | Milestone report | projects | 6 | 2–4 | 2 | missed: schedules "A letter from the audit authority" in 2 cycles |
 | Grant application | projects | 9 | 2–4 | 3 | excellent: Reputation +3 · Political capital +2 |
 | Partner coordination | projects | 5 | 2–3 | 2 | excellent: Political capital +3 |
@@ -180,6 +187,7 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 | National programme design | projects, level 4+ | 24 | 3–5 | 3 | excellent: Reputation +4 · Political capital +2 |
 | Portfolio prioritisation | projects, level 4+ | 18 | 2–4 | 3 | poor: Political capital -3 |
 
+**The money that has to go back** — A grant condition nobody read closely, four years of spending against it, and an auditor who has read it very closely indeed.
 **Milestone report** — The funding programme wants evidence that month six happened. Month six did happen, but not quite in the order the application promised.
 **Grant application** — Sixty pages, four annexes, and a budget table that must add up in three different currencies of optimism.
 **Partner coordination** — Five organisations in four countries, one shared deliverable, and a partner who has stopped answering emails.
@@ -195,6 +203,7 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
+| The money that has to go back | finance/procurement/projects, level 3+ | 20 | 3–3 | 3 | excellent: Political capital +8; good: Political capital +3; missed: monthly budget -1800 · Reputation -10 |
 | Monthly closing | finance, level 1–4 | 5 | 2–3 | 2 | missed: schedules "A conversation with the door closed" in 1 cycles |
 | Invoice backlog | finance, level 1–2 | 5 | 2–3 | 1 | missed: schedules "A formal challenge" in 1 cycles |
 | Budget amendment | finance | 7 | 2–4 | 2 | excellent: Political capital +2 |
@@ -206,6 +215,7 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 | Spending review submission | finance, level 4+ | 24 | 3–4 | 3 | excellent: monthly budget +2000 · Reputation +3; missed: monthly budget -2500 |
 | Multi-year financial framework | finance, level 4+ | 20 | 3–5 | 3 | — |
 
+**The money that has to go back** — A grant condition nobody read closely, four years of spending against it, and an auditor who has read it very closely indeed.
 **Monthly closing** — The ledger must balance by the eighth. It currently does not, by an amount small enough to be maddening.
 **Invoice backlog** — Suppliers are waiting. Some have been waiting long enough to start writing letters that mention interest.
 **Budget amendment** — A department has overspent and another has underspent. Reconciling the two on paper is easy; getting both to sign is not.
@@ -221,6 +231,7 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
+| The money that has to go back | finance/procurement/projects, level 3+ | 20 | 3–3 | 3 | excellent: Political capital +8; good: Political capital +3; missed: monthly budget -1800 · Reputation -10 |
 | Tender specification | procurement | 7 | 2–4 | 2 | poor: schedules "A formal challenge" in 2 cycles |
 | Evaluation committee | procurement | 8 | 3–4 | 3 | excellent: Reputation +3; poor: schedules "A formal challenge" in 1 cycles; missed: schedules "A formal challenge" in 1 cycles |
 | Framework renewal | procurement | 6 | 3–4 | 2 | missed: Reputation -2 · schedules "A question on the council agenda" in 1 cycles |
@@ -232,6 +243,7 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 | Procurement policy reform | procurement, level 4+ | 22 | 3–5 | 3 | excellent: Reputation +4 · Integrity +2 |
 | Category strategy | procurement, level 4+ | 18 | 3–4 | 3 | poor: schedules "A formal challenge" in 3 cycles |
 
+**The money that has to go back** — A grant condition nobody read closely, four years of spending against it, and an auditor who has read it very closely indeed.
 **Tender specification** — Describe what the administration needs precisely enough to get it, and generally enough that only one company cannot possibly qualify.
 **Evaluation committee** — Six bids, four evaluators, and a scoring grid that will be read very carefully by whoever comes second.
 **Framework renewal** — The cleaning contract expires in eleven weeks. Nobody noticed until this morning.
@@ -273,6 +285,7 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
+| The case that was missed | social/inspection/legal, level 3+ | 22 | 2–2 | 3 | excellent: Integrity +6 · Reputation +4; good: Integrity +3; missed: Reputation -16 · Stress +12 · schedules "The review" in 1 cycles |
 | On-site inspection | inspection | 7 | 2–4 | 3 | excellent: Integrity +2 |
 | Inspection report | inspection | 8 | 3–4 | 2 | excellent: Reputation +3; poor: schedules "A formal complaint" in 2 cycles; missed: Integrity -2 |
 | Follow-up on last year’s recommendations | inspection | 6 | 3–5 | 2 | — |
@@ -284,6 +297,7 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 | Redesign the inspection regime | inspection, level 4+ | 21 | 3–5 | 3 | excellent: Reputation +4 · Integrity +2 |
 | Put a body into special measures | inspection, level 4+ | 17 | 2–4 | 3 | excellent: Reputation +5; poor: schedules "A list of eleven questions" in 1 cycles; missed: Reputation -4 |
 
+**The case that was missed** — A file that passed through three teams, including one of yours, and stopped somewhere it should not have. Everything about this is now urgent and nothing about it is now fixable.
 **On-site inspection** — Two days at a body that has cleared a diary, tidied a filing room and put out biscuits. The whole skill is asking the question nobody rehearsed an answer to.
 **Inspection report** — Everything you found, in an order that makes it actionable, in language that survives being quoted back at you by their lawyers.
 **Follow-up on last year’s recommendations** — Eleven recommendations, accepted in full twelve months ago. Establishing how many were actually implemented takes considerably longer than making them did.
@@ -299,6 +313,7 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 
 | Task | Desk | Effort | Deadline | Difficulty | Consequences |
 | --- | --- | --- | --- | --- | --- |
+| The case that was missed | social/inspection/legal, level 3+ | 22 | 2–2 | 3 | excellent: Integrity +6 · Reputation +4; good: Integrity +3; missed: Reputation -16 · Stress +12 · schedules "The review" in 1 cycles |
 | Needs assessment | social | 6 | 2–4 | 2 | excellent: Integrity +2; missed: Stress +5 |
 | Placement panel | social | 7 | 2–4 | 3 | excellent: Reputation +3; poor: Stress +4; missed: Integrity -2 · Stress +6 |
 | Safeguarding referral | social | 8 | 2–4 | 3 | excellent: Integrity +4; missed: Integrity -4 · Stress +9 · schedules "This is now a formal matter" in 2 cycles |
@@ -310,6 +325,7 @@ Everyone starts in Alderford. After that the tree forks, and posts sharing a tie
 | Recommission the whole care market | social, level 4+ | 22 | 3–5 | 3 | excellent: Reputation +4 · Integrity +3; missed: Reputation -4 · Stress +8 |
 | Set the eligibility threshold | social, level 4+ | 18 | 2–4 | 3 | excellent: Integrity +4; poor: schedules "A formal complaint" in 2 cycles; missed: Stress +8 |
 
+**The case that was missed** — A file that passed through three teams, including one of yours, and stopped somewhere it should not have. Everything about this is now urgent and nothing about it is now fixable.
 **Needs assessment** — Ninety minutes in somebody’s front room, and a form afterwards that decides what they get for the next two years.
 **Placement panel** — Six cases, four places and a chair who wants it done by four o’clock. Every decision is between people rather than between options.
 **Safeguarding referral** — A concern raised by somebody who was not sure whether to raise it. Getting this wrong in either direction is the thing that wakes you at four in the morning for years.
@@ -618,7 +634,7 @@ not translated.*
 | Office of the Ombudsman | The last resort | 66 | -0.02 | social |
 | Office of the Council of Ministers | The centre of government | 59 | 0 | legal |
 
-**Alderford City Council.** Where you started. Small enough that one competent person changes it and one bad appointment breaks it, and it has had both since you left.
+**Alderford City Council.** Where every career in this country starts. Small enough that one competent person changes it and one bad appointment breaks it, and it has had plenty of both.
 
 **Northbridge City Council.** Big enough to have a structure chart and small enough that the structure chart is not the whole truth. Competently run, in the way a place is when nobody has had a reason to look closely.
 

@@ -39,6 +39,7 @@ import type {
   InitiativeTemplate,
   LogEntry,
 } from './types';
+import { initiativeProgressBonus } from './perks';
 
 export function doneFlag(templateId: string): string {
   return `init.done.${templateId}`;
@@ -209,7 +210,8 @@ export function resolveInitiatives(
       : 0;
 
     const put = Math.min(own + delegated, cycleCap(template));
-    const progress = initiative.progress + put;
+    // A systems thinker gets more out of each cycle than the points alone would buy.
+    const progress = initiative.progress + (put > 0 ? put + initiativeProgressBonus(state) : 0);
 
     if (progress >= initiative.required) {
       flags[doneFlag(template.id)] = true;

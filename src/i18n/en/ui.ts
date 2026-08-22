@@ -318,4 +318,76 @@ export const uiStrings: Record<string, string> = {
   'log.staff_promoted': '{name} was promoted to {grade}.',
   'log.staff_poached': '{name} took a job elsewhere.',
   'log.budget_underspent': 'The budget year closed underspent — next year’s allocation is cut.',
+
+  /* ---------------------------------------------------------- character sheet */
+
+  'action.self': 'Yourself',
+  'self.tree_heading': 'What the job made of you',
+  'self.tier': 'Row {tier} · costs {cost}',
+  'self.years': '{years} years in the service',
+  'self.points_heading': 'Points',
+  'self.points_available': '{points} to spend',
+  'self.points_earned': '{earned} earned, {spent} spent.',
+  'self.points_help':
+    'One point every four years, and one for every promotion. The tree costs thirty; a whole career earns about eleven. You will not finish it, and that is the decision.',
+  'self.branches_heading': 'Three ways to be good at this',
+  'self.branch.people': 'The unit',
+  'self.branch.people.blurb': 'What you can get out of other people, and what they get out of you.',
+  'self.branch.craft': 'The work',
+  'self.branch.craft.blurb': 'What actually leaves your desk, and whether it lasts.',
+  'self.branch.politics': 'The corridor',
+  'self.branch.politics.blurb': 'Who takes your call, and what happens to you when it goes wrong.',
+  'self.perk_taken': 'Yours',
+  'self.perk_take': 'Take it — {cost}',
+  'self.perk_needs': 'Needs {name}',
+  'self.perk_needs_rank': 'Needs tier {tier}',
+  'self.perk_needs_points': 'Needs {cost} points',
+
+  /* ------------------------------------------------------- people as people */
+
+  'team.level': 'Lv.{level}',
+  'team.specialism': 'Best at {field}',
+  'team.experience': 'Experience',
+  'staff.trait.meticulous': 'Meticulous',
+  'staff.trait.meticulous.help': 'Slower, and the work comes back right.',
+  'staff.trait.quick': 'Quick',
+  'staff.trait.quick.help': 'Gets through more of it than anyone. Some of it needs doing again.',
+  'staff.trait.steady': 'Steady',
+  'staff.trait.steady.help': 'Holds their level through a bad year without being managed.',
+  'staff.trait.restless': 'Restless',
+  'staff.trait.restless.help': 'Learns faster than anyone and is always half out of the door.',
+  'staff.trait.organiser': 'Organiser',
+  'staff.trait.organiser.help': 'Can hold one more file than the grade says.',
+  'staff.trait.diplomat': 'Diplomat',
+  'staff.trait.diplomat.help': 'Everyone else in the room is easier to manage.',
+
+  /* ---------------------------------------------------------------- structure */
+
+  'org.heading': 'Who runs the board',
+  'org.none': 'Nobody. Every file on the desk is handed out by you, one at a time.',
+  'org.about':
+    'A second stops carrying files and starts running the routine ones: a few a month are handled without a point of your time. What it costs is their own output, and the best person in the unit doing your job instead of theirs.',
+  'org.appoint': 'Make them your second',
+  'org.dismiss': 'Take the job back',
+  'org.current': '{name} runs the board',
+  'org.capacity': 'Handles {count} files a month for you',
+  'org.too_junior': 'Too junior to run the board',
+  'report.deputy_ran': '{name} ran {count} of the board.',
+
+  /* ------------------------------------------------------------- pushing back */
+
+  'negotiate.extend': 'Move the date',
+  'negotiate.extend.help': 'Two more cycles. Somebody remembers you asked.',
+  'negotiate.extend.done': 'Date moved',
+  'negotiate.scope': 'Cut it back',
+  'negotiate.scope.help':
+    'Agree to do less of it. Smaller file, and it can no longer come back brilliant — part of what would have made it brilliant is the part you agreed not to do.',
+  'negotiate.scope.done': 'Cut back',
+  'negotiate.refuse': 'Say no',
+  'negotiate.refuse.help':
+    'It leaves the board and does not count as missed. You did not fail it, you declined it — and it is the only one of the three anybody outside the room hears about.',
+  'negotiate.refuse.done': 'Declined',
+  'log.refused_file': 'You declined a file rather than miss it.',
+
+  'task.crisis_label': 'This will not wait, and cannot be handed back',
 };

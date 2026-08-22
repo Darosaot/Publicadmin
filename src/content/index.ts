@@ -10,6 +10,7 @@ import './directives';
 import './cast';
 import { eventRegistry } from './events';
 import { initiatives } from './initiatives';
+import { perks } from './perks';
 import { staffNames } from './staff';
 import { taskRegistry } from './tasks';
 
@@ -25,6 +26,7 @@ export { initiatives, initiativeRegistry } from './initiatives';
 export { endingCopy, endingBodyKey } from './endings';
 export { allEvents, eventRegistry } from './events';
 export { allTasks, taskRegistry } from './tasks';
+export { perks } from './perks';
 export { staffNames } from './staff';
 export { EN_STRINGS } from './authoring';
 
@@ -33,6 +35,7 @@ export const registry: ContentRegistry = {
   posts,
   tasks: taskRegistry,
   events: eventRegistry,
+  perks,
   staffNames,
   bodies,
   initiatives,

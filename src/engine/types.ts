@@ -119,6 +119,15 @@ export interface TaskTemplate {
   descKey: string;
   /** `'any'` means the template can land on any department's desk. */
   departments: DepartmentId[] | 'any';
+  /**
+   * A file with teeth: it arrives because something went wrong, not because the board refilled.
+   *
+   * Three consequences, all of them the point. It is never drawn at random — only a `spawnTask`
+   * effect puts one on the desk. It cannot be declined or cut back, because a crisis you can hand
+   * back is not one. And missing it costs what its own `onFail` says rather than the ordinary
+   * penalty, which is usually a great deal more.
+   */
+  crisis?: boolean;
   minLevel?: number;
   maxLevel?: number;
   /** Effort before level scaling is applied at spawn time. */
@@ -142,6 +151,15 @@ export interface ActiveTask {
   spawnedTurn: number;
   /** Who is carrying the file this month, if you handed it to someone. */
   assignedTo?: string;
+  /**
+   * Whether the date has already been moved, and whether the file has already been cut back.
+   *
+   * Both optional, so no save migration: absent means "not yet", which is what every file in
+   * every existing career should say. Both are once-only — without the cap, moving a deadline is
+   * an infinite loop against a stat that replenishes, and no file need ever be finished.
+   */
+  extended?: boolean;
+  scoped?: boolean;
 }
 
 /* ------------------------------------------------------------- initiatives */
@@ -236,6 +254,22 @@ export interface StaffMember {
   /** Monthly cost to the unit budget. */
   salary: number;
   monthsInPost: number;
+  /**
+   * Months spent actually carrying work, which is not the same as months in post.
+   *
+   * Somebody nobody ever hands a file to sits at the same desk for nine years and learns nothing.
+   */
+  xp: number;
+  /**
+   * The field they are actually good at.
+   *
+   * Stored rather than read off the name, unlike their trait and their face, and for one reason:
+   * hiring is *biased* toward the department you work in. Derived uniformly across seven
+   * departments, a unit of four almost never contained a specialist for its own board and the
+   * bonus fired on eight per cent of files — a decoration rather than a decision. Biasing it
+   * needs the roll, and the roll has to be remembered.
+   */
+  specialism: DepartmentId;
 }
 
 /** A recruitment in progress. Posts take months to fill, as they do. */
@@ -517,6 +551,29 @@ export interface PendingEvent {
   };
 }
 
+/**
+ * Something the career taught you, taken from a tree and kept for good.
+ *
+ * `tier` is both the row in the tree and the price, so a deep perk is expensive by construction
+ * and no separate cost field can drift out of step with the layout.
+ */
+export interface PerkTemplate {
+  id: string;
+  nameKey: string;
+  descKey: string;
+  /** Which of the three columns this sits in. */
+  branch: PerkBranch;
+  /** Row in the tree, 1-4, and also what it costs in points. */
+  tier: number;
+  /** The perk directly above it in the same branch, if any. */
+  requires?: string;
+  /** No amount of saved points buys a capstone at a junior desk. */
+  minLevel: number;
+}
+
+export const PERK_BRANCHES = ['people', 'craft', 'politics'] as const;
+export type PerkBranch = (typeof PERK_BRANCHES)[number];
+
 export interface GameState {
   saveVersion: number;
   seed: number;
@@ -547,6 +604,15 @@ export interface GameState {
   };
 
   stats: PlayerStats;
+
+  /**
+   * The person running the routine board for you, if you have named one.
+   *
+   * Optional and therefore migration-free: absent means "no deputy", which is exactly what every
+   * save written before v2.3 should say. Kept as an id rather than a copy so it cannot go stale,
+   * and cleared by `settleDeputy` on every path that removes somebody from the unit.
+   */
+  deputyId?: string;
 
   tasks: ActiveTask[];
   nextTaskUid: number;

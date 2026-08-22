@@ -315,4 +315,76 @@ export const uiStrings: Record<string, string> = {
   'log.staff_promoted': '{name} ha ascendido a {grade}.',
   'log.staff_poached': '{name} se ha ido a otro sitio.',
   'log.budget_underspent': 'El año presupuestario cerró con infragasto — recortan la asignación del año siguiente.',
+
+  /* ---------------------------------------------------------- ficha personal */
+
+  'action.self': 'Tú',
+  'self.tree_heading': 'En qué te convirtió el oficio',
+  'self.tier': 'Fila {tier} · cuesta {cost}',
+  'self.years': '{years} años de servicio',
+  'self.points_heading': 'Puntos',
+  'self.points_available': '{points} por gastar',
+  'self.points_earned': '{earned} ganados, {spent} gastados.',
+  'self.points_help':
+    'Un punto cada cuatro años, y uno por cada ascenso. El árbol cuesta treinta; una carrera entera da unos once. No vas a terminarlo, y en eso consiste la decisión.',
+  'self.branches_heading': 'Tres maneras de ser bueno en esto',
+  'self.branch.people': 'La unidad',
+  'self.branch.people.blurb': 'Lo que sacas de los demás, y lo que ellos sacan de ti.',
+  'self.branch.craft': 'El trabajo',
+  'self.branch.craft.blurb': 'Lo que sale de verdad de tu mesa, y si dura.',
+  'self.branch.politics': 'El pasillo',
+  'self.branch.politics.blurb': 'Quién te coge el teléfono, y qué te pasa cuando algo sale mal.',
+  'self.perk_taken': 'Tuyo',
+  'self.perk_take': 'Cogerlo — {cost}',
+  'self.perk_needs': 'Requiere {name}',
+  'self.perk_needs_rank': 'Requiere nivel {tier}',
+  'self.perk_needs_points': 'Requiere {cost} puntos',
+
+  /* --------------------------------------------------- las personas, una a una */
+
+  'team.level': 'Nv.{level}',
+  'team.specialism': 'Su fuerte: {field}',
+  'team.experience': 'Experiencia',
+  'staff.trait.meticulous': 'Meticulosa',
+  'staff.trait.meticulous.help': 'Más lenta, y el trabajo vuelve bien hecho.',
+  'staff.trait.quick': 'Rápida',
+  'staff.trait.quick.help': 'Despacha más que nadie. Parte hay que rehacerla.',
+  'staff.trait.steady': 'Constante',
+  'staff.trait.steady.help': 'Aguanta su nivel un mal año sin que nadie la lleve de la mano.',
+  'staff.trait.restless': 'Inquieta',
+  'staff.trait.restless.help': 'Aprende más rápido que nadie y siempre está medio fuera.',
+  'staff.trait.organiser': 'Organizadora',
+  'staff.trait.organiser.help': 'Puede llevar un expediente más de lo que dice su categoría.',
+  'staff.trait.diplomat': 'Diplomática',
+  'staff.trait.diplomat.help': 'Con ella en la sala, los demás se llevan mejor.',
+
+  /* ---------------------------------------------------------------- estructura */
+
+  'org.heading': 'Quién lleva la mesa',
+  'org.none': 'Nadie. Todos los expedientes los repartes tú, uno a uno.',
+  'org.about':
+    'Un segundo deja de llevar expedientes y pasa a llevar los de trámite: unos cuantos al mes salen sin gastarte un punto. Lo que cuesta es lo que esa persona producía, y que la mejor de la unidad haga tu trabajo en vez del suyo.',
+  'org.appoint': 'Nombrar segundo',
+  'org.dismiss': 'Recuperar el puesto',
+  'org.current': '{name} lleva la mesa',
+  'org.capacity': 'Se ocupa de {count} expedientes al mes por ti',
+  'org.too_junior': 'Demasiado júnior para llevar la mesa',
+  'report.deputy_ran': '{name} se ocupó de {count} de la mesa.',
+
+  /* --------------------------------------------------------------- plantarse */
+
+  'negotiate.extend': 'Mover la fecha',
+  'negotiate.extend.help': 'Dos ciclos más. Alguien se acuerda de que lo pediste.',
+  'negotiate.extend.done': 'Fecha movida',
+  'negotiate.scope': 'Recortarlo',
+  'negotiate.scope.help':
+    'Acordar hacer menos. Expediente más pequeño, y ya no puede salir brillante: parte de lo que lo habría hecho brillante es justo lo que acordaste no hacer.',
+  'negotiate.scope.done': 'Recortado',
+  'negotiate.refuse': 'Decir que no',
+  'negotiate.refuse.help':
+    'Sale de la mesa y no cuenta como incumplido. No fallaste, rechazaste — y es lo único de los tres que se entera alguien fuera del despacho.',
+  'negotiate.refuse.done': 'Rechazado',
+  'log.refused_file': 'Rechazaste un expediente antes que incumplirlo.',
+
+  'task.crisis_label': 'Esto no espera, y no se puede devolver',
 };

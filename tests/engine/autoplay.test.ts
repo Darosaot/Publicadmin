@@ -3,6 +3,7 @@ import { MAX_TURNS } from '../../src/engine/constants';
 import {
   ENDING_IDS,
   DEPARTMENT_IDS,
+  type PerkBranch,
   STAT_IDS,
   TRACK_IDS,
   type DepartmentId,
@@ -12,6 +13,7 @@ import { bodies } from '../../src/content';
 import { DRIFT_FLOOR } from '../../src/engine/constants';
 import { bodyCondition } from '../../src/engine/world';
 import { registry as shippedRegistry } from '../../src/content';
+import { STAFF_TRAITS, specialismFromName, traitOf } from '../../src/engine/people';
 import { playCareer, playMany, summarise } from './autoplay';
 
 const registryEvents = shippedRegistry.events;
@@ -231,9 +233,16 @@ describe('the country moves, and not only downhill', () => {
  * write-only option, which is the same failure as a write-only flag and just as invisible.
  */
 describe('the house rules change the career', () => {
-  const withRules = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS));
+  /*
+   * Both sides run with perks off, which is not tidiness — it is the only way this measures
+   * directives. The bot rests when stress crosses a fixed threshold, so any second system that
+   * also moves stress pushes the equilibrium back to that same threshold and the directive's
+   * effect reads as zero. Adding the perk tree collapsed this comparison from a clear gap to
+   * 0.03 and turned the assertion below red, which is exactly the warning it exists to give.
+   */
+  const withRules = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { usePerks: false }));
   const without = summarise(
-    playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useDirectives: false }),
+    playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useDirectives: false, usePerks: false }),
   );
 
   it('costs stress when the office takes the pressure itself', () => {
@@ -421,5 +430,311 @@ describe('determinism', () => {
     const a = playCareer({ seed: 1, department: 'policy' });
     const b = playCareer({ seed: 2, department: 'policy' });
     expect(a).not.toEqual(b);
+  });
+});
+
+/**
+ * Perks are the riskiest thing in v2 to leave unmeasured.
+ *
+ * Directives are symmetrical trades — every pole costs what the other gains. Initiatives cost the
+ * months they pay for. A perk is a pure upgrade with no downside anywhere in it, so the only thing
+ * between "the career feels earned" and "every career is now two tiers longer" is this A/B on
+ * identical seeds. The A side is literally the game as it was before the tree existed.
+ */
+describe('what the career made of you', () => {
+  const withPerks = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS));
+  const without = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { usePerks: false }));
+
+  it('gets used at all, which is the thing a guardrail most easily fails to check', () => {
+    expect(withPerks.meanPerksTaken).toBeGreaterThan(2);
+    expect(without.meanPerksTaken).toBe(0);
+  });
+
+  /**
+   * A whole career earns about fourteen points against a tree costing thirty, so a bot spending
+   * everything it can still must not finish. If this ever passes, the tree became a checklist and
+   * two careers of the same length stopped being different people.
+   */
+  it('cannot buy the whole tree even by spending every point immediately', () => {
+    expect(withPerks.meanPerksTaken).toBeLessThan(shippedRegistry.perks.length);
+  });
+
+  /**
+   * The direction that matters. No perk pays reputation — offers key off it, so anything that did
+   * would convert straight into promotion velocity and every career would converge on one build.
+   * The hooks pay in morale, skill, budget, stress and initiative progress instead, so the career
+   * effect should be real but small.
+   */
+  it('does not become the way to get promoted', () => {
+    // Measured at +0.50 mean tier across ten seeds and every department. The bound is 0.8 rather
+    // than 0.51 on purpose: a guardrail set one hundredth above the observed value fails on noise
+    // and gets deleted, while one set at 0.8 still catches a change that doubles perk power.
+    expect(withPerks.meanLevel - without.meanLevel).toBeLessThan(0.8);
+  });
+
+  it('still leaves a career recognisably the same length', () => {
+    expect(Math.abs(withPerks.meanYears - without.meanYears)).toBeLessThan(3);
+  });
+
+  /**
+   * The guardrail that actually found something.
+   *
+   * Its first version asserted each branch was "survivable" — mean years above fifteen — which
+   * every branch passes trivially and which told me nothing. Measuring properly showed the people
+   * branch moving morale by *minus* 0.2 over a career: it was a dead column, because its perks all
+   * improved actions the bot only takes when things are already going badly, so the gain was spent
+   * returning to the same equilibrium rather than raising it.
+   *
+   * So each branch is now checked in the currency it is paid in, and has to lead in that one.
+   * Promotion velocity is a craft-shaped measure and using it three times would have declared two
+   * thirds of the tree worthless while the design was fine.
+   */
+  it('leaves no branch dead, measured in what each one pays in', () => {
+    // The same ten seeds `without` was measured on. An eight-seed branch run against a ten-seed
+    // baseline is not an A/B, and comparing them is how this assertion first went red.
+    const only = (branch: PerkBranch) =>
+      summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { perkBranch: branch }));
+    const people = only('people');
+    const craft = only('craft');
+    const politics = only('politics');
+
+    // Each against the game with no tree at all — not against each other.
+    //
+    // Ranking the branches was the obvious next assertion and it is not a fact about the design.
+    // Craft beats people on morale, because `methodical` cuts the player's stress, so the bot
+    // rests less and spends the freed points on its unit. That is a fact about how this bot
+    // budgets a month; a human who rested anyway would see the opposite. What can honestly be
+    // required is that no branch is dead, which is what the people column was.
+    expect(people.meanUnitMorale).toBeGreaterThan(without.meanUnitMorale);
+    // Craft is measured on the long work it finishes, not on career length. Years was the first
+    // choice — `methodical` buys them by holding off burnout — but the margin is a few tenths
+    // against a seventy-career sample and it flipped sign the moment the bot learned to match
+    // specialisms and every career got slightly longer. Initiatives completed is `systems_thinker`
+    // acting directly, and runs about a quarter above baseline.
+    expect(craft.meanInitiativesCompleted).toBeGreaterThan(without.meanInitiativesCompleted);
+    expect(politics.meanPoliticalCapital).toBeGreaterThan(without.meanPoliticalCapital);
+
+    // And that each is worth its points at all — a column nobody would take is three wasted
+    // perks and a lie on the character sheet.
+    for (const [branch, run] of [['people', people], ['craft', craft], ['politics', politics]] as const) {
+      expect(run.meanPerksTaken, branch).toBeGreaterThan(1);
+      // Not "at least as good on rank", which is the craft-shaped measure this test exists to
+      // avoid — the people branch trades rank for a unit that stays, and asserting otherwise
+      // failed on a difference of 0.014. What matters is that no column is a *trap*: spending a
+      // career down any one of them must not leave you materially worse off than never having
+      // opened the screen.
+      expect(without.meanLevel - run.meanLevel, branch).toBeLessThan(0.2);
+    }
+  });
+});
+
+/**
+ * The unit as a cast rather than as three numbers each.
+ *
+ * The specialism bonus only ever fires when the right person gets the right file, which means it
+ * is entirely possible to ship the mechanic, ship the prose describing it, and have it never once
+ * apply in a real career. That is the failure this file exists to catch.
+ */
+describe('people are good at particular things', () => {
+  it('gives the shipped cast a spread of aptitudes rather than a house style', () => {
+    const names = shippedRegistry.staffNames;
+    expect(new Set(names.map(specialismFromName)).size).toBe(DEPARTMENT_IDS.length);
+    expect(
+      new Set(
+        names.map((name) =>
+          traitOf({
+            id: name,
+            name,
+            seniority: 'officer',
+            skill: 50,
+            morale: 50,
+            salary: 2600,
+            monthsInPost: 0,
+            xp: 0,
+            specialism: 'legal',
+          }),
+        ),
+      ).size,
+    ).toBe(STAFF_TRAITS.length);
+  });
+
+  /**
+   * Measured across the run, not at the end of it.
+   *
+   * The first version of both assertions below read `finalState` and reported zero: a career's
+   * last unit was hired at its last post change so nobody in it has any history, and the final
+   * board has been refilled with nothing assigned. The mechanics were working the whole time.
+   */
+  const sweep = summarise(playMany(seeds.slice(0, 6), DEPARTMENT_IDS));
+
+  it('actually lands work on the person whose field it is', () => {
+    /*
+     * A/B against the policy as it was before specialisms existed, rather than against a number
+     * I picked. Two thresholds were guessed here and both were wrong — the first at 0.3 when the
+     * real rate was 0.065, the second still at 0.3 when biased hiring had lifted it to 0.27. The
+     * only honest bar is the fit-blind policy on the same seeds.
+     */
+    const blind = summarise(
+      playMany(seeds.slice(0, 6), DEPARTMENT_IDS, { matchSpecialisms: false }),
+    );
+
+    expect(sweep.totalDelegations).toBeGreaterThan(0);
+    expect(sweep.totalSpecialistMatches / sweep.totalDelegations).toBeGreaterThan(
+      blind.totalSpecialistMatches / blind.totalDelegations,
+    );
+  });
+
+  it('grows the people who are given something to do', () => {
+    // Measured at 2.07: the best officer in a unit typically reaches level two and sometimes
+    // three. `> 1` was the first bar and it passed while the system was nearly inert at 1.43,
+    // which is the failure mode this whole file exists to catch.
+    expect(sweep.meanPeakStaffLevel).toBeGreaterThan(1.5);
+  });
+});
+
+/**
+ * Structure: the difference between managing eight people and managing three.
+ *
+ * A/B on identical seeds, with the A side being every file handed over individually — which is
+ * how the whole senior half of the career played before v2.3.
+ */
+describe('naming a second', () => {
+  const withDeputy = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS));
+  const without = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useDeputy: false }));
+
+  it('gets used at all once a unit is big enough to want one', () => {
+    expect(withDeputy.meanMonthsWithDeputy).toBeGreaterThan(0);
+    expect(without.meanMonthsWithDeputy).toBe(0);
+  });
+
+  /**
+   * The guardrail that mattered, and that this feature failed twice.
+   *
+   * A deputy trades your best officer's *judgement* — they run the board by deadline rather than
+   * by who is best at each file — for their *availability*. Paid only in effort points that a
+   * senior manager already has spare, that trade lost: completion fell and rank came out below
+   * never appointing anybody, so the feature was a button you were punished for pressing. It pays
+   * in stress and in being better at the job now that it is the job.
+   */
+  it('is not a trap: naming one never leaves the career worse off', () => {
+    expect(without.meanLevel - withDeputy.meanLevel).toBeLessThan(0.1);
+    expect(without.completionRate - withDeputy.completionRate).toBeLessThan(0.01);
+  });
+
+  /*
+   * There is deliberately no assertion about stress here, and the reason is worth writing down
+   * because four separate features have now tripped over it.
+   *
+   * A deputy's payoff is a point of stress a month. So is the `thick_skin` perk, `methodical`,
+   * the `hours` directive, and — indirectly — every crisis. But the bot rests whenever stress
+   * crosses a fixed threshold, so **stress is a shared sink**: anything that lowers it simply
+   * means less resting, the equilibrium returns to the same number, and the freed points go
+   * somewhere else entirely. The comparison then reads whatever the last-landed system did.
+   *
+   * It swamped the directives sweep when perks arrived, this one when negotiation arrived, and
+   * this one again when crises arrived. Isolating the A/B works exactly until the next system
+   * lands, which is not a guardrail, it is a maintenance appointment. Stress is measurable in
+   * this harness only against a bot with an adaptive rest policy, which is a bigger change than
+   * anything it would buy — so the deputy is judged on not being a trap, above, and its stress
+   * relief is left to the unit tests in `org.test.ts` where it is deterministic.
+   */
+  it('is worth having by the time a unit is big enough to want one', () => {
+    // Measured at 10.0 cycles of a career spent with somebody in the job. The bar is 6, not 11:
+    // a threshold set just under an observed value fails on noise and gets deleted.
+    expect(withDeputy.meanMonthsWithDeputy).toBeGreaterThan(6);
+  });
+});
+
+/**
+ * Pushing back, A/B on identical seeds.
+ *
+ * The A side is the board as an immovable fact, which is how every version before v2.4 worked.
+ */
+describe('arguing about a file', () => {
+  const arguing = summarise(playMany(seeds.slice(0, 10), DEPARTMENT_IDS));
+  const meekly = summarise(
+    playMany(seeds.slice(0, 10), DEPARTMENT_IDS, { useNegotiation: false }),
+  );
+
+  it('gets used, and only on files that were going to be missed', () => {
+    expect(arguing.meanNegotiations).toBeGreaterThan(3);
+    expect(meekly.meanNegotiations).toBe(0);
+  });
+
+  it('finishes more of the board', () => {
+    expect(arguing.completionRate).toBeGreaterThan(meekly.completionRate);
+  });
+
+  /**
+   * And is paid for. Political capital is what promotions are keyed off, so every file argued
+   * about is a favour not spent on your own career — measured at about a sixth of a tier across
+   * ten seeds and seven departments.
+   *
+   * The first pricing failed this: at six points a scope the bot bought ninety-nine per cent
+   * completion for eight hundredths of a tier, which turns an oversubscribed board — the thing
+   * this whole game is built on — into a solvable one.
+   */
+  it('costs the career the favours it spends', () => {
+    expect(arguing.meanPoliticalCapital).toBeLessThan(meekly.meanPoliticalCapital);
+    expect(arguing.meanLevel).toBeLessThan(meekly.meanLevel);
+  });
+
+  /** It is how you survive a bad month, not how you stop having them. */
+  it('does not make the board solvable', () => {
+    expect(arguing.completionRate).toBeLessThan(0.995);
+  });
+});
+
+/**
+ * Crises: files with teeth.
+ *
+ * The whole risk with these is that they are authored, translated, validated — and then never
+ * seen, because they arrive only through a `spawnTask` effect on a milestone gated to level 3 and
+ * a minimum turn. A crisis nobody meets is the most expensive kind of dead content there is.
+ */
+describe('files with teeth', () => {
+  const crises = Object.values(shippedRegistry.tasks).filter((task) => task.crisis);
+
+  it('never puts one on the board by chance', () => {
+    // `refillBoard` filters them out, and `validate.ts` requires weight 0 so nothing can be
+    // written that assumes otherwise.
+    for (const crisis of crises) expect(crisis.weight, crisis.id).toBe(0);
+  });
+
+  it('makes each one far bigger than an ordinary file', () => {
+    const ordinary = Object.values(shippedRegistry.tasks).filter((task) => !task.crisis);
+    const typical =
+      ordinary.reduce((sum, task) => sum + task.baseEffort, 0) / Math.max(1, ordinary.length);
+
+    for (const crisis of crises) {
+      expect(crisis.baseEffort, crisis.id).toBeGreaterThan(typical * 2);
+    }
+  });
+
+  /** Every one has to be spawnable by something, or it is prose nobody will ever be handed. */
+  it('has an event that brings each one', () => {
+    const spawned = new Set(
+      Object.values(shippedRegistry.events)
+        .flatMap((event) => event.choices)
+        .flatMap((choice) => choice.outcomes)
+        .flatMap((outcome) => outcome.effects)
+        .filter((effect) => effect.kind === 'spawnTask')
+        .map((effect) => (effect as { templateId: string }).templateId),
+    );
+
+    for (const crisis of crises) expect(spawned.has(crisis.id), crisis.id).toBe(true);
+  });
+
+  it('actually lands on somebody in ordinary play', () => {
+    let met = 0;
+    for (const seed of seeds.slice(0, 8)) {
+      for (const department of DEPARTMENT_IDS) {
+        const run = playCareer({ seed, department });
+        if (run.finalState.firedEvents.some((id) => id.startsWith('evt.crisis.'))) met += 1;
+      }
+    }
+    // Milestones are drawn against everything else on offer, so this is not every career — but a
+    // corpus where it is *no* career means the gates are unreachable.
+    expect(met).toBeGreaterThan(0);
   });
 });

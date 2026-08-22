@@ -3,6 +3,7 @@ import { doneFlag } from '../../engine/initiatives';
 import { bodyCondition, bodyKnown, contributionTo } from '../../engine/world';
 import type { GameState } from '../../engine/types';
 import { useT } from '../../i18n';
+import { Portrait } from './Portrait';
 
 /**
  * What is left behind.
@@ -99,6 +100,7 @@ export function Epilogue({ game }: { game: GameState }) {
           <ul className="epilogue__list">
             {remembered.map((person) => (
               <li key={`${person.name}-${person.leftOnTurn}`}>
+                <Portrait name={person.name} size={32} />{' '}
                 <span className="epilogue__name">{person.name}</span>{' '}
                 <span className="muted">
                   {person.regard >= 15

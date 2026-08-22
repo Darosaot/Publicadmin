@@ -693,6 +693,119 @@ times across seventy simulated careers.
 
 ---
 
+## 8e. Perks — what the career made of you
+
+Every number on the stats bar decays. A perk is the opposite: learned, kept, never taken away.
+Twelve of them, three columns of four, each costing its own tier — so a full career affords about
+eleven points against a tree costing thirty and has to decide what kind of official it became. A
+tree you can complete is a checklist.
+
+Stored as `perk.<id>` flags, the same trade the country and directives took. Points are **derived**
+from months served and rank reached rather than stored, so there is no balance to corrupt and no
+code path that can leak or double-spend one.
+
+Two design rules, both learned by measurement rather than argument:
+
+- **A perk never multiplies and never pays reputation.** Additive bonuses stay legible to the
+  sweep; offers key off reputation, so anything paying it converts straight into promotion
+  velocity and every career converges on one build.
+- **The strongest effect must be the most expensive.** `methodical` began at tier 1 and was, on
+  isolation, worth half its branch alone and nearly two extra years of career — burnout is what
+  actually ends one. It moved to tier 3. It was priced, not weakened.
+
+The people column was a *dead branch* on its first draft: −0.2 morale across a career. Its perks
+all improved actions the bot only takes when things are already going badly, so the gain was spent
+returning to the same equilibrium. `open_door` now halves the monthly morale drift, which no
+policy can absorb.
+
+## 8f. People — a unit of individuals
+
+Officers have a field they are good at, a temperament, and a record of what they have done.
+
+**Traits and faces come out of the name**, so the cast is consistent across careers and the save
+does not grow. Six traits, each with one hook and none strictly better: quick trades output
+against quality, meticulous the reverse, restless is a worse colleague and a faster learner.
+
+**Specialisms are stored**, and that was a reversal. Derived uniformly across seven departments, a
+unit of four almost never held a specialist for its own board and the bonus fired on 6% of files.
+Hiring is weighted `SPECIALIST_HIRE_CHANCE` toward the player's own department; the rate is 25%.
+
+**Experience is earned by carrying work, not by drawing a salary.** Somebody nobody hands a file
+to sits at the same desk for nine years and learns nothing.
+
+Two traits had to be redesigned because they cancelled a core mechanic outright: a diplomat's
+morale point exactly offsets `STAFF_MORALE_DRIFT`, so one hire switched off attrition for a whole
+unit. They hold a *floor* instead. `steady` resists only below 50, which is what its own
+description promised.
+
+## 8g. Structure — naming a second
+
+Until v2.3 a unit of eight played exactly like a unit of three, only with more of it: every file
+handed over individually, the manager of a directorate performing the same clerical act eight
+times.
+
+A deputy stops carrying your handovers and runs the routine board — a few files a month, by
+deadline, with none of your time spent. `deputyId` is an optional string, so no migration.
+
+**The trade is judgement for availability.** They run the board by deadline rather than by who is
+best at each file, and that cost is real: paid only in effort points, which a senior manager
+already has spare, the feature measured as a button you were punished for pressing. Somebody doing
+nothing but running the board is genuinely better at it, which is what `DEPUTY_OUTPUT_BONUS`
+corrects for.
+
+The one real trap is that `deputyId` references a list people leave. Every removal path —
+resignation, poaching, a post change with a unit, a move to one without — runs through
+`settleDeputy`, with a test for each.
+
+## 8h. Pushing back
+
+The original design note said this game's missing verb was self-directed action. Three verbs on
+every file, in ascending order of what they cost:
+
+| | |
+| --- | --- |
+| **Move the date** | Two cycles. Priced on how much of the file is left, because everybody can see the difference. |
+| **Cut it back** | Smaller file, and it can no longer come back excellent — part of what would have made it excellent is the part you agreed not to do. |
+| **Say no** | Leaves the board and does *not* count as missed. The only one anybody outside the room hears about, so the only one costing standing. |
+
+Paid in political capital, because that is what it is: favours owed is exactly what getting a date
+moved spends. Once per file — without the cap, pushing a deadline is an infinite loop against a
+stat that replenishes.
+
+**The first pricing made the board solvable**: at six points a scope, the bot bought 99.4%
+completion for eight hundredths of a tier. An oversubscribed board is what the whole game rests
+on. Priced up, the trade reads properly — more of the board finished, paid for in the favours that
+would otherwise have bought promotions.
+
+## 8i. Crises — files with teeth
+
+A crisis is a **task**, not a subsystem. Building it as one reuses allocation, delegation,
+progress, deadlines, quality and the turn report, and avoids a fourth allocation channel in a
+codebase whose notes list three silent failures in the last one.
+
+- **Never drawn.** `refillBoard` filters them out and `validate.ts` *requires* weight 0 — an
+  inversion of the usual rule, so "never arrives at random" is checked rather than asserted.
+- **Cannot be declined or cut back.** You may ask for more time. A crisis you can hand back is not
+  one.
+- **Two to three months of a senior desk**, so the rest of the board suffers while it is open.
+- **Failing one costs what it says**, not the ordinary penalty.
+
+## 8j. A note on measuring stress
+
+Four separate features have now tripped over this, so it is written here rather than rediscovered.
+
+The autoplay bot rests whenever stress crosses a fixed threshold. **Stress is therefore a shared
+sink**: anything that lowers it simply means less resting, the equilibrium returns to the same
+number, and the freed points go somewhere else. An A/B on `meanStress` measures whichever system
+landed most recently.
+
+It swamped the directives sweep when perks arrived, the deputy sweep when negotiation arrived, and
+the deputy sweep again when crises arrived. Isolating each comparison works exactly until the next
+system lands, which is a maintenance appointment rather than a guardrail. Stress is measurable
+here only against a bot with an adaptive rest policy — a bigger change than anything it buys — so
+features whose payoff is stress are judged on *not being a trap* in the sweep, and on deterministic
+unit tests for the relief itself.
+
 ## 9. Endings
 
 Checked at the end of every month, in this order — the first one that matches wins.

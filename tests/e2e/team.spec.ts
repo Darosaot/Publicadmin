@@ -92,9 +92,11 @@ test('a manager gets a unit, a budget and a way to spend a month on people', asy
 
   await tab(page, 'Team').click();
 
-  // Everyone the bot ended up with is on the roster, with both bars rendered.
+  // Everyone the bot ended up with is on the roster, with all three bars rendered: experience,
+  // skill and morale. Experience is the one that joined them in v2 — what they have actually
+  // done, as opposed to what they can do and whether they feel like doing it.
   await expect(page.locator('.staff')).toHaveCount(managing.staff.length);
-  await expect(page.locator('.staff').first().locator('.staffbar')).toHaveCount(2);
+  await expect(page.locator('.staff').first().locator('.staffbar')).toHaveCount(3);
 
   const effort = page.getByTestId('effort-remaining');
   const before = Number((await effort.textContent())?.match(/(\d+) of/)?.[1]);

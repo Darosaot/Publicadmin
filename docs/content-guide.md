@@ -471,3 +471,69 @@ Run it after any content change so the readable script keeps matching the game.
 - Every department has task templates and random events that can reach it
 - Career levels are contiguous from 1, with rising salaries and real promotion requirements
 - Every ending has closing text, and the Minister ending is actually reachable from content
+
+## Writing a crisis
+
+A crisis is a task with `crisis: true`, and everything follows from that.
+
+```ts
+defineTask('task.crisis.inquiry', {
+  departments: 'any',
+  minLevel: 3,
+  baseEffort: 26,       // two to three months of a senior desk
+  deadlineRange: [3, 3],
+  difficulty: 3,
+  weight: 0,            // required: validate.ts fails the build on anything else
+  crisis: true,
+  onFail: [ /* real consequences — not an awkward follow-up */ ],
+});
+```
+
+Four rules the build enforces or the design requires:
+
+1. **`weight` must be 0.** `refillBoard` filters crises out, so a weight would never be read — but
+   a template carrying one is a template somebody later assumes can be drawn, and a crisis leaking
+   into the random pool puts a twenty-six-point file on an unsuspecting desk.
+2. **Something must spawn it.** Write an arrival event with a `spawnTask` effect. A crisis nobody
+   can be handed is the most expensive kind of dead content there is, and there is a guardrail in
+   `autoplay.test.ts` that plays careers until one turns up.
+3. **Make the arrival a real choice.** Both options should cost something. Heading it off spends
+   favours and sometimes works; accepting it early buys a better footing than a fortnight of
+   denial.
+4. **`onFail` is the whole point.** Ordinary missed work schedules an awkward conversation. If
+   missing this costs no more than that, it is a big file rather than a crisis.
+
+## Adding a perk
+
+```ts
+definePerk('mentor', {
+  name: 'Mentor',
+  desc: 'You have taught somebody this job from nothing...',
+  branch: 'people',     // people | craft | politics
+  tier: 2,              // the row, and the price
+  requires: 'open_door',
+  minLevel: 2,
+});
+```
+
+Then add a hook in `src/engine/perks.ts` and call it from wherever it bites. Three rules:
+
+- **Write the person, not the modifier.** "You have sat through enough recruitment rounds to know
+  who is worth waiting for" and "−1 month hiring time" are the same mechanic and a different game.
+  The number is printed on the card underneath either way.
+- **Never pay reputation.** Offers key off it, so a perk that adds to it converts directly into
+  promotion velocity and every career converges on the same build.
+- **Price by strength, not by theme.** A perk's tier is its cost. If the sweep says it is the
+  strongest thing in its branch, it belongs further down — `methodical` started at tier 1 and was
+  worth half its column on its own.
+
+**Then measure it.** `playMany(seeds, DEPARTMENT_IDS, { perkBranch: 'people' })` runs a career
+that spends only down one column. A branch that moves nothing is a dead branch, and the people
+column shipped as one in its first draft.
+
+## Writing something whose payoff is stress
+
+Don't measure it in the sweep. See `game-design.md` §8j — the bot rests against a fixed threshold,
+so stress is a shared sink and an A/B on `meanStress` reads whichever system landed last. Four
+features have now tripped over this. Test the relief deterministically in a unit test, and judge
+the feature in the sweep on *not being a trap*.

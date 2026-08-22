@@ -20,6 +20,8 @@ import type {
   GameEvent,
   InitiativeTemplate,
   Outcome,
+  PerkBranch,
+  PerkTemplate,
   PlayerStats,
   QualityTier,
   TaskTemplate,
@@ -123,6 +125,8 @@ export interface TaskSpec {
   deadlineRange: [number, number];
   difficulty: 1 | 2 | 3;
   weight?: number;
+  /** A file that arrives because something went wrong. See `TaskTemplate.crisis`. */
+  crisis?: boolean;
   onComplete?: Partial<Record<QualityTier, Effect[]>>;
   onFail?: Effect[];
 }
@@ -133,6 +137,7 @@ export function defineTask(id: string, spec: TaskSpec): TaskTemplate {
     titleKey: register(`${id}.title`, spec.title),
     descKey: register(`${id}.desc`, spec.desc),
     departments: spec.departments,
+    ...(spec.crisis ? { crisis: true } : {}),
     minLevel: spec.minLevel,
     maxLevel: spec.maxLevel,
     baseEffort: spec.baseEffort,
@@ -206,4 +211,34 @@ export function defineDepartment(id: DepartmentId, spec: DepartmentSpec): Depart
 /** Registers a plain string (endings, career titles, UI copy that lives beside content). */
 export function text(key: string, value: string): string {
   return register(key, value);
+}
+
+/* -------------------------------------------------------------------- perks */
+
+export interface PerkSpec {
+  name: string;
+  desc: string;
+  branch: PerkBranch;
+  tier: number;
+  requires?: string;
+  minLevel: number;
+}
+
+/**
+ * A perk, which is the only thing in the game the player keeps.
+ *
+ * The description is written as what the person became, not as what the number does. "You have
+ * run enough recruitment rounds to know who is worth waiting for" is the same mechanic as
+ * "-1 month hiring time" and a different game; the number is on the card underneath either way.
+ */
+export function definePerk(id: string, spec: PerkSpec): PerkTemplate {
+  return {
+    id,
+    nameKey: register(`perk.${id}.name`, spec.name),
+    descKey: register(`perk.${id}.desc`, spec.desc),
+    branch: spec.branch,
+    tier: spec.tier,
+    ...(spec.requires !== undefined ? { requires: spec.requires } : {}),
+    minLevel: spec.minLevel,
+  };
 }

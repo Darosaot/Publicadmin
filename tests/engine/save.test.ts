@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { SAVE_VERSION } from '../../src/engine/constants';
 import { createGame } from '../../src/engine/newGame';
+import { specialismFromName, specialismOf, traitOf } from '../../src/engine/people';
 import { deserialize, serialize } from '../../src/engine/save';
+import { setupTeamForPost } from '../../src/engine/team';
 import { beginNextTurn, emptyAllocation, resolveTurn } from '../../src/engine/turn';
 import type { GameState } from '../../src/engine/types';
 import { registry as realRegistry } from '../../src/content';
@@ -193,6 +195,60 @@ describe('migrating a save forward', () => {
     // A career that predates initiatives has not started any, and every one on the menu is still
     // open to it — so there is nothing to convert, only a field to exist.
     expect(result.state.initiatives).toEqual([]);
+  });
+
+  /** Version 6 had a unit, but nobody in it had a recorded history. */
+  function version6(state: GameState): string {
+    const staff = state.staff.map(({ xp: _none, ...rest }) => rest);
+    return JSON.stringify({ ...state, staff, saveVersion: 6 });
+  }
+
+  it('gives a version 6 unit no recorded experience rather than inventing some', () => {
+    const withUnit = { ...game(), turn: 40 };
+    const staffed = setupTeamForPost(
+      { ...withUnit, player: { ...withUnit.player, postId: 'post.region.head_of_unit', level: 3 } },
+      shipped,
+    );
+    expect(staffed.staff.length).toBeGreaterThan(0);
+
+    const result = deserialize(version6(staffed), shipped);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.state.staff.length).toBe(staffed.staff.length);
+    expect(result.state.staff.every((member) => member.xp === 0)).toBe(true);
+  });
+
+  /**
+   * The migration must be *stable*, not merely plausible.
+   *
+   * A v6 officer predates specialisms, so there is no rolled value to recover and one has to be
+   * chosen. Choosing it from the name means the same save opened twice describes the same person;
+   * rolling for it here would write a different unit every time the file was loaded, which is the
+   * one thing a migration must never do.
+   */
+  it('gives a migrated officer the same field every time the save is opened', () => {
+    const withUnit = { ...game(), turn: 40 };
+    const staffed = setupTeamForPost(
+      { ...withUnit, player: { ...withUnit.player, postId: 'post.region.head_of_unit', level: 3 } },
+      shipped,
+    );
+
+    const result = deserialize(version6(staffed), shipped);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const again = deserialize(version6(staffed), shipped);
+    expect(again.ok).toBe(true);
+    if (!again.ok) return;
+
+    for (const member of result.state.staff) {
+      const twin = again.state.staff.find((s) => s.id === member.id)!;
+      expect(specialismOf(member)).toBe(specialismOf(twin));
+      expect(specialismOf(member)).toBe(specialismFromName(member.name));
+      // Traits are still read from the name, so they never needed migrating at all.
+      expect(traitOf(member)).toBe(traitOf(twin));
+    }
   });
 
   it('leaves the migrated career playable', () => {
