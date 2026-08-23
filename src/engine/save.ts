@@ -174,6 +174,20 @@ const MIGRATIONS: Record<number, (raw: RawSave) => RawSave> = {
       },
     };
   },
+
+  /**
+   * A career that has no record of itself, and does not get one invented.
+   *
+   * Every other migration in this file seeds its new field with something defensible — a rival at
+   * the player's own tier, savings reconstructed from months served, a neutral climate. This one
+   * seeds an empty array on purpose.
+   *
+   * The alternative is to synthesise a plausible arc from the stats as they stand now, and there
+   * is no honest version of that. A chart is a claim about what happened; drawing one from a
+   * single endpoint would be a fabrication rendered convincingly, which is worse than a gap. The
+   * screen therefore shows an in-flight save the years it can actually account for, and says so.
+   */
+  8: (raw) => ({ ...raw, history: [] }),
 };
 
 /**
@@ -253,6 +267,7 @@ function hasRequiredShape(raw: RawSave): boolean {
     Array.isArray(raw.tasks) &&
     Array.isArray(raw.initiatives) &&
     Array.isArray(raw.alumni) &&
+    Array.isArray(raw.history) &&
     typeof player === 'object' &&
     player !== null &&
     typeof player.department === 'string' &&

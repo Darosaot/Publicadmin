@@ -11,6 +11,7 @@ import { InitiativesScreen } from './ui/screens/InitiativesScreen';
 import { SelfScreen } from './ui/screens/SelfScreen';
 import { NewGameScreen } from './ui/screens/NewGameScreen';
 import { PeopleScreen } from './ui/screens/PeopleScreen';
+import { RecordScreen } from './ui/screens/RecordScreen';
 import { TeamScreen } from './ui/screens/TeamScreen';
 import { TitleScreen } from './ui/screens/TitleScreen';
 
@@ -49,6 +50,8 @@ function Router() {
         <SelfScreen game={game} />
       ) : state.view === 'initiatives' ? (
         <InitiativesScreen game={game} />
+      ) : state.view === 'record' ? (
+        <RecordScreen game={game} />
       ) : (
         <DashboardScreen game={game} />
       )}

@@ -56,6 +56,7 @@ import {
   resolveInitiatives,
 } from './initiatives';
 import { driftClimate, reputationDecayDelta } from './climate';
+import { record } from './history';
 import { moneyStressDelta, savingsDelta } from './money';
 import { advanceRival } from './rival';
 import { driftWorld, learnLocalBodies } from './world';
@@ -683,6 +684,10 @@ export function finalizeTurn(state: GameState, registry: ContentRegistry): GameS
     };
     next = { ...next, log: [...next.log, offerLog].slice(-LOG_LIMIT) };
   }
+
+  // Taken here rather than in `beginNextTurn` because a career that ends never reaches one, and
+  // the final year is the one the epilogue most wants to be able to show.
+  next = record(next);
 
   const ending = checkEnding(next);
   if (ending) {
