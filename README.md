@@ -38,6 +38,13 @@ Council of Ministers. Along the way you'll meet the same eight people over and o
 started the same week, a journalist, an auditor who remembers your files — and the game keeps track
 of how you left things with each of them.
 
+Two screens are about the long view rather than this month. The **Record** draws every cycle you
+have played — five stats, your pay and what you have put by, ruled where you changed post, so the
+question *was it the new job that did this* is answerable by looking. And the **Country** is a map
+of Valmara: every institution placed from the first month, the ones you have never been to drawn
+blank, because the point of that screen has always been that the country is bigger than your view
+of it.
+
 Two things move whether or not you are looking. **Elena Vásquez** joined the same week you did and
 is climbing the same tree: she takes the post you turned down, and thirty years later the epilogue
 tells you where she finished. And the **country has weather** — whether there is money, whether
