@@ -23,6 +23,7 @@ import {
 import { adjustStat } from './effects';
 import { outgoingsFor } from './money';
 import { displaceRival, fillLapsedPost, postHeld } from './rival';
+import { learnLocalBodies } from './world';
 import { edgeBetween, getPost, maxTier, postsFrom, type ContentRegistry } from './registry';
 import { nextChance, nextRange } from './rng';
 import { refillBoard } from './tasks';
@@ -264,8 +265,13 @@ export function acceptOffer(
   // career screen would otherwise show the player their own job title under somebody else's name.
   const settled = displaceRival(promoted, registry, target.id);
 
+  // You know the building on your first morning in it, not a cycle later. `beginNextTurn` runs
+  // this too, but only after a whole cycle has been played, which would show a new arrival their
+  // own office as somewhere they had never been.
+  const sited = learnLocalBodies(settled, registry);
+
   // The unit you inherit comes with the post — or is handed over, if the new post has none.
-  return refillBoard(setupTeamForPost(settled, registry, keep), registry);
+  return refillBoard(setupTeamForPost(sited, registry, keep), registry);
 }
 
 /**

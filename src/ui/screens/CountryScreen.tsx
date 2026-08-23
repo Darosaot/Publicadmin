@@ -5,6 +5,7 @@ import { climateBand } from '../../engine/climate';
 import { bodyCondition, bodyKnown, bodyStanding } from '../../engine/world';
 import { useT } from '../../i18n';
 import { StatsBar } from '../components/StatsBar';
+import { ValmaraMap, bandFor } from '../components/ValmaraMap';
 import { GameTabs } from '../components/GameTabs';
 
 /**
@@ -19,17 +20,6 @@ import { GameTabs } from '../components/GameTabs';
  * is "this place is in trouble", not "this place is at 34".
  */
 
-const CONDITION_BANDS = [
-  { floor: 75, tone: 'strong' },
-  { floor: 58, tone: 'sound' },
-  { floor: 42, tone: 'strained' },
-  { floor: 25, tone: 'failing' },
-  { floor: 0, tone: 'collapsing' },
-] as const;
-
-function bandFor(condition: number): (typeof CONDITION_BANDS)[number]['tone'] {
-  return (CONDITION_BANDS.find((band) => condition >= band.floor) ?? CONDITION_BANDS[4]).tone;
-}
 
 export function CountryScreen({ game }: { game: GameState }) {
   const t = useT();
@@ -48,6 +38,13 @@ export function CountryScreen({ game }: { game: GameState }) {
       <div className="layout">
         <section className="layout__main">
           <h2 className="section__title">{t('country.heading')}</h2>
+
+          {/* Every institution, from the first month — the ones you have never looked at drawn
+              without a name or a condition. The fog is the point: a list could tell you there
+              were nine more places and could not show you that there was more country. */}
+          <ValmaraMap game={game} />
+
+          <h3 className="section__subtitle">{t('country.visited_heading')}</h3>
 
           {seen.length === 0 ? (
             <p className="muted">{t('country.empty')}</p>
@@ -134,6 +131,9 @@ export function CountryScreen({ game }: { game: GameState }) {
           {unseen > 0 && (
             <section className="panel">
               <h2 className="panel__title">{t('country.unseen_heading')}</h2>
+              {/* Kept alongside the map rather than replaced by it: the map shows you *that*
+                  there is more, and this says how much, which is the one thing a blank dot
+                  cannot. */}
               <p className="muted">{t('country.unseen', { count: unseen })}</p>
             </section>
           )}

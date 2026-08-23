@@ -36,6 +36,10 @@ export const uiStrings: Record<string, string> = {
   'country.about':
     'These places carry on whether or not you are watching them. Some are slowly getting better and some are slowly falling over, and the difference is usually nobody in particular. What you do here moves them, and they remember which way.',
   'country.unseen_heading': 'Elsewhere',
+  'country.visited_heading': 'Where you have been',
+  'map.alt': 'A map of Valmara. The capital is north, the regional tier across the middle, the councils south.',
+  'map.here': 'You are here',
+  'map.unvisited': 'Never been',
   'country.unseen': '{count} more institutions you have never had reason to look at.',
   'country.better': 'Better than it was',
   'country.worse': 'Worse than it was',

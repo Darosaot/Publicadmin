@@ -122,7 +122,7 @@ export function driftWorld(
 }
 
 /**
- * Marks the bodies on the player's own beat as known.
+ * Marks the bodies you could not fail to know: your department's beat, and the one you work in.
  *
  * You do not need to go looking for the institutions your department deals with every week — you
  * already know what state they are in, because dealing with them is the job. Every department has
@@ -130,11 +130,20 @@ export function driftWorld(
  * Country screen has something on it from the first month rather than staying empty until the
  * player happens to take the right initiative.
  *
- * Everything beyond your own beat has to be gone and looked at.
+ * **And the building you are sitting in.** That was missing until the map went in and made it
+ * visible: a Special Adviser at the Council of Ministers was shown their own workplace as a blank
+ * dot marked "never been", because the Cabinet Office is on the legal beat and they were on the
+ * policy one. Nobody has to go and look at their own desk. The post's institution is its id's
+ * second segment — `post.cabinet.special_adviser` — which is the same convention the map reads
+ * and `validate.ts` enforces.
+ *
+ * Everything beyond those has to be gone and looked at.
  */
 export function learnLocalBodies(state: GameState, registry: ContentRegistry): GameState {
+  const here = state.player.postId.split('.')[1];
   const local = registry.bodies.filter(
-    (body) => body.beat === state.player.department && !bodyKnown(state, body),
+    (body) =>
+      (body.beat === state.player.department || body.id === here) && !bodyKnown(state, body),
   );
   if (local.length === 0) return state;
 

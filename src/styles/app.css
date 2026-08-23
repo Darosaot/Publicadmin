@@ -456,6 +456,119 @@ input {
   color: var(--c-text-faint);
 }
 
+/* --- the map of Valmara --------------------------------------------------
+ *
+ * Flat fills, hard edges, no gradients — the same material as everything else. Condition is the
+ * one thing carrying colour, because it is the one thing the map is for; standing is a rim and
+ * the current post a ring, so neither competes with it.
+ */
+
+.map {
+  margin: 0 0 var(--s-5);
+}
+
+.map__svg {
+  display: block;
+  width: 100%;
+  max-width: 34rem;
+  margin: 0 auto;
+  aspect-ratio: 1;
+  background: var(--c-surface-sunken);
+  border: var(--bw) solid var(--c-border);
+}
+
+.map__coast {
+  fill: var(--c-surface);
+  stroke: var(--c-border);
+  stroke-width: 0.6;
+  stroke-linejoin: miter;
+}
+
+/* A place you have never looked at: positioned, and nothing else. */
+.place--unknown circle {
+  fill: var(--c-bevel-dark);
+  opacity: 0.4;
+}
+
+.place__dot {
+  stroke: var(--c-border-strong);
+  stroke-width: 0.4;
+}
+
+.place--strong .place__dot { fill: var(--c-performance); }
+.place--sound .place__dot { fill: var(--c-reputation); }
+.place--strained .place__dot { fill: var(--c-accent); }
+.place--failing .place__dot { fill: #d4692a; }
+.place--collapsing .place__dot { fill: var(--c-stress); }
+
+/* Where you are sitting. A ring rather than a bigger dot, so it does not read as a bigger place. */
+.place__ring {
+  fill: none;
+  stroke: var(--c-brand-strong);
+  stroke-width: 0.9;
+}
+
+.place__warm,
+.place__cold {
+  fill: none;
+  stroke-width: 0.6;
+}
+
+.place__warm { stroke: var(--c-performance); }
+.place__cold { stroke: var(--c-stress); }
+
+.place__name {
+  font-size: 2.6px;
+  font-weight: 700;
+  text-anchor: middle;
+  fill: var(--c-text);
+  /* A halo, so a label crossing the coastline stays readable without a box behind it. */
+  paint-order: stroke;
+  stroke: var(--c-surface);
+  stroke-width: 0.9;
+  stroke-linejoin: round;
+}
+
+.map__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--s-2) var(--s-4);
+  margin-top: var(--s-3);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--c-text-muted);
+}
+
+.map__key::before {
+  content: '';
+  display: inline-block;
+  width: 0.6em;
+  height: 0.6em;
+  margin-right: var(--s-1);
+  border: 1px solid var(--c-border-strong);
+  vertical-align: baseline;
+}
+
+.map__key--here::before { background: var(--c-brand-strong); }
+.map__key--strong::before { background: var(--c-performance); }
+.map__key--strained::before { background: var(--c-accent); }
+.map__key--collapsing::before { background: var(--c-stress); }
+.map__key--unknown::before {
+  background: var(--c-bevel-dark);
+  opacity: 0.4;
+}
+
+.section__subtitle {
+  margin: 0 0 var(--s-3);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-muted);
+}
+
 /* --- the record ----------------------------------------------------------
  *
  * Charts drawn as columns of whole cells, matching what `pixel.css` already does to every
