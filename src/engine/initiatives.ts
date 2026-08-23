@@ -28,6 +28,7 @@ import {
   INITIATIVE_SLOTS_SENIOR,
   INITIATIVE_SLOTS_SENIOR_TIER,
 } from './constants';
+import { initiativeEffortFactor } from './climate';
 import { conditionMet } from './effects';
 import type { ContentRegistry } from './registry';
 import { findStaff, staffOutput } from './team';
@@ -105,7 +106,10 @@ export function startInitiative(
   const started: ActiveInitiative = {
     templateId: template.id,
     progress: 0,
-    required: template.required,
+    // What it takes to get this done, in the conditions it is actually being started in. Fixed
+    // at the start rather than re-read each cycle: a project is scoped once, and re-pricing it
+    // every month as the weather turned would make a progress bar that moved backwards.
+    required: Math.max(1, Math.round(template.required * initiativeEffortFactor(state))),
     startedTurn: state.turn,
     idleCycles: 0,
   };

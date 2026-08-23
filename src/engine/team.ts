@@ -37,6 +37,7 @@ import {
   STAFF_START_SKILL,
   TRAINING_SKILL_GAIN,
 } from './constants';
+import { budgetFactor } from './climate';
 import { remember } from './alumni';
 import { dismissDeputy, settleDeputy } from './org';
 import { knownBodies } from './world';
@@ -253,7 +254,13 @@ export function setupTeamForPost(
 
   const budget: Budget = {
     // A budget hawk's post is funded better than the establishment says it should be.
-    monthly: post.monthlyBudget === undefined ? 0 : post.monthlyBudget + budgetBonus(state),
+    monthly:
+      post.monthlyBudget === undefined
+        ? 0
+        : // An allocation is written in a particular year by a particular government. What the
+          // establishment says you get and what the settlement actually funds are two numbers,
+          // and everyone who has run a public budget knows which one arrives.
+          Math.round((post.monthlyBudget + budgetBonus(state)) * budgetFactor(state)),
     balance: 0,
     yearStartMonth: next.calendarMonth,
     spentThisMonth: 0,

@@ -44,6 +44,10 @@ function describeEffect(effect: Effect): string {
       return `${STAT_LABEL[effect.stat] ?? effect.stat} ${signed(effect.delta)}`;
     case 'salary':
       return `Salary ${signed(effect.delta)}`;
+    case 'savings':
+      return `Savings ${signed(effect.delta)}`;
+    case 'climate':
+      return `${effect.dial} ${signed(effect.delta)}`;
     case 'flag':
       return `flag \`${effect.flag}\`${effect.value === false ? ' cleared' : ''}`;
     case 'flagDelta':

@@ -38,6 +38,14 @@ export function describeFailure(t: Translate, failure: ConditionFailure): string
     return t(key, { stat: t(`stat.${failure.stat}`).toLowerCase(), required: failure.required });
   }
   if (failure.reason === 'level') return t('event.locked.level');
+  // The one the money system is for: seeing the door you cannot afford is the feature, not a
+  // consolation for it.
+  if (failure.reason === 'savings') {
+    return t(failure.comparison === 'max' ? 'event.locked.savings_max' : 'event.locked.savings_min');
+  }
+  if (failure.reason === 'rival') {
+    return t(failure.comparison === 'max' ? 'event.locked.rival_max' : 'event.locked.rival_min');
+  }
   return t('event.locked.other');
 }
 

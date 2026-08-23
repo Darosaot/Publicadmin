@@ -85,6 +85,32 @@ export interface Condition {
   minFlag?: Record<string, number>;
   /** Numeric flags at or below a value. */
   maxFlag?: Record<string, number>;
+  /**
+   * Where Elena is, relative to you: her tier minus yours, so positive means she is ahead.
+   *
+   * Relative rather than absolute because every scene worth writing about the two of you is about
+   * the gap and not about her rank. "She is your director now" is `minRivalGap: 1` whether that
+   * happened at tier two or tier five. Reads 0 once she has left the service.
+   */
+  minRivalGap?: number;
+  maxRivalGap?: number;
+
+  /**
+   * What you have put by, in euros.
+   *
+   * `maxSavings` is the interesting one and the reason this exists: it is how an outcome says
+   * "you needed the money", which is a sentence this corpus has been full of offers for and has
+   * never once been able to speak.
+   */
+  minSavings?: number;
+  maxSavings?: number;
+
+  /** The conditions the country is working in. Centred on zero: an ordinary year reads 0. */
+  minClimate?: Partial<Record<ClimateId, number>>;
+  maxClimate?: Partial<Record<ClimateId, number>>;
+  /** Only under a government of this character. */
+  stances?: Stance[];
+
   /** True: only with a unit under you. False: only before you have one. */
   requiresTeam?: boolean;
   /** Gates on the state of the unit itself. */
@@ -96,6 +122,17 @@ export interface Condition {
 export type Effect =
   | { kind: 'stat'; stat: StatId; delta: number }
   | { kind: 'salary'; delta: number }
+  /**
+   * Money in or out of your own pocket, in euros.
+   *
+   * Distinct from `salary`, which changes what you earn every month from now on. This is a
+   * one-off: the consultancy fee, the loan to somebody on your floor, the four months of overtime
+   * that closed a gap. Unclamped in both directions, because being short is the half of this the
+   * game was built to be able to say.
+   */
+  | { kind: 'savings'; delta: number }
+  /** Moves the national mood. Rare and powerful: most content should read the climate, not set it. */
+  | { kind: 'climate'; dial: ClimateId; delta: number }
   | { kind: 'flag'; flag: string; value?: boolean }
   /** Moves a numeric flag. Absent counts as 0, so the first delta sets it. */
   | { kind: 'flagDelta'; flag: string; delta: number }
@@ -415,6 +452,100 @@ export interface Post {
   from: PostEdge[];
 }
 
+/* ------------------------------------------------------------------ rival */
+
+/**
+ * Elena Vásquez, simulated.
+ *
+ * She joined the same week you did, and the design has always called her the control group for
+ * your career. Until now she was three authored scenes and a `rel.vasquez` flag: a person the
+ * prose asserted was keeping pace, with nothing behind the assertion.
+ *
+ * She is now a second token on the same board. `advanceRival` moves her with the same
+ * `postsFrom` / `edgeBetween` helpers the player's own offers come from, and she is held to the
+ * same `PromotionRequirement` on the same edges. That is the whole point: when she turns up
+ * running a directorate it is because she met the terms written on that edge, not because a
+ * number went up somewhere.
+ *
+ * ### Why one stat and not five
+ *
+ * She has to be cheap enough to simulate every cycle for thirty years and legible enough that a
+ * player can reason about her. A full stat block is neither: it doubles the tuning surface and
+ * buys nothing, because nothing ever reads her stress or her integrity. `standing` is the
+ * analogue of the player's reputation and it is the only number the edges actually ask her for.
+ */
+export interface RivalState {
+  /** A node in the same career graph the player walks. */
+  postId: string;
+  /** Denormalised `post.tier`, exactly as the player's `level` is. */
+  level: number;
+  track: TrackId;
+  /**
+   * Her professional standing, 0–100 — the analogue of the player's reputation.
+   *
+   * Checked against `PromotionRequirement.minReputation` and against `minPerformance`, because
+   * from the outside those are one thing: how well she is thought of.
+   */
+  standing: number;
+  /**
+   * How good she actually is, rolled once at the start of a career and never moved.
+   *
+   * Her standing drifts toward this rather than climbing forever, which is what stops every
+   * career ending with Elena in the Council of Ministers. Two careers on different seeds get a
+   * different Elena, and that is most of the replay value of having her at all.
+   */
+  ceiling: number;
+  monthsInPost: number;
+  /** She does not have to last thirty years either. */
+  left?: 'resigned' | 'retired';
+}
+
+/* ---------------------------------------------------------------- climate */
+
+/** The two national dials content can gate on. The government is a term, not a dial. */
+export type ClimateId = 'fiscal' | 'trust';
+
+export const CLIMATE_IDS: readonly ClimateId[] = ['fiscal', 'trust'];
+
+/** What kind of government is in, which decides what a cycle under it feels like. */
+export type Stance = 'reforming' | 'consolidating' | 'drifting';
+
+export const STANCES: readonly Stance[] = ['reforming', 'consolidating', 'drifting'];
+
+/**
+ * The weather over the whole country.
+ *
+ * Everything else in this game is something the player does or something done to the player. The
+ * climate is neither: it is the conditions the work happens in, and it moves whether or not
+ * anybody is looking. It is the game's answer to the demand meter every city builder puts on
+ * screen and never lets you hide — a permanent signal of what the world currently wants, which
+ * you can read and cannot argue with.
+ *
+ * ### Both dials are centred on zero
+ *
+ * Like a body's standing and unlike a stat, because 0 is a real reading here: an ordinary year
+ * under an ordinary government. A scale of 0–100 would make "normal" an arbitrary number in the
+ * middle that every hook had to subtract before using.
+ *
+ * ### It must average out
+ *
+ * A dial with a net drift is not weather, it is a difficulty setting applied to every guardrail
+ * at once — and the guardrails would move with it rather than catching it. `driftClimate` is
+ * mean-reverting for exactly this reason, and there is a test asserting that a career's mean
+ * climate comes out near zero.
+ */
+export interface ClimateState {
+  /** Austerity (negative) to expansion (positive). Moves budgets and what an undertaking costs. */
+  fiscal: number;
+  /** How far the public currently credits the administration. Moves what standing is worth. */
+  trust: number;
+  /** Which government this is, from 1. Increments at every election, so content can notice one. */
+  administration: number;
+  stance: Stance;
+  /** Calendar months until the next one. Elections are the beat the political track runs on. */
+  monthsToElection: number;
+}
+
 export interface JobOffer {
   id: string;
   toPost: string;
@@ -601,9 +732,48 @@ export interface GameState {
     track: TrackId;
     turnsAtLevel: number;
     salary: number;
+    /**
+     * What you have put by, in euros. Unclamped in both directions.
+     *
+     * Salary was a scoreboard for six versions: the design document said stepping onto the expert
+     * track "costs money, which is the point", and money bought nothing, so it cost nothing.
+     * Savings are what make that sentence true. They buy options and relief, never standing —
+     * see `MONEY_NEVER_BUYS_REPUTATION` in constants.ts for why that rule is absolute.
+     *
+     * Negative is not a bug. It is the interesting half: an official who is short is an official
+     * some of this game's oldest scenes were written for and never had.
+     */
+    savings: number;
+    /**
+     * What the month costs you to live, before anything discretionary.
+     *
+     * Scales with the post, because the career already moves you Alderford → Northbridge → the
+     * Region → the Agency → the Ministry, and a bigger job in a bigger place is not cheaper. Held
+     * on the state rather than derived so that content can move it: the mortgage, the move, the
+     * person who becomes your responsibility.
+     */
+    outgoings: number;
   };
 
   stats: PlayerStats;
+
+  /**
+   * Elena Vásquez's career, running alongside yours.
+   *
+   * Optional because a career that has lost her — she resigns on some seeds — still has a
+   * `RivalState` with `left` set; `undefined` means only that this save predates her existing.
+   */
+  rival?: RivalState;
+
+  /**
+   * The conditions the whole country is working in this month.
+   *
+   * Optional for the same reason `rival` is, and it buys the same two things. A save written
+   * before the weather existed was played in ordinary conditions and reads as neutral through
+   * every hook below; and the balance harness gets its A side for free, because "no climate" is
+   * not a switch bolted onto the engine for testing — it is literally the game as it was.
+   */
+  climate?: ClimateState;
 
   /**
    * The person running the routine board for you, if you have named one.

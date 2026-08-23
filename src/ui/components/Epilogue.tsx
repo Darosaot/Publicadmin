@@ -2,6 +2,7 @@ import { bodies, registry } from '../../content';
 import { doneFlag } from '../../engine/initiatives';
 import { bodyCondition, bodyKnown, contributionTo } from '../../engine/world';
 import type { GameState } from '../../engine/types';
+import { rivalPost } from '../../engine/rival';
 import { useT } from '../../i18n';
 import { Portrait } from './Portrait';
 
@@ -19,6 +20,9 @@ import { Portrait } from './Portrait';
 
 export function Epilogue({ game }: { game: GameState }) {
   const t = useT();
+
+  const herPost = rivalPost(game, registry);
+  const finalTier = game.player.level;
 
   // Only places the player actually worked on. A body that drifted while they were busy elsewhere
   // is not part of anybody's record.
@@ -124,6 +128,34 @@ export function Epilogue({ game }: { game: GameState }) {
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {/*
+        The control group reports.
+        
+        The design document has called Elena that since the cast was written, and for six versions
+        the claim had nothing behind it — she was three authored scenes and a standing number. Her
+        career runs now, so a career that met her can be told where it left her, which is the
+        payoff the whole feature is for and the only place the two careers get compared directly.
+      */}
+      {game.rival && game.flags['met.vasquez'] && (
+        <div className="epilogue__block">
+          <h3 className="epilogue__title">{t('epilogue.rival_heading')}</h3>
+          <p className="muted">
+            {game.rival.left
+              ? t('epilogue.rival_left')
+              : herPost
+                ? t(
+                    herPost.tier > finalTier
+                      ? 'epilogue.rival_ahead'
+                      : herPost.tier < finalTier
+                        ? 'epilogue.rival_behind'
+                        : 'epilogue.rival_level',
+                    { title: herPost.titleKey, org: herPost.orgKey },
+                  )
+                : t('epilogue.rival_left')}
+          </p>
         </div>
       )}
     </section>

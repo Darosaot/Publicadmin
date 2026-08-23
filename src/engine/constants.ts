@@ -7,7 +7,7 @@
 
 import type { PlayerStats } from './types';
 
-export const SAVE_VERSION = 7;
+export const SAVE_VERSION = 8;
 
 export const STAT_MIN = 0;
 export const STAT_MAX = 100;
@@ -49,9 +49,27 @@ export const BASELINE_STRESS_PER_TURN = 2;
  * fades, and a terrible one recovers rather than spiralling.
  *
  * Integrity is deliberately exempt. A record does not fade.
+ *
+ * ### Re-derived in v3, and why these are not round numbers
+ *
+ * Both stats settle at **monthly gain ÷ decay rate**, so the rate is not a free parameter: it is
+ * a function of how generous the corpus is on average. v3 added twenty-eight events and three
+ * systems, and the sweep came out at mean level 4.34 and reputation 75.3 against a tuned baseline
+ * of 4.0 and 67.2 — with careers reaching the top tier rising from 26% to 45%, which makes the
+ * top of the ladder ordinary.
+ *
+ * Measured, the drift split almost evenly: with all three new systems switched off the corpus
+ * alone still gave 4.11 and 70.6, so half of it was the new events diluting the pool in a
+ * favourable direction and half was the systems. That is the same effect the design document
+ * records from the other side — 71 events once dropped careers reaching the top from 57% to 26%
+ * because the new ones were slightly *less* generous than the ones they diluted.
+ *
+ * So the rates were re-derived rather than the content re-priced: 0.046 → 0.0497 and 0.044 →
+ * 0.047 put the sweep back at level 3.99, reputation 66.0 and 25% reaching tier 5. The awkward
+ * third digit is the point. A round number here would mean somebody guessed.
  */
-export const REPUTATION_DECAY_RATE = 0.046;
-export const POLITICAL_CAPITAL_DECAY_RATE = 0.044;
+export const REPUTATION_DECAY_RATE = 0.0497;
+export const POLITICAL_CAPITAL_DECAY_RATE = 0.047;
 export const PERFORMANCE_REVERSION_RATE = 0.05;
 export const PERFORMANCE_BASELINE = 50;
 
@@ -341,6 +359,205 @@ export const HONOURED_RETIREMENT_REPUTATION = 60;
 /** Requirements for the Minister confirmation arc to begin, from level 5. */
 export const MINISTER_MIN_REPUTATION = 88;
 export const MINISTER_MIN_POLITICAL_CAPITAL = 70;
+
+/* ------------------------------------------------------------------ rival */
+
+/**
+ * Elena Vásquez's numbers.
+ *
+ * She is tuned to be a pacer rather than an opponent. A rival who always wins is a taunt and a
+ * rival who always loses is furniture; the sweep asserts her final tier spreads across the range
+ * rather than piling at either end, and these are the numbers that keep it there.
+ */
+
+/** She starts where you start, because she started the week you did. */
+export const RIVAL_STARTING_STANDING = 20;
+
+/**
+ * How good she turns out to be, rolled once per career and never moved.
+ *
+ * The band is deliberately wide. On a low roll you outgrow her by year ten and the late scenes
+ * are about what that does to somebody; on a high roll she is your director and they are about
+ * what that does to you. Both are worth playing and neither should be the only one you ever see.
+ */
+export const RIVAL_CEILING_MIN = 48;
+export const RIVAL_CEILING_MAX = 81;
+
+/**
+ * How long she has to have been somewhere before she is a plausible appointment elsewhere.
+ *
+ * Only used when she picks up a post the player let go. Her ordinary progression is held to the
+ * `minTurnsAtLevel` written on the edge, like everyone else's.
+ */
+export const RIVAL_MIN_MONTHS_TO_MOVE = 10;
+
+/** Fraction of the distance to her ceiling that she closes each cycle. */
+export const RIVAL_STANDING_DRIFT = 0.055;
+
+/** A new post knocks anybody back. You arrive one post short; so does she. */
+export const RIVAL_STANDING_ON_PROMOTION = -14;
+
+/**
+ * Her chance of taking any one edge she qualifies for, per cycle.
+ *
+ * Below the player's `OFFER_BASE_CHANCE` on purpose: she is walking the same graph without a
+ * player's attention on it, and a rival who is promoted faster than you can be while playing well
+ * reads as the game cheating rather than as a career.
+ */
+export const RIVAL_OFFER_CHANCE = 0.26;
+
+/**
+ * How long a post she took is closed to you.
+ *
+ * The mechanic that finally gives offer expiry teeth: before this, an offer lapsing cost nothing
+ * whatsoever. A cooldown rather than a permanent closure, because permanent is a much harsher
+ * game than the one these constants are tuned for — the sweep shows it immediately as a collapse
+ * in mean level.
+ */
+export const RIVAL_HOLDS_POST_TURNS = 10;
+
+/**
+ * When she gives up on it, and how likely that is each cycle once she has.
+ *
+ * Written twice before it was right, and the second version is the interesting failure. It asked
+ * whether her standing had fallen below a threshold — but her standing climbs toward a ceiling of
+ * at least 48 and the only thing that knocks it down is a promotion, so after the qualifying
+ * period nobody could ever be below the bar. Zero rivals resigned across eighty-four careers.
+ * Unreachable content is the failure this codebase has documented more than any other, and a
+ * mechanic that cannot fire is the same thing as one that does not exist.
+ *
+ * **People do not leave a public administration because their standing dipped. They leave because
+ * it stopped going anywhere.** So it is a stall: a decade in the same post, still near the bottom
+ * of the tree. That is reachable — a ceiling under the tier-3 bar means exactly this career — and
+ * it is the true reason, which is usually where these end up.
+ */
+export const RIVAL_STALL_MONTHS = 120;
+export const RIVAL_STALL_LEVEL = 2;
+export const RIVAL_RESIGN_CHANCE = 0.06;
+
+/** Set on the state when she goes, so content can gate on it rather than assuming. */
+export const RIVAL_GONE_FLAG = 'rival_gone';
+
+/* ------------------------------------------------------------------ money */
+
+/**
+ * Savings, and the rule that keeps them from becoming a second reputation.
+ *
+ * Money buys **options and relief**; its absence buys **pressure**. It must never buy standing or
+ * promotion velocity, which is the same rule perks and initiatives already follow and for the same
+ * reason: offers key off reputation, so anything paying reputation converts a hoarded resource
+ * straight into promotion speed and every career converges on one build. `validate.ts` enforces
+ * it on content.
+ */
+export const MONEY_NEVER_BUYS_REPUTATION = true;
+
+export const STARTING_SAVINGS = 1400;
+
+/**
+ * What living costs, as a fraction of the post's baseline salary.
+ *
+ * Scaled to the post rather than fixed, because the career moves you to a bigger place every time
+ * it promotes you and the rent goes with it. Holding it fixed would have made seniority a money
+ * printer and the whole system trivial by tier three.
+ */
+export const OUTGOINGS_OF_BASE_SALARY = 0.72;
+
+/** Hardship: below this you are short, and it costs you every cycle until you are not. */
+export const HARDSHIP_SAVINGS = 0;
+export const HARDSHIP_STRESS_PER_CYCLE = 2;
+
+/**
+ * Above this you have a cushion — and it buys you nothing on the stats bar, deliberately.
+ *
+ * The first version gave comfort a permanent point of stress relief, which the sweep caught
+ * immediately: a competent career clears this threshold by its second post and then holds it for
+ * twenty-five years, so the "relief" was a flat upgrade with no downside. Worse, it laundered
+ * itself into promotion velocity through the sink documented in §8j — less stress means less
+ * resting, the freed points go on the board, and the career came out five points of reputation
+ * ahead. That is money buying standing by another route, which is the one thing money may never
+ * do.
+ *
+ * So comfort is a **state content can gate on**, not a bonus. It decides which choices are open
+ * to you. What it must never do is quietly make you better at the job.
+ */
+export const COMFORT_SAVINGS = 45_000;
+
+/* ---------------------------------------------------------------- climate */
+
+export const CLIMATE_MIN = -100;
+export const CLIMATE_MAX = 100;
+
+/**
+ * How fast each dial returns to nothing in particular.
+ *
+ * Mean reversion is not decoration here, it is the guardrail. A dial with a net drift is not
+ * weather — it is a difficulty setting applied to every other guardrail at once, and they would
+ * move with it rather than catching it. A career's mean climate has to come out near zero, and
+ * there is a test that says so.
+ */
+export const CLIMATE_REVERSION_RATE = 0.055;
+
+/** How hard the dials are pushed each month, before reversion pulls back. */
+export const CLIMATE_SHOCK_MAX = 4;
+
+/** A term of government, in calendar months, and how much of it the campaign occupies. */
+export const ELECTION_TERM_MONTHS = 48;
+
+/**
+ * What a change of government does to the dials.
+ *
+ * The fiscal swing is symmetric, so a new government is as likely to open the taps as to close
+ * them. Trust is **reset toward nothing rather than bounced upward**, and that is a correction
+ * rather than a preference: the first version gave every new administration +12 and, at 7.6
+ * elections a career, that made mean trust +4.00 for thirty years running. Trust suppresses
+ * reputation decay, so a permanently positive dial was a permanent discount on the single number
+ * every promotion keys off — every career in the sweep came out four points of reputation and a
+ * tenth of a tier ahead, for no reason anybody had chosen.
+ *
+ * Resetting is also the truer reading. A new government has not yet been believed or disbelieved;
+ * it has no record. That is zero, not a credit.
+ */
+export const ELECTION_FISCAL_SWING = 18;
+export const ELECTION_TRUST_RESET = 0.65;
+
+/**
+ * What each stance leans the dials toward while it is in.
+ *
+ * A reforming government spends and is believed until it isn't; a consolidating one cuts and is
+ * trusted for it; a drifting one does neither and is credited with nothing.
+ *
+ * **Each column sums to zero across the three stances**, and it has to. Stances are drawn
+ * uniformly, so the mean of a column is the dial's resting point over a long career — and a
+ * resting point that is not zero is not weather, it is a difficulty setting applied to every
+ * guardrail at once. The first version leaned fiscal to −2 and trust to −0.67 by accident.
+ */
+export const STANCE_FISCAL_LEAN: Record<string, number> = {
+  reforming: 16,
+  consolidating: -16,
+  drifting: 0,
+};
+export const STANCE_TRUST_LEAN: Record<string, number> = {
+  reforming: 10,
+  consolidating: 2,
+  drifting: -12,
+};
+
+/**
+ * What the climate is worth, mechanically.
+ *
+ * Every one of these is a small multiple of a dial at full deflection, and "small" is doing real
+ * work: these hooks sit on the two things the entire game is tuned against — the decay rates and
+ * the unit budget. The climate is meant to change which years are hard, not which careers are
+ * possible.
+ */
+/** Unit budget moves this fraction of itself at full fiscal deflection. */
+export const CLIMATE_BUDGET_SWING = 0.18;
+/** Reputation decays faster when nobody believes the administration. */
+export const CLIMATE_TRUST_DECAY_SWING = 0.006;
+/** An undertaking costs more effort to move in an austere year. */
+export const CLIMATE_INITIATIVE_EFFORT_SWING = 0.2;
+/** Austerity accelerates the country's own decline, which is what makes the bodies responsive. */
+export const CLIMATE_BODY_DRIFT_SWING = 0.5;
 
 /* -------------------------------------------------------------------- misc */
 

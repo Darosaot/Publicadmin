@@ -1,0 +1,59 @@
+
+> publicadmin@0.1.0 balance
+> vite-node scripts/balance.ts
+
+
+280 simulated careers across 7 departments
+
+Endings
+  retirement_honoured     169  60.4%
+  retirement_quiet         96  34.3%
+  minister                 13  4.6%
+  disgrace                  1  0.4%
+  burnout                   1  0.4%
+
+Level reached
+  level 1                 1  0.4%
+  level 2                 5  1.8%
+  level 3                46  16.4%
+  level 4               155  55.4%
+  level 5                73  26.1%
+
+Averages
+  cycles played          118.3
+  years of service       27.9
+  level                  4.0
+  reputation             67.2
+  political capital      47.7
+  integrity              93.8
+  stress                 62.4
+  salary                 €6192
+  tasks finished on time 97.2%
+  initiatives started    8.8
+  initiatives finished   4.1
+  initiatives dropped    1059 across the corpus
+
+With initiatives switched off, same seeds
+  level 4.2 (4.0)  years 28.5 (27.9)  reputation 70.8 (67.2)
+
+By department
+  legal        level 3.7  rep 61.2  stress 60.9  integrity 89.3  years 25.3
+  projects     level 4.0  rep 65.5  stress 62.4  integrity 93.4  years 28.2
+  finance      level 4.0  rep 64.4  stress 63.2  integrity 93.8  years 27.2
+  procurement  level 4.1  rep 68.8  stress 62.5  integrity 96.2  years 28.3
+  policy       level 4.2  rep 72.2  stress 62.9  integrity 93.8  years 28.8
+  inspection   level 4.3  rep 76.3  stress 60.6  integrity 94.5  years 28.7
+  social       level 4.0  rep 61.8  stress 64.0  integrity 95.4  years 28.8
+
+By track, played deliberately
+  line        level 4.6  rep 92.5  pc 62.7  integrity 94.9  stress 61.8  stayed on it 100%
+  expert      level 3.7  rep 59.7  pc 31.7  integrity 94.8  stress 62.1  stayed on it 96%
+  political   level 3.9  rep 63.9  pc 51.5  integrity 94.3  stress 62.4  stayed on it 89%
+  oversight   level 4.4  rep 86.0  pc 56.6  integrity 95.8  stress 62.2  stayed on it 98%
+
+Reachability of the endings the balanced bot avoids
+  ruthless  integrity 5.7  stress 64.0  years 2.2
+            disgrace 84
+  reckless  integrity 76.7  stress 100.0  years 0.6
+            burnout 84
+

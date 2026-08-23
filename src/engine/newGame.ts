@@ -1,7 +1,10 @@
 /** Building a fresh career. */
 
-import { SAVE_VERSION, STARTING_STATS } from './constants';
+import { SAVE_VERSION, STARTING_SAVINGS, STARTING_STATS } from './constants';
+import { createClimate } from './climate';
 import { adjustStat } from './effects';
+import { outgoingsFor } from './money';
+import { createRival } from './rival';
 import { startingPost, type ContentRegistry } from './registry';
 import { seedToState } from './rng';
 import { refillBoard } from './tasks';
@@ -31,10 +34,15 @@ export function createGame(options: NewGameOptions, registry: ContentRegistry): 
     adjustStat(stats, stat, delta);
   }
 
+  // Elena and the country are both rolled before the first month, off the same cursor as
+  // everything else, so a seed still reproduces a whole career exactly.
+  const rivalRoll = createRival(seedToState(seed), registry);
+  const climateRoll = createClimate(rivalRoll.rngState);
+
   const state: GameState = {
     saveVersion: SAVE_VERSION,
     seed,
-    rngState: seedToState(seed),
+    rngState: climateRoll.rngState,
 
     turn: 1,
     calendarMonth: 0,
@@ -48,9 +56,17 @@ export function createGame(options: NewGameOptions, registry: ContentRegistry): 
       track: start.track,
       turnsAtLevel: 0,
       salary: start.baseSalary,
+      savings: STARTING_SAVINGS,
+      outgoings: outgoingsFor(start),
     },
 
     stats,
+
+    // Somebody who joined the same week you did, and who is going to keep turning up.
+    rival: rivalRoll.rival,
+
+    // The country you happen to have started working in, this particular year.
+    climate: climateRoll.climate,
 
     tasks: [],
     nextTaskUid: 1,

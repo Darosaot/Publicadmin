@@ -1,6 +1,7 @@
-import { cast } from '../../content';
+import { cast, registry } from '../../content';
 import { flagValue } from '../../engine/effects';
 import type { GameState } from '../../engine/types';
+import { rivalPost } from '../../engine/rival';
 import { useT } from '../../i18n';
 import { StatsBar } from '../components/StatsBar';
 import { GameTabs } from '../components/GameTabs';
@@ -18,6 +19,15 @@ export function PeopleScreen({ game }: { game: GameState }) {
   const t = useT();
 
   const known = cast.filter((person) => game.flags[person.metFlag]);
+
+  const herPost = rivalPost(game, registry);
+  const whereSheIs = !game.rival
+    ? undefined
+    : game.rival.left
+      ? t('rival.left_the_service')
+      : herPost
+        ? t('rival.now_at', { title: herPost.titleKey, org: herPost.orgKey })
+        : undefined;
 
   return (
     <>
@@ -62,6 +72,15 @@ export function PeopleScreen({ game }: { game: GameState }) {
                       <span className="person__mid" aria-hidden="true" />
                     </div>
                     <p className="person__blurb muted">{t(person.blurbKey)}</p>
+
+                    {/*
+                      Where she has got to, for the one person in the cast whose career is
+                      simulated. Described, never scored — the rule this screen already applies to
+                      standing applies twice over to a rank you might otherwise start racing.
+                    */}
+                    {person.id === 'vasquez' && whereSheIs && (
+                      <p className="person__now">{whereSheIs}</p>
+                    )}
                   </article>
                 );
               })}

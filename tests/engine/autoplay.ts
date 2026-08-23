@@ -20,6 +20,7 @@ import {
   MINISTER_MIN_POLITICAL_CAPITAL,
   ONE_TO_ONE_EFFORT_COST,
   RECRUITING_EFFORT_COST,
+  STARTING_SAVINGS,
   TRAINING_COST,
 } from '../../src/engine/constants';
 import { directiveFlag } from '../../src/engine/directives';
@@ -30,6 +31,7 @@ import {
   startInitiative,
   startableInitiatives,
 } from '../../src/engine/initiatives';
+import { inHardship } from '../../src/engine/money';
 import { createGame } from '../../src/engine/newGame';
 import { nextInt, seedToState } from '../../src/engine/rng';
 import { getPost, postsFrom } from '../../src/engine/registry';
@@ -107,6 +109,23 @@ export interface RunResult {
   delegationsMade: number;
   initiativesCompleted: number;
   initiativesLapsed: number;
+  /**
+   * Posts filled behind the player because an offer lapsed or was declined.
+   *
+   * Accumulated during the run rather than read off the final state, for the reason the comments
+   * above already give twice: the `post.<id>.held` flags expire, so a career that lost three
+   * posts in its twenties looks identical at retirement to one that lost none.
+   */
+  postsClosedBehindYou: number;
+  /** Where Elena finished. 0 for a career played without her. */
+  rivalLevel: number;
+  /** Whether she was still in the service at the end. */
+  rivalLeft: boolean;
+  /** Elections lived through, which is the climate's most visible product. */
+  administrations: number;
+  /** What the career had put by at the end, and how many cycles of it were spent short. */
+  finalSavings: number;
+  cyclesInHardship: number;
 }
 
 /**
@@ -190,6 +209,32 @@ export interface CareerOptions {
    * before v2.4 worked.
    */
   useNegotiation?: boolean;
+  /**
+   * Whether Elena Vásquez's career runs alongside the bot's.
+   *
+   * Off is the A side, and it is not a switch bolted onto the engine for the harness: `rival` is
+   * optional on the state, so "off" is a career with no rival on it — literally the game as it
+   * was before she was simulated. She costs the player posts by taking offers they let lapse, so
+   * this A/B is the one that says whether that cost is a texture or a tax.
+   */
+  useRival?: boolean;
+  /**
+   * Whether the country has weather.
+   *
+   * Off the same way and for the same reason: `climate` is optional, every hook reads neutral
+   * without one, and neutral is a real reading rather than a placeholder. This is the riskiest
+   * A/B of the three, because the climate sits on the decay rates and the unit budget — the two
+   * numbers the whole game is tuned against.
+   */
+  useClimate?: boolean;
+  /**
+   * Whether savings accumulate and hardship bites.
+   *
+   * Unlike the other two this cannot be switched off by dropping a field, because salary has
+   * always been on the state. Off freezes savings at their starting figure, so nobody is ever
+   * comfortable and nobody is ever short, which is exactly how money behaved for six versions.
+   */
+  useMoney?: boolean;
 }
 
 const REST_THRESHOLD = 62;
@@ -449,9 +494,18 @@ export function playCareer(options: CareerOptions): RunResult {
     matchSpecialisms = true,
     useDeputy = true,
     useNegotiation = true,
+    useRival = true,
+    useClimate = true,
+    useMoney = true,
   } = options;
 
   let game = createGame({ name: 'Bot', department, seed }, registry);
+
+  // The A sides. Both world systems are optional on the state, so switching one off is not a
+  // special path through the engine — it is a career that simply does not have one, which is the
+  // only baseline worth comparing against.
+  if (!useRival) game = { ...game, rival: undefined };
+  if (!useClimate) game = { ...game, climate: undefined };
 
   // The bot picks its house rules on day one and never revisits them, which is roughly what
   // happens in life. It takes the pressure itself, because a bot that empties its own unit
@@ -485,6 +539,9 @@ export function playCareer(options: CareerOptions): RunResult {
   let peakStaffLevel = 1;
   let monthsWithDeputy = 0;
   let negotiations = 0;
+  let postsClosedBehindYou = 0;
+  let cyclesInHardship = 0;
+  let heldSeen = new Set<string>();
   let specialistMatches = 0;
   let delegationsMade = 0;
   let initiativesCompleted = 0;
@@ -649,9 +706,28 @@ export function playCareer(options: CareerOptions): RunResult {
         break;
       }
 
-      case 'report':
+      case 'report': {
+        const before = game.turn;
         game = beginNextTurn(game, registry);
+        if (game.turn !== before) {
+          if (inHardship(game)) cyclesInHardship += 1;
+          for (const key of Object.keys(game.flags)) {
+            if (key.startsWith('post.') && key.endsWith('.held') && !heldSeen.has(key)) {
+              heldSeen.add(key);
+              postsClosedBehindYou += 1;
+            }
+          }
+        }
+        // The A side for money. Savings are the only one of the three new systems that cannot be
+        // switched off by dropping a field, because salary has always been on the state. Holding
+        // them at the starting figure reproduces the old behaviour exactly: that figure sits
+        // between hardship and comfort, so `moneyStressDelta` reads zero every month and nothing
+        // else in the engine looks at the number at all.
+        if (!useMoney) {
+          game = { ...game, player: { ...game.player, savings: STARTING_SAVINGS } };
+        }
         break;
+      }
 
       default:
         guard = Number.MAX_SAFE_INTEGER;
@@ -689,6 +765,12 @@ export function playCareer(options: CareerOptions): RunResult {
     delegationsMade,
     initiativesCompleted,
     initiativesLapsed,
+    postsClosedBehindYou,
+    rivalLevel: game.rival?.level ?? 0,
+    rivalLeft: game.rival?.left !== undefined,
+    administrations: game.climate?.administration ?? 0,
+    finalSavings: game.player.savings,
+    cyclesInHardship,
   };
 }
 
@@ -741,6 +823,11 @@ export function summarise(results: RunResult[]) {
     totalDelegations: results.reduce((n, r) => n + r.delegationsMade, 0),
     meanInitiativesCompleted: mean((r) => r.initiativesCompleted),
     totalInitiativesLapsed: results.reduce((n, r) => n + r.initiativesLapsed, 0),
+    meanPostsClosedBehindYou: mean((r) => r.postsClosedBehindYou),
+    meanRivalLevel: mean((r) => r.rivalLevel),
+    meanAdministrations: mean((r) => r.administrations),
+    meanFinalSavings: mean((r) => r.finalSavings),
+    totalCyclesInHardship: results.reduce((n, r) => n + r.cyclesInHardship, 0),
     completionRate: mean((r) =>
       r.tasksCompleted + r.tasksFailed === 0
         ? 1

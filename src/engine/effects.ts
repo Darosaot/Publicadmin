@@ -7,10 +7,19 @@
 
 import { yearsElapsed } from './calendar';
 import { STAT_MAX, STAT_MIN } from './constants';
+import { clampClimate, climateOf } from './climate';
 import type { ContentRegistry } from './registry';
+import { rivalGap } from './rival';
 import { spawnTask } from './tasks';
 import { adjustTeamMorale, averageMorale, createStaff } from './team';
-import type { Condition, Effect, GameState, PlayerStats, StatId } from './types';
+import type {
+  ClimateId,
+  Condition,
+  Effect,
+  GameState,
+  PlayerStats,
+  StatId,
+} from './types';
 
 /**
  * A flag read as a number.
@@ -30,6 +39,8 @@ export function cloneState(state: GameState): GameState {
     ...state,
     player: { ...state.player },
     stats: { ...state.stats },
+    rival: state.rival ? { ...state.rival } : undefined,
+    climate: state.climate ? { ...state.climate } : undefined,
     tasks: state.tasks.map((t) => ({ ...t })),
     initiatives: state.initiatives.map((i) => ({ ...i })),
     alumni: state.alumni.map((a) => ({ ...a })),
@@ -81,6 +92,23 @@ export function applyEffects(
 
       case 'salary':
         next.player.salary = Math.max(0, Math.round(next.player.salary + effect.delta));
+        break;
+
+      case 'savings':
+        // Deliberately unclamped below zero. Hardship is the half of this system the corpus was
+        // waiting for, and a floor at nought would delete it.
+        next.player.savings = Math.round(next.player.savings + effect.delta);
+        break;
+
+      case 'climate':
+        // A no-op for a career with no weather, exactly as the management effects are a no-op for
+        // a player with no unit — so a common event can carry one without a gate.
+        if (next.climate) {
+          next.climate = {
+            ...next.climate,
+            [effect.dial]: clampClimate(next.climate[effect.dial] + effect.delta),
+          };
+        }
         break;
 
       case 'flag':
@@ -188,7 +216,19 @@ export function statDeltas(before: PlayerStats, after: PlayerStats): Partial<Pla
 
 /** Why a condition failed, so the UI can tell the player what they're missing. */
 export interface ConditionFailure {
-  reason: 'level' | 'department' | 'track' | 'turn' | 'stat' | 'salary' | 'flag' | 'team';
+  reason:
+    | 'level'
+    | 'department'
+    | 'track'
+    | 'turn'
+    | 'stat'
+    | 'salary'
+    | 'flag'
+    | 'team'
+    | 'rival'
+    | 'savings'
+    | 'climate'
+    | 'stance';
   stat?: StatId;
   required?: number;
   comparison?: 'min' | 'max';
@@ -237,6 +277,49 @@ export function checkCondition(
         return { reason: 'stat', stat, required, comparison: 'max' };
       }
     }
+  }
+
+  if (condition.minSavings !== undefined && player.savings < condition.minSavings) {
+    return { reason: 'savings', required: condition.minSavings, comparison: 'min' };
+  }
+  if (condition.maxSavings !== undefined && player.savings > condition.maxSavings) {
+    return { reason: 'savings', required: condition.maxSavings, comparison: 'max' };
+  }
+
+  if (condition.minRivalGap !== undefined || condition.maxRivalGap !== undefined) {
+    // A career that ended is not a career you are level with. `rivalGap` reads 0 for a rival who
+    // has gone, which is right for prose asking "how far ahead is she" and wrong for a gate: it
+    // would make every scene about being neck and neck fire for the rest of the game.
+    if (!state.rival || state.rival.left) return { reason: 'rival' };
+
+    const gap = rivalGap(state);
+    if (condition.minRivalGap !== undefined && gap < condition.minRivalGap) {
+      return { reason: 'rival', required: condition.minRivalGap, comparison: 'min' };
+    }
+    if (condition.maxRivalGap !== undefined && gap > condition.maxRivalGap) {
+      return { reason: 'rival', required: condition.maxRivalGap, comparison: 'max' };
+    }
+  }
+
+  if (condition.minClimate) {
+    for (const [dial, required] of Object.entries(condition.minClimate) as [
+      ClimateId,
+      number,
+    ][]) {
+      if (climateOf(state)[dial] < required) {
+        return { reason: 'climate', required, comparison: 'min' };
+      }
+    }
+  }
+  if (condition.maxClimate) {
+    for (const [dial, limit] of Object.entries(condition.maxClimate) as [ClimateId, number][]) {
+      if (climateOf(state)[dial] > limit) {
+        return { reason: 'climate', required: limit, comparison: 'max' };
+      }
+    }
+  }
+  if (condition.stances && !condition.stances.includes(climateOf(state).stance)) {
+    return { reason: 'stance' };
   }
 
   if (condition.requiresTeam !== undefined) {

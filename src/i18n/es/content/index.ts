@@ -16,6 +16,7 @@ import { strings as endings } from './endings';
 import { strings as eventsAlumni } from './events/alumni';
 import { strings as eventsCrises } from './events/crises';
 import { strings as eventsCast } from './events/cast';
+import { strings as eventsClimate } from './events/climate';
 import { strings as eventsCommon } from './events/common';
 import { strings as eventsCommonExtra } from './events/common-extra';
 import { strings as eventsDepartmentsExtra } from './events/departments-extra';
@@ -27,10 +28,12 @@ import { strings as eventsLeadership } from './events/leadership';
 import { strings as eventsLegal } from './events/legal';
 import { strings as eventsManagement } from './events/management';
 import { strings as eventsMilestones } from './events/milestones';
+import { strings as eventsMoney } from './events/money';
 import { strings as eventsPolicy } from './events/policy';
 import { strings as eventsProcurement } from './events/procurement';
 import { strings as eventsProjects } from './events/projects';
 import { strings as eventsReckonings } from './events/reckonings';
+import { strings as eventsRival } from './events/rival';
 import { strings as eventsSocial } from './events/social';
 import { strings as eventsTracks } from './events/tracks';
 import { strings as initiatives } from './initiatives';
@@ -72,6 +75,9 @@ const dictionaries = [
   eventsReckonings,
   eventsSocial,
   eventsTracks,
+  eventsRival,
+  eventsClimate,
+  eventsMoney,
   initiatives,
   perks,
   tasksFinance,

@@ -1,0 +1,86 @@
+/**
+ * What the job pays, and what it costs to have taken it.
+ *
+ * Salary was a scoreboard for six versions. The design document said stepping onto the expert
+ * track "costs money, which is the point" — and money bought nothing, so it cost nothing. Content
+ * agreed: `Condition.minSalary` had never once been used in a corpus of two hundred and fifty
+ * events, and the `salary` effect had exactly one use in the whole game.
+ *
+ * Savings make that sentence true. They are what a career puts by after it has lived, and they do
+ * two things the game could not previously say:
+ *
+ * - **Options.** A cushion is what lets you take the sideways move that pays less. That is the
+ *   expert fork's whole stated identity and it had no mechanical weight behind it.
+ * - **Pressure.** This corpus is full of scenes where somebody offers an official money, and
+ *   nobody has ever had a reason to take one. An official who is short is the player these scenes
+ *   were written for, and until now the game could not produce one.
+ *
+ * ### The rule, and why it is absolute
+ *
+ * **Money never buys reputation or promotion velocity.** It is the same rule perks and
+ * initiatives already follow, for the same reason: offers key off reputation and reputation
+ * decays every cycle, so anything paying it converts a hoarded resource straight into promotion
+ * speed and every career converges on the one build that hoards. Money buys relief and options;
+ * its absence buys pressure. `validate.ts` enforces it on content.
+ */
+
+import {
+  COMFORT_SAVINGS,
+  HARDSHIP_SAVINGS,
+  HARDSHIP_STRESS_PER_CYCLE,
+  OUTGOINGS_OF_BASE_SALARY,
+} from './constants';
+import type { GameState, Post } from './types';
+
+/**
+ * What a month at this post costs to live.
+ *
+ * Scaled to the post rather than fixed, because the career already moves you Alderford →
+ * Northbridge → the Region → the Agency → the Ministry, and none of those is cheaper than the
+ * last. A fixed figure would have made seniority a money printer and the whole system trivial by
+ * tier three: the first draft did exactly that, and a Director-General finished with more saved
+ * than they had earned in twenty years.
+ */
+export function outgoingsFor(post: Post): number {
+  return Math.round(post.baseSalary * OUTGOINGS_OF_BASE_SALARY);
+}
+
+/** What this cycle adds to, or takes out of, what you have put by. */
+export function savingsDelta(state: GameState, months: number): number {
+  return Math.round((state.player.salary - state.player.outgoings) * months);
+}
+
+/** Short. Not a failure state — a pressure, and the one this game had no way to apply. */
+export function inHardship(state: GameState): boolean {
+  return state.player.savings < HARDSHIP_SAVINGS;
+}
+
+/** Enough behind you that the ordinary weight of the job sits a little lighter. */
+export function comfortable(state: GameState): boolean {
+  return state.player.savings >= COMFORT_SAVINGS;
+}
+
+/**
+ * What your finances do to your stress this cycle.
+ *
+ * One-directional on purpose, and that is the correction the balance sweep forced. Being short
+ * costs you; being comfortable pays nothing. A two-sided version reads better on paper and plays
+ * as a flat upgrade: a competent career is comfortable from its second post onward, so the
+ * "relief" side applied for twenty-five of thirty years and converted straight into standing
+ * through the stress sink described in §8j.
+ *
+ * Comfort still matters — it decides which choices content will open to you. It simply does not
+ * make you better at the job, because money is not allowed to do that.
+ */
+export function moneyStressDelta(state: GameState): number {
+  return inHardship(state) ? HARDSHIP_STRESS_PER_CYCLE : 0;
+}
+
+/** The band a screen describes rather than scores, the way the People screen already does. */
+export function savingsBand(state: GameState): 'short' | 'tight' | 'steady' | 'comfortable' {
+  const { savings } = state.player;
+  if (savings < HARDSHIP_SAVINGS) return 'short';
+  if (savings < state.player.outgoings * 3) return 'tight';
+  if (savings < COMFORT_SAVINGS) return 'steady';
+  return 'comfortable';
+}

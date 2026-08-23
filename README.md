@@ -32,10 +32,17 @@ being brilliant, by being well-connected, or by cutting corners — and the game
    used to work in. Where you didn't go stays on the Career screen for the rest of the game.
 
 Six stats decide how it goes: **Reputation**, **Performance**, **Political Capital**,
-**Integrity**, **Stress** and your **Salary**. There are six ways it can end, from burnout to the
+**Integrity**, **Stress** and your **Salary** — and what is left of the salary after you have
+lived, which decides which choices you can afford and which ones being short puts in front of you. There are six ways it can end, from burnout to the
 Council of Ministers. Along the way you'll meet the same eight people over and over — a peer who
 started the same week, a journalist, an auditor who remembers your files — and the game keeps track
 of how you left things with each of them.
+
+Two things move whether or not you are looking. **Elena Vásquez** joined the same week you did and
+is climbing the same tree: she takes the post you turned down, and thirty years later the epilogue
+tells you where she finished. And the **country has weather** — whether there is money, whether
+anybody believes the administration, and who is in government — which decides how hard the same
+work is, and changes at an election you do not get a vote in.
 
 The setting is a fictional European country — EU-funded projects, procurement directives,
 transparency requests and audits — so nothing here maps onto any real administration's law.

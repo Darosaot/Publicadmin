@@ -3,6 +3,7 @@ import { posts, registry } from '../../content';
 import { meetsRequirements } from '../../engine/career';
 import { edgeBetween, getPost, postsFrom } from '../../engine/registry';
 import type { GameState, Post, PromotionRequirement } from '../../engine/types';
+import { rivalPost } from '../../engine/rival';
 import { useT } from '../../i18n';
 import { useGame } from '../../state/GameProvider';
 import { formatSalary } from '../format';
@@ -23,6 +24,7 @@ export function CareerScreen({ game }: { game: GameState }) {
   const [confirming, setConfirming] = useState<string | undefined>(undefined);
 
   const current = getPost(registry, game.player.postId);
+  const herPost = rivalPost(game, registry);
   const pendingOffer = game.offers.find((o) => o.id === confirming);
   const reachable = postsFrom(registry, current.id);
   const tiers = [...new Set(posts.map((p) => p.tier))].sort((a, b) => a - b);
@@ -110,9 +112,26 @@ export function CareerScreen({ game }: { game: GameState }) {
             ))}
           </div>
         </section>
-
-        <aside className="layout__side">
+      <aside className="layout__side">
+        {/*
+          Somebody else is walking this tree. Where she has reached is on the screen that shows
+          the tree, because that is the only place it means anything — and it is described rather
+          than plotted, so it reads as news about a colleague and not as a scoreboard.
+        */}
+        {game.rival && (
           <section className="panel">
+            <h2 className="panel__title">{t('rival.heading')}</h2>
+            <p className="muted">
+              {game.rival.left
+                ? t('rival.left_the_service')
+                : herPost
+                  ? t('rival.now_at', { title: herPost.titleKey, org: herPost.orgKey })
+                  : t('rival.left_the_service')}
+            </p>
+          </section>
+        )}
+
+        <section className="panel">
             <h2 className="panel__title">{t('career.current')}</h2>
             <p className="career__post">{t(current.titleKey)}</p>
             <p className="muted">{t(current.orgKey)}</p>
