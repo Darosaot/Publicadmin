@@ -40,6 +40,7 @@ export type GameView =
   | 'country'
   | 'initiatives'
   | 'self'
+  | 'record'
   | 'career';
 
 export interface AppState {

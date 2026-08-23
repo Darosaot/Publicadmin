@@ -7,7 +7,7 @@
 
 import type { PlayerStats } from './types';
 
-export const SAVE_VERSION = 8;
+export const SAVE_VERSION = 9;
 
 export const STAT_MIN = 0;
 export const STAT_MAX = 100;
@@ -562,3 +562,12 @@ export const CLIMATE_BODY_DRIFT_SWING = 0.5;
 /* -------------------------------------------------------------------- misc */
 
 export const LOG_LIMIT = 60;
+
+/**
+ * Cycles a career needs before the record is worth a tab.
+ *
+ * A year. Below that the charts are three columns and the timeline is one row, which tells the
+ * player less than the stats bar already does — the same rule People, Country and Yourself follow
+ * for the same reason.
+ */
+export const RECORD_MIN_CYCLES = 12;

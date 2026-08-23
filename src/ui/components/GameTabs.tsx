@@ -5,6 +5,7 @@ import { bodyKnown } from '../../engine/world';
 import { useT } from '../../i18n';
 import { useActiveGame, useGame } from '../../state/GameProvider';
 import { perkPointsAvailable, perkPointsEarned } from '../../engine/perks';
+import { RECORD_MIN_CYCLES } from '../../engine/constants';
 import type { GameView } from '../../state/gameReducer';
 
 /**
@@ -61,6 +62,13 @@ export function GameTabs({ current }: { current: GameView }) {
       label: t('action.self'),
       dot: perkPointsAvailable(game, registry) > 0,
     });
+  }
+
+  // The record appears once there is enough of one to have a shape. Before that it is a chart of
+  // three columns, which is the same rule People, Country and Yourself already follow: a screen
+  // that shows nothing is a worse introduction than no tab at all.
+  if (game.history.length >= RECORD_MIN_CYCLES) {
+    tabs.push({ view: 'record', label: t('action.record') });
   }
 
   tabs.push({ view: 'career', label: t('action.career'), dot: game.offers.length > 0 });

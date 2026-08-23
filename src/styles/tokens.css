@@ -46,6 +46,10 @@
   --c-political: #7a3bb5;
   --c-integrity: #b8791a;
   --c-stress: #bd3030;
+  /* The two money series on the record screen. Neither is a stat, so neither borrows a stat's
+     colour — salary is the accent the chrome already uses, savings a quieter green. */
+  --c-salary: #b8791a;
+  --c-savings: #3f7a52;
 
   /* Feedback */
   --c-good: #24803f;
@@ -141,6 +145,8 @@
     --c-political: #c77dff;
     --c-integrity: #ffc94a;
     --c-stress: #ff5c5c;
+    --c-salary: #ffc94a;
+    --c-savings: #4ad97f;
 
     --c-good: #4ad97f;
     --c-good-soft: #16351f;
@@ -182,6 +188,8 @@
   --c-political: #c77dff;
   --c-integrity: #ffc94a;
   --c-stress: #ff5c5c;
+  --c-salary: #ffc94a;
+  --c-savings: #4ad97f;
 
   --c-good: #4ad97f;
   --c-good-soft: #16351f;

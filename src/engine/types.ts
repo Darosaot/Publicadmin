@@ -452,6 +452,37 @@ export interface Post {
   from: PostEdge[];
 }
 
+/* ---------------------------------------------------------------- history */
+
+/**
+ * One cycle of a career, kept.
+ *
+ * The game covers thirty years and until now had the memory of a goldfish: `log` is capped at
+ * sixty lines and `lastReport` holds a single month, so nothing anywhere could answer "what
+ * happened in year twelve" or show a career its own shape. Every screen described the present
+ * tense of a game whose entire subject is a long arc.
+ *
+ * Deliberately a flat record of numbers rather than a snapshot of the state. What a history is
+ * for is comparison across time, and anything that cannot be plotted against a turn number does
+ * not belong in one — a full `GameState` per cycle would be an archive rather than a chart, and
+ * would multiply the save size by a hundred and twenty.
+ */
+export interface TurnSample {
+  turn: number;
+  /** Elapsed months, so a chart can have a real time axis rather than a cycle-count one. */
+  calendarMonth: number;
+  /** Where you were sitting. A change between samples is a post change, so nothing else is stored. */
+  postId: string;
+  level: number;
+  reputation: number;
+  performance: number;
+  politicalCapital: number;
+  integrity: number;
+  stress: number;
+  salary: number;
+  savings: number;
+}
+
 /* ------------------------------------------------------------------ rival */
 
 /**
@@ -756,6 +787,16 @@ export interface GameState {
   };
 
   stats: PlayerStats;
+
+  /**
+   * Every cycle this career has played, oldest first.
+   *
+   * **Uncapped, alone among the arrays on this state.** `log` is trimmed to sixty and `alumni` to
+   * twelve because both are windows onto a present — the recent past, the colleagues you might
+   * still name. This is the opposite: it is the whole arc, and an arc with the beginning cut off
+   * is not one. It is bounded anyway, by `MAX_TURNS`, at a hundred and twenty rows of ten numbers.
+   */
+  history: TurnSample[];
 
   /**
    * Elena Vásquez's career, running alongside yours.

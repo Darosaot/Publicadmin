@@ -511,6 +511,43 @@ export function validateContent(): string[] {
     }
   }
 
+  /*
+   * The map.
+   *
+   * Three things it depends on, all of them currently true and none of them previously checked.
+   */
+  const seen = new Map<string, string>();
+  for (const body of bodies) {
+    if (body.x < 2 || body.x > 98 || body.y < 2 || body.y > 98) {
+      problems.push(`body "${body.id}" sits outside the map`);
+    }
+    // Two institutions on the same spot is one institution as far as a player can tell.
+    const key = `${Math.round(body.x / 4)}:${Math.round(body.y / 4)}`;
+    const clash = seen.get(key);
+    if (clash) problems.push(`bodies "${clash}" and "${body.id}" are drawn on top of each other`);
+    seen.set(key, body.id);
+
+    if (!body.short.trim()) problems.push(`body "${body.id}" has no short name for the map`);
+  }
+
+  /*
+   * `post.<body>.<role>`, which is how the map knows where you are sitting and how
+   * `learnLocalBodies` knows which building you work in.
+   *
+   * It has been true of all fifteen posts since the career tree was a ladder, and until the map
+   * went in nothing read it, so nothing checked it. A post whose second segment names no
+   * institution would not fail — it would silently stop marking the player's own desk, which is
+   * the class of bug this file exists to make impossible.
+   */
+  for (const post of posts) {
+    const bodyId = post.id.split('.')[1];
+    if (!bodies.some((body) => body.id === bodyId)) {
+      problems.push(
+        `post "${post.id}" names no institution: its second segment must be a body id, which is how the map and learnLocalBodies place it`,
+      );
+    }
+  }
+
   return problems;
 }
 

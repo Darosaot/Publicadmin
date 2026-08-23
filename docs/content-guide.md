@@ -461,25 +461,41 @@ somebody to have gone somewhere and become somebody.
 ```ts
 export const eastmoor = body(
   'eastmoor',
-  'Eastmoor District Council',   // a proper noun: a literal string, never a key
+  'Eastmoor District Council',      // a proper noun: a literal string, never a key
+  'Eastmoor',                       // what it is called on a map
   'District council, and struggling',
   'Three chief executives in six years...',
-  34,          // baseline condition, 1–99
-  -0.09,       // drift per calendar month
-  'inspection' // the department whose beat it is on
+  34,           // baseline condition, 1–99
+  -0.09,        // drift per calendar month
+  'inspection', // the department whose beat it is on
+  { x: 68, y: 81, region: 'local' },
 );
 ```
 
-Then add it to the `bodies` array and translate its two prose keys. The name is **not** translated,
-per the same rule the cast follows.
+Then add it to the `bodies` array and translate its two prose keys. Neither name is translated, per
+the same rule the cast follows.
 
 Validation requires: a unique id, both prose keys, a baseline in 1–99, a `beat` naming a real
 department, `|drift| <= 0.5` (faster than that is not drift, it is a collapse, and should be an
-event), and every department carrying at least one body — otherwise its events have nothing to
-point at.
+event), every department carrying at least one body — otherwise its events have nothing to point
+at — a position inside the map, and no two bodies drawn on top of each other.
 
 Drift is per **calendar month**, not per cycle. −0.09 is about one point a year, which over a
 thirty-year career is most of the way from "under strain" to "failing" with nobody at fault.
+
+**Short names are authored because proper nouns are not patterns.** The first version of the map
+derived them with a regex and produced "Ministry of" and "Government of". Use what people actually
+call the place; where the career tree already names the same institution, match its `org_short`.
+
+**Coordinates are content and the engine never reads them.** `WorldBody` — the engine's view of a
+place — carries condition, drift and beat and nothing else. `region` is the tier of the state the
+body belongs to, and the map's layout depends on it being truthful: capital north, regional across
+the middle, councils south. A test pins that ordering.
+
+**If a post sits in it, the post id has to say so.** Every post is `post.<body>.<role>` —
+`post.alderford.officer`, `post.ombudsman.office` — which is how the map marks where you are and
+how `learnLocalBodies` knows which building you work in. `validate.ts` fails a post whose second
+segment names no institution.
 
 ## Adding a directive
 

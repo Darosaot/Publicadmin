@@ -509,3 +509,33 @@ test('the career screen says where the one who started with you got to', async (
     expect(hers).not.toContain(`She is ${myTitle} at`);
   }
 });
+
+/**
+ * The two v4 screens. Both exist to answer a question the game could not previously be asked:
+ * what shape was this career, and how much of this country have I actually seen.
+ */
+test('the country is a map, with the places you have never been still on it', async ({ page }) => {
+  await resume(page, managing);
+  await tab(page, 'Country').click();
+
+  await expect(page.locator('.map__svg')).toBeVisible();
+
+  // Somewhere named, somewhere blank, and the desk you are sitting at marked.
+  await expect(page.locator('.place--unknown').first()).toBeVisible();
+  await expect(page.locator('.place__name').first()).toBeVisible();
+  await expect(page.locator('.place--here')).toHaveCount(1);
+});
+
+test('the record shows the whole career rather than this month', async ({ page }) => {
+  await resume(page, managing);
+  await tab(page, 'Record').click();
+
+  // One chart per stat, plus salary and savings.
+  await expect(page.locator('.chart')).toHaveCount(7);
+  await expect(page.locator('.spark').first()).toBeVisible();
+
+  // And the posts held, in order, which is the career's actual shape.
+  const spells = page.locator('.spell');
+  expect(await spells.count()).toBeGreaterThan(1);
+  await expect(spells.first()).toContainText('Administrative Officer');
+});

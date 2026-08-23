@@ -62,6 +62,9 @@ export function createGame(options: NewGameOptions, registry: ContentRegistry): 
 
     stats,
 
+    // Nothing has happened yet. The first row lands when the first cycle closes.
+    history: [],
+
     // Somebody who joined the same week you did, and who is going to keep turning up.
     rival: rivalRoll.rival,
 

@@ -104,6 +104,9 @@ quality, which produces more bad months.
 Two things outside the six move on their own and are read all over the game: **Elena's career**
 (§8k) and **the climate** (§8m). Neither is a stat and neither is yours.
 
+All six are sampled once a cycle into `GameState.history`, which is what the **Record** screen
+(§8n) draws. Nothing reads it back — it is written for the player and not for the simulation.
+
 **Hidden state.** The engine also tracks *flags* — named values set by choices
 (`accepted_supplier_gift`, `journalist_has_your_number`, `holds_leverage`). Flags gate later
 events, so a decision in your second year can produce a knock at the door in your twelfth. They are
@@ -974,6 +977,112 @@ integrity and political capital, and the pool now reads 0.75.
 
 ---
 
+## 8n. The record — a career that remembers itself
+
+This game covers thirty years and, until v4, could not show you any of them. `log` is capped at
+sixty lines, `lastReport` holds a single month, and every screen described a present tense. A
+player could reach retirement without ever having seen the shape of the thing they had just spent
+an evening making — no idea when the good years were, when the stress started climbing, or which
+post was the one that changed everything.
+
+One row per cycle, taken as the cycle closes.
+
+| | |
+| --- | --- |
+| Where it lives | `GameState.history`, a `TurnSample[]` |
+| What a row is | turn, calendar month, post, level, the five stats, salary, savings |
+| Size | ten numbers × at most `MAX_TURNS` rows |
+| Screen | **Record**, appearing once there is a year of it (`RECORD_MIN_CYCLES`) |
+
+**It is the only uncapped array on the state.** `log` is trimmed to sixty and `alumni` to twelve,
+because both are windows onto a present — the recent past, the colleagues you might still name —
+and trimming them costs nothing anybody wanted. An arc with the beginning cut off is not an arc.
+
+**It stores numbers, not snapshots.** A history is for comparison across time, and anything that
+cannot be plotted against a turn number does not belong in one. A `GameState` per cycle would be
+an archive rather than a chart, would multiply the save by a hundred and twenty, and would still
+not answer the question a player actually has, which is *when did this start going wrong*.
+
+**`postId` earns its place by making a second system unnecessary.** A post change is a row where it
+differs from the row before, so `spells()` derives the career timeline rather than maintaining it.
+A timeline kept alongside the data would be a second source of truth about the same fact, and this
+codebase has three documented cases of exactly that drifting.
+
+### Two things about when it is taken
+
+Sampled in **`finalizeTurn`**, not `beginNextTurn`: a career that ends never reaches the latter,
+and the final year is the one the epilogue most wants to be able to show.
+
+It **replaces rather than appends** for a turn already held. `finalizeTurn` is reachable twice in
+one cycle — an event queue that empties, then a milestone that resolves — and a history holding the
+same turn twice would put a spike in every chart at exactly the moments the game was most
+interesting.
+
+### Drawn as columns, not curves
+
+Matching what `pixel.css` already does to every progress bar. Not a stylistic tic: the series is a
+hundred and twenty discrete cycles, and a smooth curve would imply readings between them that were
+never taken, as well as being the only anti-aliased thing on the screen.
+
+The five stats sit on a **fixed 0–100 axis** so that a flat line means flat. Auto-scaling each
+series to its own range would make a career that never moved look as dramatic as one that swung
+from 20 to 90. Money has no ceiling, so those two scale to what the career actually reached.
+
+Post changes are ruled behind every chart, because the question a player has is *was it the new
+job that did this*, and it should be answerable by looking rather than by remembering.
+
+**A save from before v9 gets an empty array, not a reconstruction.** Every other migration in this
+codebase seeds its field with something defensible; this one refuses to, because a chart is a claim
+about what happened and drawing one from a single endpoint would be a fabrication rendered
+convincingly. The screen says which cycle it can account for from.
+
+---
+
+## 8o. The map
+
+Fourteen institutions with a condition, a standing and a drift, rendered for three versions as a
+sorted list of cards. A list shows you everything about the places you have been and nothing about
+the one thing it structurally cannot: **that the country is bigger than your view of it.** The old
+screen tried, with a line reading "and 9 more you have not run into yet", and a number is not a
+country.
+
+Every institution is on the map from the first month. The ones you have never looked at are drawn
+without a name and without a condition — present, placed, and blank. The fog is the feature; the
+cards underneath are the detail, and the count stays next to them because a blank dot cannot say
+how many.
+
+**Coordinates are content and the engine cannot see them.** `WorldBody`, the engine's view of a
+place, carries `baselineCondition`, `drift` and `beat` and nothing else. Nothing in the simulation
+reads a position and nothing should.
+
+**The layout is not decoration.** Capital north, regional tier across the middle, councils south,
+so a career reads off the map as a walk inward and upward — and Eastmoor being a long way from
+anybody who might have noticed is a fact you can see rather than one the prose has to assert. A
+test pins the three tiers in that order.
+
+### What one render caught that no test would have
+
+**Short names are authored, not derived.** The first version trimmed the full names with a regex
+and produced "Ministry of" and "Government of", which is what happens every time a proper noun is
+treated as a pattern. The authored ones also match the `org_short` the career tree has always used
+for the same institutions.
+
+**You know the building you work in.** A Special Adviser at the Council of Ministers was shown
+their own workplace as a blank dot marked *never been*, because the Cabinet Office is on the legal
+beat and they were on the policy one. `learnLocalBodies` covers the post's own institution now, and
+`acceptOffer` calls it too, so you know the building on your first morning rather than a cycle
+later. This was invisible while the country was a list — the list only ever showed places you knew.
+
+### The convention the map made load-bearing
+
+Every post is `post.<body>.<role>`. That has been true of all fifteen since the career tree was a
+ladder, and until the map read it, nothing did — so a post naming no institution would not have
+failed, it would have silently stopped marking the player's own desk. `validate.ts` now enforces
+it, alongside two others: no institution outside the map, and no two drawn on top of each other.
+All three were checked by breaking them.
+
+---
+
 ## 9. Endings
 
 Checked at the end of every month, in this order — the first one that matches wins.
@@ -1003,6 +1112,7 @@ All of these live in `src/engine/constants.ts`.
 | Establishment, line track | — / — / 4 / 6 / 8 |
 | Unit budget, line track | — / — / €11,500 / €18,500 / €26,000 a month |
 | Posts in the tree | 15 across 4 tracks |
+| Cycles before the record appears | 12 |
 | A declined post is held | 10 cycles |
 | Living costs | 72% of the post's baseline salary |
 | A term of government | 48 months |
@@ -1132,11 +1242,16 @@ Three things that were on this list have since been built and are documented abo
 outside your unit** (§3a), a **career that branches** (§7), and **Spanish**. The list is shorter
 than it was.
 
-What v3 deliberately left for later is **legibility**: there is still no time-series anywhere in
-this game — `log` is capped at sixty entries and `lastReport` holds one month — so a thirty-year
-career has no way to show its own arc, and the fourteen institutions of §8b are rendered as a
-sorted list of cards rather than as anywhere. A history view and a map of Valmara are the strongest
-next candidates, and they are worth doing on top of a world that now has more to show.
+The **legibility** gap v3 left is closed. A thirty-year career can show its own arc (§8n) and the
+fourteen institutions of §8b are a place rather than a list (§8o) — both built, as intended, on top
+of a world that had more to show than it had when they were first proposed.
+
+What is left, in rough order of how much it would add: **sound**, still the oldest item here and
+still the one a player would notice first; a **unified people directory**, since your unit, the
+cast and up to twelve alumni currently live on three different screens and one of them is the
+epilogue; and **ceremony for the big moments** — landing a nine-year initiative, reaching a
+ministry and losing somebody you coached for a decade are all a line item in the same modal, and
+the engine distinguishes them carefully while the presentation does not.
 
 ### Saving
 
