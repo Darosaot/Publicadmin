@@ -79,8 +79,8 @@ export function drawCard(
 
   // The Record in miniature: reputation on its fixed 0 to 100 axis, one column per stretch of
   // career, so a flat career looks flat.
-  const chartTop = 372;
-  const chartHeight = 120;
+  const chartTop = 360;
+  const chartHeight = 96;
   ctx.fillStyle = 'rgba(242, 236, 216, 0.12)';
   ctx.fillRect(left, chartTop, max, chartHeight);
   const rep = summary.reputation;
@@ -110,13 +110,13 @@ export function drawCard(
   const rivalLine = summary.rival ? t(`summary.rival_${summary.rival}`) : '';
   if (rivalLine) {
     fit(ctx, rivalLine, BODY_FONT, 26, max);
-    ctx.fillText(rivalLine, left, 520);
+    ctx.fillText(rivalLine, left, 498);
   }
 
   ctx.fillStyle = GOLD;
   const foot = challengeLine(summary, t) ?? `${t('summary.seed')} ${summary.seed}`;
   fit(ctx, foot, BODY_FONT, 24, max);
-  ctx.fillText(foot, left, HEIGHT - 84);
+  ctx.fillText(foot, left, HEIGHT - 96);
 }
 
 /**
