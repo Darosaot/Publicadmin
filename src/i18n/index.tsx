@@ -7,9 +7,16 @@
  */
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
-import { DEFAULT_LOCALE, LOCALE_IDS, translate, type LocaleId, type Translate } from './translate';
+import {
+  DEFAULT_LOCALE,
+  LOCALE_IDS,
+  loadLocale,
+  translate,
+  type LocaleId,
+  type Translate,
+} from './translate';
 
-export { DEFAULT_LOCALE, LOCALE_IDS, translate } from './translate';
+export { DEFAULT_LOCALE, LOCALE_IDS, loadLocale, translate } from './translate';
 export type { LocaleId, Translate, TranslateParams } from './translate';
 
 const STORAGE_KEY = 'publicadmin.locale';
@@ -26,7 +33,8 @@ function isLocaleId(value: string): value is LocaleId {
   return (LOCALE_IDS as readonly string[]).includes(value);
 }
 
-function initialLocale(): LocaleId {
+/** The language this device last chose. Exported so the entry point can load it before rendering. */
+export function initialLocale(): LocaleId {
   const stored = readStorage()?.getItem(STORAGE_KEY);
   return stored && isLocaleId(stored) ? stored : DEFAULT_LOCALE;
 }
@@ -42,9 +50,13 @@ const LocaleContext = createContext<LocaleContextValue | undefined>(undefined);
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<LocaleId>(initialLocale);
 
+  // Switching waits for the dictionary, so the screen changes language in one step and never
+  // shows a half-English page while Spanish is still arriving.
   const setLocale = useCallback((next: LocaleId) => {
-    setLocaleState(next);
-    readStorage()?.setItem(STORAGE_KEY, next);
+    void loadLocale(next).then(() => {
+      setLocaleState(next);
+      readStorage()?.setItem(STORAGE_KEY, next);
+    });
   }, []);
 
   const t = useCallback<Translate>((key, params) => translate(locale, key, params), [locale]);

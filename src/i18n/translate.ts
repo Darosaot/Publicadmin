@@ -13,8 +13,6 @@
 
 import { EN_STRINGS } from '../content';
 import { uiStrings as enUiStrings } from './en/ui';
-import { ES_STRINGS } from './es/content';
-import { uiStrings as esUiStrings } from './es/ui';
 
 export type LocaleId = 'en' | 'es';
 
@@ -28,8 +26,38 @@ export const LOCALE_IDS: readonly LocaleId[] = ['en', 'es'];
  */
 const locales: Record<LocaleId, Record<string, string>[]> = {
   en: [enUiStrings, EN_STRINGS],
-  es: [esUiStrings, ES_STRINGS, enUiStrings, EN_STRINGS],
+  // Filled in by `loadLocale`. Until then a Spanish lookup falls straight through to English,
+  // which is the same fallback a half-translated key gets, so nothing can break while it loads.
+  es: [enUiStrings, EN_STRINGS],
 };
+
+/**
+ * The loaders for every locale but the default.
+ *
+ * English ships in the main bundle because the engine and the content registry need it to exist;
+ * every other language is a separate chunk fetched on demand, so a player who reads English never
+ * downloads Spanish. Each loader returns the locale's own dictionaries, most specific first.
+ */
+const loaders: Partial<Record<LocaleId, () => Promise<Record<string, string>[]>>> = {
+  es: async () => (await import('./es/bundle')).dictionaries,
+};
+
+const loaded = new Set<LocaleId>([DEFAULT_LOCALE]);
+
+export function isLocaleLoaded(locale: LocaleId): boolean {
+  return loaded.has(locale);
+}
+
+/** Fetches a locale's dictionaries once. Resolves immediately for one already in memory. */
+export async function loadLocale(locale: LocaleId): Promise<void> {
+  if (loaded.has(locale)) return;
+  const loader = loaders[locale];
+  if (!loader) return;
+  const own = await loader();
+  // The English dictionaries stay on the end as the fallback for any key not yet translated.
+  locales[locale] = [...own, enUiStrings, EN_STRINGS];
+  loaded.add(locale);
+}
 
 export type TranslateParams = Record<string, string | number>;
 export type Translate = (key: string, params?: TranslateParams) => string;
