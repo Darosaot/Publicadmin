@@ -20,7 +20,7 @@ import {
 } from '../../src/engine/alumni';
 import { createGame } from '../../src/engine/newGame';
 import { createStaff, resolveAttrition, setupTeamForPost } from '../../src/engine/team';
-import { translate } from '../../src/i18n/translate';
+import { loadLocale, translate } from '../../src/i18n/translate';
 import type { GameState, StaffMember } from '../../src/engine/types';
 import { makeQuietRegistry } from './fixtures';
 
@@ -56,7 +56,8 @@ describe('prose can name a person the content has never heard of', () => {
     expect(rendered).toContain('Ada Fixture');
   });
 
-  it('does the same in Spanish, because a name is not a translatable thing', () => {
+  it('does the same in Spanish, because a name is not a translatable thing', async () => {
+    await loadLocale('es');
     const en = translate('en', 'log.staff_left', { name: 'Ada Fixture' });
     const es = translate('es', 'log.staff_left', { name: 'Ada Fixture' });
 

@@ -448,4 +448,52 @@ export const uiStrings: Record<string, string> = {
   'log.refused_file': 'Rechazaste un expediente antes que incumplirlo.',
 
   'task.crisis_label': 'Esto no espera, y no se puede devolver',
+
+  /* --- sonido, partidas, retos, resumen, ceremonias --- */
+  'action.dismiss': 'Descartar',
+  'action.continue_story': 'Continuar',
+
+  'sound.on': 'Sonido: sí',
+  'sound.off': 'Sonido: no',
+
+  'save.export': 'Exportar partida',
+  'save.import': 'Importar partida',
+  'save.import_confirm': 'Importar sustituye la carrera que estás jugando ahora. ¿Continuar?',
+  'save.import_failed': 'Ese archivo no se ha podido leer como una carrera guardada, así que no se ha cambiado nada.',
+  'save.import_ok': 'Carrera importada.',
+
+  'newgame.mode_label': 'Cómo jugar',
+  'newgame.mode_free': 'Partida libre',
+  'newgame.mode_daily': 'Reto diario',
+  'newgame.mode_weekly': 'Reto semanal',
+  'newgame.mode_free_hint': 'Una carrera propia, en el departamento que quieras.',
+  'newgame.challenge_daily': 'Reto diario {label}: quien juegue hoy recibe la misma carrera, en {department}.',
+  'newgame.challenge_weekly': 'Reto semanal {label}: quien juegue esta semana recibe la misma carrera, en {department}.',
+
+  'summary.heading': 'Comparte esta carrera',
+  'summary.copy': 'Copiar como texto',
+  'summary.copied': 'Copiado.',
+  'summary.copy_failed': 'Aquí no se puede copiar.',
+  'summary.download': 'Descargar imagen',
+  'summary.years': '{years} años',
+  'summary.final_post': 'Último puesto',
+  'summary.seed': 'Semilla',
+  'summary.challenge_daily': 'Reto diario {label}',
+  'summary.challenge_weekly': 'Reto semanal {label}',
+  'summary.rival_ahead': 'Elena Vásquez terminó por delante de mí.',
+  'summary.rival_behind': 'Yo terminé por delante de Elena Vásquez.',
+  'summary.rival_level': 'Elena Vásquez y yo terminamos en el mismo escalón.',
+  'summary.rival_left': 'Elena Vásquez dejó la función pública.',
+
+  'ceremony.promotion.eyebrow': 'Un nuevo puesto',
+  'ceremony.promotion.tier_2': 'Alguien se ha fijado. La mesa es más grande, y el edificio también.',
+  'ceremony.promotion.tier_3': 'Ahora los expedientes son trabajo de otros, y las decisiones son tuyas.',
+  'ceremony.promotion.tier_4': 'Ya no diriges el trabajo. Diriges la institución que lo hace.',
+  'ceremony.promotion.tier_5': 'La cima del edificio. Todo lo que hay debajo es una decisión que tomaste o permitiste.',
+  'ceremony.initiative.eyebrow': 'Llevado hasta el final',
+  'ceremony.farewell.eyebrow': 'Una despedida',
+  'ceremony.farewell.morale': '{name} se ha ido, tras {years} años en tu unidad. Le enseñaste casi todo lo que sabía, y ha decidido llevárselo a otro sitio.',
+  'ceremony.farewell.promoted_away': '{name} ha recibido un puesto propio, tras {years} años en tu unidad. Es la mejor razón para perder a alguien, y sigue siendo perderlo.',
+  'ceremony.ministry.eyebrow': 'El Consejo de Ministros',
+  'ceremony.ministry.body': 'Hace veintidós años llevabas tres días en un trabajo en Alderford. El coche te espera.',
 };

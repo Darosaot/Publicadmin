@@ -204,6 +204,9 @@ test('a manager runs an office, moves post, and is warned first', async ({ page 
   const brought = await dialog.locator('.keep__name').first().textContent();
   await dialog.getByRole('button', { name: 'Take the post' }).click();
 
+  // A step up the ladder is given the whole screen, and it stays until it is dismissed.
+  await page.locator('.ceremony').getByRole('button', { name: 'Continue' }).click();
+
   await tab(page, 'Team').click();
   await expect(page.locator('.roster')).toContainText(brought!);
   console.log(`  ✓ the move warns first, and ${brought} came along`);

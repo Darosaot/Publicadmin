@@ -15,6 +15,8 @@ export interface NewGameOptions {
   name: string;
   department: DepartmentId;
   seed?: number;
+  /** The id of a shared challenge this run belongs to, from `challenge.ts`. */
+  challenge?: string;
 }
 
 export function randomSeed(): number {
@@ -64,6 +66,8 @@ export function createGame(options: NewGameOptions, registry: ContentRegistry): 
 
     // Nothing has happened yet. The first row lands when the first cycle closes.
     history: [],
+
+    ...(options.challenge ? { challenge: options.challenge } : {}),
 
     // Somebody who joined the same week you did, and who is going to keep turning up.
     rival: rivalRoll.rival,

@@ -388,6 +388,9 @@ test('taking a post warns you first, and lets you bring somebody', async ({ page
   const broughtName = await dialog.locator('.keep__name').first().textContent();
   await dialog.getByRole('button', { name: 'Take the post' }).click();
 
+  // A step up the ladder is given the whole screen, and it stays until it is dismissed.
+  await page.locator('.ceremony').getByRole('button', { name: 'Continue' }).click();
+
   await tab(page, 'Team').click();
   // They arrive with their skill, morale and tenure intact — the point of bringing them.
   await expect(page.locator('.roster')).toContainText(broughtName!);

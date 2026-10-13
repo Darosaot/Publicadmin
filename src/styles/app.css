@@ -2333,3 +2333,67 @@ input {
 /* Neither a win nor a loss: the work landed and the place still fell. The commonest honest
    outcome in the game, and it gets its own colour rather than borrowing one of the other two. */
 .epilogue__slowed { color: var(--c-text-muted); }
+
+/* ---------- Utility strip: sound, import, export ---------- */
+
+.utility {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-4) var(--s-4) var(--s-5);
+}
+
+.utility__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--s-2);
+}
+
+.utility__file {
+  /* Driven by the button beside it; visually hidden but still labelled for assistive tech. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.utility__notice {
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+}
+
+/* ---------- New game: free play or a shared challenge ---------- */
+
+.modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+}
+
+.deptcard:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- The shareable card ---------- */
+
+.summary__canvas {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1200 / 630;
+  border: 1px solid var(--c-border);
+  background: var(--c-brand-strong);
+}
+
+.summary__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+}
