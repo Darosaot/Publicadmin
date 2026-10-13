@@ -24,7 +24,7 @@ Items already built before this change was written are ticked; each says how it 
 
 - [x] 4.1 Add the summary builder, text renderer, block sparkline and share link; verify `tests/ui/summary.test.ts` passes
 - [x] 4.2 Add the canvas card with copy and download; verify the e2e test copies text containing the name and `?seed=` and downloads `public-service-story.png`
-- [ ] 4.3 Look at the rendered card in English and Spanish at a long name and a long Spanish title, and confirm no text runs off the image
+- [x] 4.3 Look at the rendered card in English and Spanish at a long name and a long Spanish title, and confirm no text runs off the image
 
 ## 5. Sound
 
@@ -44,7 +44,7 @@ Items already built before this change was written are ticked; each says how it 
 - [x] 7.2 Run `npm run typecheck` and `npm test` (562 tests); verify both pass
 - [x] 7.3 Run the whole Playwright suite (`npm run test:e2e`) against the production build and verify no existing e2e test regressed
 - [x] 7.4 Run `openspec validate add-shell-features --strict` and verify it passes
-- [ ] 7.5 Run `npm run balance` and confirm the numbers in section 11 are unchanged (no rule was touched, so they should be)
+- [x] 7.5 Run `npm run balance` and confirm the numbers in section 11 are unchanged (no rule was touched, so they should be)
 
 ## Workflow follow-up
 
