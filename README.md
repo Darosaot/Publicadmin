@@ -71,6 +71,19 @@ npm run build      # production build into dist/
 npm run preview    # serve the production build
 ```
 
+## Around the game
+
+- **Daily and weekly challenges.** On the new-game screen, everyone who plays the same UTC day or
+  ISO week gets the same career in the same department. The date is the seed, so there is no
+  server. When a career ends, a card (image or text) says which run it was.
+- **Saves in and out.** *Export save* and *Import save* sit along the bottom of every screen. The
+  file is the same JSON the game keeps in your browser.
+- **Sound.** Off until you turn it on. Every cue is synthesised in the browser, so there are no
+  audio files to download.
+- **Ceremony.** Promotions, long initiatives landing, a long-serving colleague leaving and the
+  ministry each get the whole screen.
+- **Spanish** loads only when chosen.
+
 Add `?seed=42` to the URL to start a run with a fixed random seed — the same seed and the same
 decisions always produce the same game, which is how the tests work too.
 

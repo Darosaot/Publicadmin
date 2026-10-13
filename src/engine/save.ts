@@ -268,6 +268,15 @@ function hasRequiredShape(raw: RawSave): boolean {
     Array.isArray(raw.initiatives) &&
     Array.isArray(raw.alumni) &&
     Array.isArray(raw.history) &&
+    // These are iterated unconditionally on every screen. A file that was edited by hand, or that
+    // is simply not a save, should be turned away here and not crash the first render.
+    Array.isArray(raw.staff) &&
+    Array.isArray(raw.offers) &&
+    Array.isArray(raw.log) &&
+    Array.isArray(raw.pendingEvents) &&
+    Array.isArray(raw.scheduledEvents) &&
+    typeof raw.flags === 'object' &&
+    raw.flags !== null &&
     typeof player === 'object' &&
     player !== null &&
     typeof player.department === 'string' &&
@@ -346,6 +355,29 @@ export function loadGame(registry: ContentRegistry): LoadResult {
   const store = storage();
   if (!store) return { ok: false, reason: 'empty' };
   return deserialize(store.getItem(SAVE_KEY), registry);
+}
+
+/** The save exactly as it sits in storage, for export. Null when there is none. */
+export function readRawSave(): string | null {
+  try {
+    return storage()?.getItem(SAVE_KEY) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A file name for an exported career. Names are free text, so anything that is not a letter or a
+ * digit becomes a hyphen; accents are stripped first so "Inés" reads as "Ines", not "In-s".
+ */
+export function saveFileName(state: GameState): string {
+  const slug = state.player.name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Za-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase();
+  return `public-service-story-${slug || 'career'}-cycle-${state.turn}.json`;
 }
 
 export function clearSave(): void {

@@ -22,7 +22,7 @@ import { appointDeputy, dismissDeputy } from '../engine/org';
 import { takePerk } from '../engine/perks';
 import { startInitiative } from '../engine/initiatives';
 import { cancelHiring, startHiring } from '../engine/team';
-import { clearSave, loadGame } from '../engine/save';
+import { clearSave, deserialize, loadGame } from '../engine/save';
 import {
   acceptOffer,
   beginNextTurn,
@@ -56,6 +56,7 @@ export interface AppState {
 export type GameAction =
   | { type: 'NEW_GAME'; options: NewGameOptions }
   | { type: 'CONTINUE_SAVED' }
+  | { type: 'IMPORT_SAVE'; json: string }
   | { type: 'SET_TASK_EFFORT'; uid: string; points: number }
   | { type: 'SET_INITIATIVE_EFFORT'; templateId: string; points: number }
   | { type: 'SET_INITIATIVE_DELEGATION'; templateId: string; staffId: string | null }
@@ -117,6 +118,14 @@ export function gameReducer(state: AppState, action: GameAction): AppState {
         };
       }
       return freshTurn(state, result.state);
+    }
+
+    case 'IMPORT_SAVE': {
+      // The same road a save from localStorage takes, so an imported file gets the same
+      // migrations and the same pruning of content that no longer exists.
+      const result = deserialize(action.json, registry);
+      if (!result.ok) return { ...state, notice: 'save.import_failed' };
+      return { ...freshTurn(state, result.state), notice: 'save.import_ok' };
     }
 
     case 'SET_TASK_EFFORT': {

@@ -1083,6 +1083,80 @@ All three were checked by breaking them.
 
 ---
 
+## 8p. The shell around the career
+
+None of this changes a rule. It is everything about *playing* that is not in the simulation, and it
+is kept out of the engine on purpose: `src/engine/` knows nothing about audio, files or the
+clipboard, and a save carries nothing that records one of them having happened.
+
+### Shared challenges
+
+`src/engine/challenge.ts` turns a date into a run. The challenge id is the **UTC** day
+(`daily:2026-10-13`) or ISO week (`weekly:2026-W42`); the seed and the **department** are both
+hashed out of that id, so two people on opposite sides of the Atlantic get the same career on the
+same day with nothing uploaded anywhere. There is no server and no leaderboard, only a shared
+start and a card to compare.
+
+- **The department is fixed as well as the seed.** The departments differ in difficulty by design
+  (§11 measures the spread), so letting each player choose one would make two scores
+  incomparable.
+- **UTC, not local time.** A challenge that turns over at a different moment for each player is
+  not a shared one.
+- `GameState.challenge` is a label and nothing reads it for a rule. It exists so the end-of-career
+  card can say which run it was. Free-play careers do not have the field at all.
+
+### Saves in and out
+
+The save was always a plain JSON string, so export is a copy and import is the same
+`deserialize` a reload uses: same migrations, same pruning of content that no longer exists.
+`hasRequiredShape` now also checks every array the screens iterate unconditionally, because a
+file chosen by a person can be anything, whereas a save the game wrote could not.
+
+Import replaces the career in progress and asks first. A file that is not a save changes nothing
+and says so.
+
+### Language chunks
+
+English ships in the main bundle because the engine's content registry needs it to exist.
+Spanish is a separate chunk fetched by `loadLocale` when it is first chosen, and awaited before
+the first paint for a returning Spanish reader. Until it arrives, a Spanish lookup falls through
+to English, the same fallback a half-translated key gets. Main bundle: 345 kB to about 220 kB
+gzipped.
+
+### Sound
+
+Synthesised with the Web Audio API; there are no audio files. Cues are data (`CUES` in
+`src/ui/sound.ts`: a note is a frequency, a start, a length, a gain and a waveform), which is
+what lets a test check that every one is well formed. **Off by default**, remembered per device,
+and silent in a hidden tab. A single document-level listener plays the tap for every button, and
+state changes (a report, a new event, an ending) are heard by comparing the state with the one
+before, so no screen has to remember to ask for a sound.
+
+### Ceremony
+
+`src/ui/ceremony.ts` compares the state the player was looking at with the one they are looking
+at now and names the moments big enough for the whole screen:
+
+| Moment | Trigger |
+| --- | --- |
+| Promotion | The post changed and the tier went up (not sideways, not down) |
+| An initiative seen through | It landed, and its `minCycles` is at least 7: the long ones |
+| A parting | Someone who served at least 36 turns left; the longest-serving of the month, one at most |
+| The ministry | The career ended as Minister |
+
+Because the check is a comparison with the previous render, a reloaded career never replays the
+promotion it was saved in the middle of, and a different career loaded over this one is not
+mistaken for a promotion in it. `monthsInPost` counts turns despite its name, so the farewell
+threshold is most of a decade at a senior desk.
+
+### The card
+
+`src/ui/summary.ts` boils a finished career to data (ending, department, track, years, final post,
+peak tier, the reputation series, how Elena finished, which challenge), and two renderers read
+that same data: plain text for a clipboard and a 1200 by 630 canvas for an image. The reputation
+chart uses the Record's fixed 0 to 100 axis, so a flat career looks flat. A free-play card links
+to `?seed=N`; a challenge card links to the bare page, since the date is the seed.
+
 ## 9. Endings
 
 Checked at the end of every month, in this order — the first one that matches wins.
@@ -1234,8 +1308,8 @@ candidate, and should only be attempted with the spread as tight as it is now.
 
 ## 12. Deliberately out of scope for v1
 
-Sound and music; multiple save slots and save export; difficulty settings; changing department
-mid-career; achievements. Spanish has since been written and is now enforced: `i18n.test.ts` fails
+Multiple save slots; difficulty settings; changing department mid-career; achievements.
+Sound, save export and ceremony have since been built (§8p). Spanish has since been written and is now enforced: `i18n.test.ts` fails
 a build in which any English key lacks a Spanish counterpart, in either direction.
 
 Three things that were on this list have since been built and are documented above: **named NPCs
@@ -1246,12 +1320,10 @@ The **legibility** gap v3 left is closed. A thirty-year career can show its own 
 fourteen institutions of §8b are a place rather than a list (§8o) — both built, as intended, on top
 of a world that had more to show than it had when they were first proposed.
 
-What is left, in rough order of how much it would add: **sound**, still the oldest item here and
-still the one a player would notice first; a **unified people directory**, since your unit, the
-cast and up to twelve alumni currently live on three different screens and one of them is the
-epilogue; and **ceremony for the big moments** — landing a nine-year initiative, reaching a
-ministry and losing somebody you coached for a decade are all a line item in the same modal, and
-the engine distinguishes them carefully while the presentation does not.
+What is left, in rough order of how much it would add: a **unified people directory**, since
+your unit, the cast and up to twelve alumni currently live on three different screens and one of
+them is the epilogue. Sound and the ceremony for the big moments were the other two items on this
+list; both are now built (§8p).
 
 ### Saving
 

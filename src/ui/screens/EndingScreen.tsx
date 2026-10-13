@@ -7,6 +7,7 @@ import { useT } from '../../i18n';
 import { useGame } from '../../state/GameProvider';
 import { formatSalary } from '../format';
 import { Epilogue } from '../components/Epilogue';
+import { SummaryCard } from '../components/SummaryCard';
 
 export function EndingScreen({ game }: { game: GameState }) {
   const t = useT();
@@ -51,6 +52,8 @@ export function EndingScreen({ game }: { game: GameState }) {
         </section>
 
         <Epilogue game={game} />
+
+        <SummaryCard game={game} />
 
         <button
           type="button"

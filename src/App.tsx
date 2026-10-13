@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { LocaleProvider } from './i18n';
 import { GameProvider, useGame } from './state/GameProvider';
+import { Ceremony } from './ui/components/Ceremony';
+import { UtilityBar } from './ui/components/UtilityBar';
+import { useCeremonies } from './ui/useCeremonies';
+import { useSoundEffects } from './ui/useSoundEffects';
 import { EventModal } from './ui/components/EventModal';
 import { TurnReportModal } from './ui/components/TurnReportModal';
 import { CareerScreen } from './ui/screens/CareerScreen';
@@ -24,6 +28,12 @@ function Router() {
   const [creating, setCreating] = useState(false);
   const game = state.game;
 
+  useSoundEffects(game);
+  const ceremonies = useCeremonies(game);
+  const ceremony = ceremonies.current && (
+    <Ceremony ceremony={ceremonies.current} onDone={ceremonies.dismiss} />
+  );
+
   if (!game) {
     return creating ? (
       <NewGameScreen onBack={() => setCreating(false)} />
@@ -32,7 +42,14 @@ function Router() {
     );
   }
 
-  if (game.phase === 'ended') return <EndingScreen game={game} />;
+  if (game.phase === 'ended') {
+    return (
+      <>
+        <EndingScreen game={game} />
+        {ceremony}
+      </>
+    );
+  }
 
   const pending = game.phase === 'event' ? game.pendingEvents[0] : undefined;
 
@@ -58,6 +75,7 @@ function Router() {
 
       {pending && <EventModal game={game} pending={pending} />}
       {game.phase === 'report' && <TurnReportModal game={game} />}
+      {ceremony}
     </main>
   );
 }
@@ -68,6 +86,7 @@ export function App() {
       <GameProvider>
         <div className="app">
           <Router />
+          <UtilityBar />
         </div>
       </GameProvider>
     </LocaleProvider>

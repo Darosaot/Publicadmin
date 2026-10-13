@@ -807,6 +807,15 @@ export interface GameState {
   rival?: RivalState;
 
   /**
+   * Which shared challenge this career is, if it is one: `daily:2026-10-13` or `weekly:2026-W42`.
+   *
+   * Optional because most careers are not. It is a label and nothing reads it for a rule — the
+   * seed and the department already make the run reproducible; this only lets the end-of-career
+   * card say which run it was, so two people can compare.
+   */
+  challenge?: string;
+
+  /**
    * The conditions the whole country is working in this month.
    *
    * Optional for the same reason `rival` is, and it buys the same two things. A save written

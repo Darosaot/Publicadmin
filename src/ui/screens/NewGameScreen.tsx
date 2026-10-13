@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { departmentList, registry } from '../../content';
+import { challengeFor, type ChallengeKind } from '../../engine/challenge';
 import { startingPost } from '../../engine/registry';
 import type { DepartmentId, StatId } from '../../engine/types';
 import { useT } from '../../i18n';
@@ -11,14 +12,30 @@ export function NewGameScreen({ onBack }: { onBack: () => void }) {
   const { dispatch } = useGame();
 
   const [name, setName] = useState('');
-  const [department, setDepartment] = useState<DepartmentId | null>(null);
+  const [chosen, setChosen] = useState<DepartmentId | null>(null);
+  const [mode, setMode] = useState<'free' | ChallengeKind>('free');
   const firstPost = startingPost(registry);
+
+  // Read once per visit: the challenge is the UTC day or week, and a page left open across
+  // midnight should still start the run it advertised.
+  const challenge = useMemo(
+    () => (mode === 'free' ? undefined : challengeFor(mode, new Date())),
+    [mode],
+  );
+
+  // A shared challenge fixes the department as well as the seed, so two scores are comparable.
+  const department = challenge ? challenge.department : chosen;
 
   const start = () => {
     if (!department) return;
     dispatch({
       type: 'NEW_GAME',
-      options: { name, department, seed: URL_SEED },
+      options: {
+        name,
+        department,
+        seed: challenge ? challenge.seed : URL_SEED,
+        ...(challenge ? { challenge: challenge.id } : {}),
+      },
     });
   };
 
@@ -48,6 +65,29 @@ export function NewGameScreen({ onBack }: { onBack: () => void }) {
           />
         </label>
 
+        <h2 className="newgame__subheading">{t('newgame.mode_label')}</h2>
+        <div className="modes" role="group" aria-label={t('newgame.mode_label')}>
+          {(['free', 'daily', 'weekly'] as const).map((id) => (
+            <button
+              key={id}
+              type="button"
+              className={`btn${mode === id ? ' btn--primary' : ''}`}
+              aria-pressed={mode === id}
+              onClick={() => setMode(id)}
+            >
+              {t(`newgame.mode_${id}`)}
+            </button>
+          ))}
+        </div>
+        <p className="muted newgame__hint">
+          {challenge
+            ? t(`newgame.challenge_${challenge.kind}`, {
+                label: challenge.label,
+                department: t(registry.departments[challenge.department].nameKey),
+              })
+            : t('newgame.mode_free_hint')}
+        </p>
+
         <h2 className="newgame__subheading">{t('newgame.department_label')}</h2>
         <p className="muted newgame__hint">{t('newgame.department_hint')}</p>
 
@@ -60,7 +100,8 @@ export function NewGameScreen({ onBack }: { onBack: () => void }) {
                 type="button"
                 className={`deptcard${selected ? ' deptcard--selected' : ''}`}
                 aria-pressed={selected}
-                onClick={() => setDepartment(entry.id)}
+                disabled={challenge !== undefined && !selected}
+                onClick={() => setChosen(entry.id)}
               >
                 <h3 className="deptcard__name">{t(entry.nameKey)}</h3>
                 <p className="deptcard__blurb">{t(entry.blurbKey)}</p>

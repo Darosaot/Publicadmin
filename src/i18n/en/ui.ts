@@ -451,4 +451,52 @@ export const uiStrings: Record<string, string> = {
   'log.refused_file': 'You declined a file rather than miss it.',
 
   'task.crisis_label': 'This will not wait, and cannot be handed back',
+
+  /* --- sound, saves, challenges, summary, ceremonies --- */
+  'action.dismiss': 'Dismiss',
+  'action.continue_story': 'Continue',
+
+  'sound.on': 'Sound: on',
+  'sound.off': 'Sound: off',
+
+  'save.export': 'Export save',
+  'save.import': 'Import save',
+  'save.import_confirm': 'Importing replaces the career you are playing now. Continue?',
+  'save.import_failed': 'That file could not be read as a saved career, so nothing was changed.',
+  'save.import_ok': 'Career imported.',
+
+  'newgame.mode_label': 'How to play',
+  'newgame.mode_free': 'Free play',
+  'newgame.mode_daily': 'Daily challenge',
+  'newgame.mode_weekly': 'Weekly challenge',
+  'newgame.mode_free_hint': 'A career of your own, in any department.',
+  'newgame.challenge_daily': 'Daily challenge {label}: everyone who plays today gets the same career, in {department}.',
+  'newgame.challenge_weekly': 'Weekly challenge {label}: everyone who plays this week gets the same career, in {department}.',
+
+  'summary.heading': 'Share this career',
+  'summary.copy': 'Copy as text',
+  'summary.copied': 'Copied.',
+  'summary.copy_failed': 'Copying is not available here.',
+  'summary.download': 'Download image',
+  'summary.years': '{years} years',
+  'summary.final_post': 'Final post',
+  'summary.seed': 'Seed',
+  'summary.challenge_daily': 'Daily challenge {label}',
+  'summary.challenge_weekly': 'Weekly challenge {label}',
+  'summary.rival_ahead': 'Elena Vásquez finished ahead of me.',
+  'summary.rival_behind': 'I finished ahead of Elena Vásquez.',
+  'summary.rival_level': 'Elena Vásquez and I finished on the same rung.',
+  'summary.rival_left': 'Elena Vásquez left the service.',
+
+  'ceremony.promotion.eyebrow': 'A new post',
+  'ceremony.promotion.tier_2': 'Somebody noticed. The desk is bigger and so is the building.',
+  'ceremony.promotion.tier_3': 'Now the files are the work of others, and the decisions are yours.',
+  'ceremony.promotion.tier_4': 'You no longer manage the work. You manage the institution that does it.',
+  'ceremony.promotion.tier_5': 'The top of the building. Everything below you is a decision you made or allowed.',
+  'ceremony.initiative.eyebrow': 'Seen through',
+  'ceremony.farewell.eyebrow': 'A parting',
+  'ceremony.farewell.morale': '{name} has gone, after {years} years in your unit. You taught them most of what they knew, and they have chosen to take it elsewhere.',
+  'ceremony.farewell.promoted_away': '{name} has been given a post of their own, after {years} years in your unit. It is the best reason to lose someone, and it is still losing them.',
+  'ceremony.ministry.eyebrow': 'The Council of Ministers',
+  'ceremony.ministry.body': 'Twenty-two years ago you were three days into a job in Alderford. The car is waiting.',
 };
